@@ -3,6 +3,7 @@
 - [x] Project-specific source-backed Portland + Oregon HP3 calculator
 - [x] Test permutations for location, property, wiring and efficiency
 - [ ] Verify all claims against current agency guidance and human review
+- [x] Add a self-reported quote-readiness checklist, government contractor-directory link, and anonymous intent events
 - [ ] Evaluate one actual contractor quote and map missing information, without inventing eligibility
 - [ ] Real-user workflow and acquisition experiment
 - [ ] Verify whether contractor referral partners are commercially available

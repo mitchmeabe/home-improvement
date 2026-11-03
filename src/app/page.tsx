@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { QuoteReview } from "../components/quote-review";
 import { evaluateHeatPump, RULE_REVIEWED_ON, FUNDING_SNAPSHOT_AS_OF, SOURCES, type Location, type Property, type Wiring, type Equipment, type Status } from "../lib/heat-pump";
 
 function formatStatus(status: Status) {
@@ -63,6 +64,7 @@ export default function Home() {
         <div className="next"><h3>Before signing an installation contract</h3><ol><li>Verify the applicable permitting authority and contractor responsibilities.</li><li>Get multiple quotes from ODOE-approved contractors; ask whether a permit and final inspection are included.</li><li>Verify live incentive funding, program restrictions and any limitations on stacking before relying on savings.</li><li>Check that any HP3 discount is applied upfront on your quote and retain the signed final invoice.</li></ol></div>
       </section>
     </div>
+    <QuoteReview funding={result?.funding} />
     <section className="sources"><h2>Official government sources</h2><p className="muted">Reviewed {RULE_REVIEWED_ON}. ODOE funding numbers last updated {FUNDING_SNAPSHOT_AS_OF}. Confirm live before relying on any incentive.</p><ul>{SOURCES.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></li>)}</ul></section>
     <footer>Independent planning prototype. Not affiliated with Portland or the Oregon Department of Energy; does not issue permits, verify active incentive reservations or approve eligibility.</footer>
   </main>;

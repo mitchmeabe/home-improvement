@@ -13,5 +13,10 @@ Test 8–12 actual Portland-area homeowners or HVAC contractors considering a he
 ## Evidence to collect (manual and pseudonymous)
 Participant ID, project type, completed flow, disagreements with official guidance, missing fields, whether they requested a quote, willingness to use a referral, source of acquisition, and follow-up costs. Don't collect sensitive household or address information.
 
+## Instrumentation
+- `@vercel/analytics` pageview and privacy-safe custom events: `quote_questions_copied`, `hp3_contractor_directory_click`, `quote_compare_interest_yes/no`.
+- The owner must enable Web Analytics in the Vercel project dashboard. No household, address, quote details, or equipment identifiers sent to analytics.
+- Directory clicks and interest signals are **not** verified sales or paying contractor leads.
+
 ## Stop / go
 Do not expand geography until accuracy is acceptable and at least one acquisition channel consistently produces actual project researchers. No pretense of live HP3 availability without a refresh system. This is a pilot plan, not completed user testing.
