@@ -3,6 +3,8 @@
  * eligibility certification. Portland permit conclusions never apply elsewhere.
  */
 export const RULE_REVIEWED_ON = "2026-11-03";
+/** The agency publishes approximate available funds and its last *dated* table is Oct 1. */
+export const FUNDING_SNAPSHOT_AS_OF = "2026-10-01";
 export const SOURCES = [
   { label: "Portland — residential mechanical permits", url: "https://www.portland.gov/ppd/residential-permitting/residential-mechanical-permits" },
   { label: "Portland — which residential projects need permits", url: "https://www.portland.gov/ppd/residential-permitting/do-you-need-permit/residential-permits" },
@@ -83,10 +85,10 @@ export function evaluateHeatPump(input: ProjectInput): ProjectResult {
     fundingExplanation = "Location or property classification is not established. Check eligibility and current state funding with Oregon ODOE and an approved contractor.";
   } else if (input.property === "existing-owner-occupied") {
     funding = "fully-reserved";
-    fundingExplanation = "ODOE currently lists HP3 funding for existing owner-occupied homes as fully reserved for new applications. A previously approved reservation may have a different status. Recheck live before relying on this result.";
+    fundingExplanation = "In its October 1, 2026 funding table, ODOE reported no unreserved HP3 funds for existing owner-occupied residences. Existing approved reservations may differ. This is a historical snapshot, NOT a live availability check. Confirm with an ODOE-approved contractor.";
   } else {
     funding = "verify-live";
-    fundingExplanation = "ODOE lists existing rentals and eligible new construction as possible HP3 categories, but funds, approval, contractor eligibility and all other conditions must be confirmed live.";
+    fundingExplanation = "ODOE listed funds for eligible rental properties and new residential construction in its October 1, 2026 table. That inventory is historical. Only an ODOE-approved contractor can confirm current application details, and availability is not guaranteed.";
   }
 
   let efficiency: EfficiencyStatus = "unknown";

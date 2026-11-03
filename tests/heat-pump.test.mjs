@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { evaluateHeatPump, SOURCES } from "../src/lib/heat-pump.ts";
+import { evaluateHeatPump, FUNDING_SNAPSHOT_AS_OF, SOURCES } from "../src/lib/heat-pump.ts";
 
 const input = {
   location: "portland",
@@ -27,12 +27,18 @@ test("outside Portland does not inherit Portland permit determination", () => {
 test("out of state cannot use Oregon HP3", () => {
   assert.equal(calc({ location: "outside-oregon" }).funding, "not-applicable");
 });
-test("existing owner-occupied funding listed fully reserved for new applications", () => {
-  assert.equal(calc().funding, "fully-reserved");
+test("existing owner-occupied uses dated historical snapshot only", () => {
+  const result = calc();
+  assert.equal(result.funding, "fully-reserved");
+  assert.match(result.fundingExplanation, /historical snapshot/i);
+  assert.equal(FUNDING_SNAPSHOT_AS_OF, "2026-10-01");
 });
 test("rentals and new construction require live funding check", () => {
-  assert.equal(calc({ property: "existing-rental" }).funding, "verify-live");
-  assert.equal(calc({ property: "new-construction" }).funding, "verify-live");
+  for (const property of ["existing-rental", "new-construction"]) {
+    const result = calc({ property });
+    assert.equal(result.funding, "verify-live");
+    assert.match(result.fundingExplanation, /historical/i);
+  }
 });
 test("vacation and commercial properties are outside program scope", () => {
   assert.equal(calc({ property: "vacation-or-commercial" }).funding, "not-applicable");

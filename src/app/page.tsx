@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { evaluateHeatPump, RULE_REVIEWED_ON, SOURCES, type Location, type Property, type Wiring, type Equipment, type Status } from "../lib/heat-pump";
+import { evaluateHeatPump, RULE_REVIEWED_ON, FUNDING_SNAPSHOT_AS_OF, SOURCES, type Location, type Property, type Wiring, type Equipment, type Status } from "../lib/heat-pump";
 
 function formatStatus(status: Status) {
   return status === "required" ? "Required" : status === "check" ? "Verify" : "Not applicable";
@@ -55,15 +55,15 @@ export default function Home() {
         {error ? <p className="warning" role="alert">{error}</p> : result ? <>
           <h3>Permits</h3>
           {result.permits.map((finding) => <div className="finding" key={finding.title}><span className={"flag " + finding.status}>{formatStatus(finding.status)}</span><div><strong>{finding.title}</strong><p>{finding.detail} <a href={finding.sourceUrl} target="_blank" rel="noreferrer">Official guidance ↗</a></p></div></div>)}
-          <h3>Oregon HP3 incentive funding</h3>
+          <h3>Oregon HP3 incentive funding</h3><p className="small"><strong>Agency funding table dated {FUNDING_SNAPSHOT_AS_OF}.</strong> This is not a real-time inventory or reservation.</p>
           <div className="notice"><b>{result.funding === "fully-reserved" ? "Fully reserved — existing owner-occupied" : result.funding === "not-applicable" ? "Outside current program scope" : "Current funding & eligibility: verify"}</b><p>{result.fundingExplanation}</p></div>
           <h3>General equipment efficiency check</h3>
           <div className="notice"><b>{result.efficiency === "meets-numeric-thresholds-only" ? "Numeric minimums met (not approval)" : result.efficiency === "below-threshold" ? "Below a general numeric minimum" : "Ratings not yet checked"}</b><p>{result.efficiencyExplanation}</p></div>
         </> : null}
-        <div className="next"><h3>Before signing an installation contract</h3><ol><li>Verify the applicable permitting authority and contractor responsibilities.</li><li>Check current incentive funds and conditions with ODOE and an approved contractor.</li><li>Confirm equipment model ratings, possible restrictions on stacking, and the invoice requirements.</li></ol></div>
+        <div className="next"><h3>Before signing an installation contract</h3><ol><li>Verify the applicable permitting authority and contractor responsibilities.</li><li>Get multiple quotes from ODOE-approved contractors; ask whether a permit and final inspection are included.</li><li>Verify live incentive funding, program restrictions and any limitations on stacking before relying on savings.</li><li>Check that any HP3 discount is applied upfront on your quote and retain the signed final invoice.</li></ol></div>
       </section>
     </div>
-    <section className="sources"><h2>Official government sources</h2><p className="muted">Reviewed {RULE_REVIEWED_ON}. Funding can change quickly, so confirm live before relying on any incentive.</p><ul>{SOURCES.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></li>)}</ul></section>
+    <section className="sources"><h2>Official government sources</h2><p className="muted">Reviewed {RULE_REVIEWED_ON}. ODOE funding numbers last updated {FUNDING_SNAPSHOT_AS_OF}. Confirm live before relying on any incentive.</p><ul>{SOURCES.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></li>)}</ul></section>
     <footer>Independent planning prototype. Not affiliated with Portland or the Oregon Department of Energy; does not issue permits, verify active incentive reservations or approve eligibility.</footer>
   </main>;
 }
