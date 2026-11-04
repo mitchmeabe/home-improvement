@@ -38,10 +38,13 @@ The report is a deterministic, client-side text file with each finding's **condi
 The dossier does not request a street address, bill, income, identification number, credentials, utility account, photo, PDF or transcript. No server upload, integration, persistent storage, public indexing, referral relationship or financial checkout.
 
 ## Tests and boundaries
-- Added **21** focused Node regression tests in the repository's existing test runner; tests protect jurisdiction mismatches, use-class boundaries, all three project types, utility uncertainty, no out-of-state Oregon rebates, the dated HP3 funding limitation, no DIY HP3, panel permits, site document provenance and invalid inputs. No new validation scripts/CI infrastructure.
+- Added **25** focused Node regression tests in the repository's existing test runner; tests protect jurisdiction mismatches, use-class boundaries, all three project types, utility uncertainty, no out-of-state Oregon rebates, the dated HP3 funding limitation, no DIY HP3, panel permits, site document provenance and invalid inputs. No new validation scripts/CI infrastructure.
 - Existing global `robots.index=false`, noindex and protected Vercel preview remain unchanged.
 - Actual parcel lookups, utility account proof, live permit records, agency current funding and contractor license validation are **not** implemented. Avoid wording such as “the property is verified” or “the rebate is approved.”
 - This is a reusable **project dossier layer**, not automatic permit or incentive adjudication. Its market depth is explicitly limited to the existing Oregon/Portland published rules; Oregon cities and counties beyond Portland require an authority lookup first.
 
 ## Recommended next evidence milestone
 If user research validates the need, add source-authenticated property/parcel jurisdiction for a limited geographic market without retaining addresses, plus contractor quote fields that reconcile requested permit/document evidence directly against specific bid inclusions. Do not expand widely into undocumented city rules.
+
+## Consolidation review notes
+The resolver de-duplicates general electrical permit findings from the original space/HPWH tools when panel or additional circuits are explicitly included. It preserves a single appropriate city permit finding instead of repeating permit tasks. Installation dates **before or after** the 2026-11-04 source review trigger a historical/future applicability warning; no historical date inherits retroactively asserted eligibility. Panel-only work outside Oregon cannot inherit an Oregon utility rebate. All of these boundaries have explicit Node regression cases.

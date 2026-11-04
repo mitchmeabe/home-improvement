@@ -194,3 +194,18 @@ test("unknown electrical scope shows one action, not two duplicate permit checks
  assert.equal(find(r,"electrical-trade"),undefined);
  assert.ok(r.blockers.some(x=>/Electrical circuit/i.test(x)));
 });
+
+test("out-of-state panel-only work never inherits Oregon program eligibility",()=>{
+ const r=run({project:"electrical-panel",place:"outside-oregon",
+  house:"one-two-family",electricScope:"panel-replacement"});
+ assert.equal(find(r,"panel-incentive")?.status,"not-applicable");
+ assert.equal(find(r,"electrical-trade")?.status,"verify");
+ assert.equal(r.canClaimRebate,false);
+});
+test("historical installation dates do not inherit later 2026 incentive snapshots",()=>{
+ const r=run({project:"space-heat-pump",place:"portland-reported",
+  house:"one-two-family",plannedInstallationDate:"2025-09-20"});
+ assert.ok(r.blockers.some(x=>/predates this source review/i.test(x)));
+ assert.equal(r.plannedDate,"2025-09-20");
+ assert.equal(r.canClaimRebate,false);
+});
