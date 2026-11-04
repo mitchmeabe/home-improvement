@@ -201,3 +201,18 @@ test("PDF magic validation rejects disguised text files without modifying quote"
  await expect(importer.getByText(/valid PDF header/)).toBeVisible();
  await expect(page.locator("#ma-a-price")).toHaveValue("");
 });
+
+test("Oregon location and utility matching keeps Portland postal addresses unverified",async({page})=>{
+ await page.goto("/");
+ await expect(page.getByText("Permit authority not yet established")).toBeVisible();
+ await page.locator("#building-structure").selectOption("one-two-family");
+ await page.locator("#portland-jurisdiction").selectOption("portland-confirmed");
+ await expect(page.getByText("Portland permit authority confirmed by your report")).toBeVisible();
+ const match=page.getByRole("region",{name:"Jurisdiction and utility program matches"});
+ await expect(match).toContainText("Portland residential mechanical permit");
+ await page.locator("#electric-utility").selectOption("pge");
+ await expect(match).toContainText("Energy Trust of Oregon residential heat-pump incentives");
+ await page.locator("#portland-jurisdiction").selectOption("not-portland");
+ await expect(match).toContainText("Identify correct permit authority");
+ await expect(match).not.toContainText("Portland residential mechanical permit");
+});
