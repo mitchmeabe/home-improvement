@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "updated": "2026-11-03",
+  "policy": "Human-reviewed permit and program source snapshots; never auto-edit eligibility logic.",
+  "sources": [
+    {
+      "id": "portland-mechanical",
+      "owner": "Portland PPD",
+      "url": "https://www.portland.gov/ppd/residential-permitting/residential-mechanical-permits",
+      "lastReviewed": "2026-11-03",
+      "maxAgeDays": 60,
+      "expectedText": [
+        "Heat pumps"
+      ],
+      "claimedUse": "Portland residential heat pump mechanical permit"
+    },
+    {
+      "id": "portland-electrical",
+      "owner": "Portland PPD",
+      "url": "https://www.portland.gov/ppd/residential-permitting/residential-electrical-permits",
+      "lastReviewed": "2026-11-03",
+      "maxAgeDays": 60,
+      "expectedText": [
+        "electrical permit"
+      ],
+      "claimedUse": "Hardwired installations and most mechanical equipment electrical permit guidance"
+    },
+    {
+      "id": "oregon-hp3",
+      "owner": "Oregon Department of Energy",
+      "url": "https://www.oregon.gov/energy/incentives/Pages/HP3.aspx",
+      "lastReviewed": "2026-11-03",
+      "maxAgeDays": 14,
+      "expectedText": [
+        "Available Funding"
+      ],
+      "claimedUse": "HP3 efficiency, owner-occupied fully reserved as of 2026-10-01, approved contractor and upfront reduction"
+    },
+    {
+      "id": "portland-project-types",
+      "owner": "Portland PPD",
+      "url": "https://www.portland.gov/ppd/residential-permitting/do-you-need-permit/residential-permits",
+      "lastReviewed": "2026-11-03",
+      "maxAgeDays": 60,
+      "expectedText": [
+        "heat pump"
+      ],
+      "claimedUse": "Scope of local mechanical/electrical permits"
+    }
+  ]
+}

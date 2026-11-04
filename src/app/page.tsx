@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { QuoteReview } from "../components/quote-review";
+import { HeatPumpQuoteComparison } from "../components/heat-pump-quote-comparison";
 import { evaluateHeatPump, RULE_REVIEWED_ON, FUNDING_SNAPSHOT_AS_OF, SOURCES, type Location, type Property, type Wiring, type Equipment, type Status } from "../lib/heat-pump";
 
 function formatStatus(status: Status) {
@@ -26,8 +27,13 @@ export default function Home() {
   }, [location, property, equipment, wiring, hspf2, seer2]);
 
   return <main className="container">
-    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><span className="edition">Early research prototype · Oregon</span></header>
-    <section className="hero"><p className="eyebrow">Residential heat pump project planner</p><h1>Plan the work before you pay for it.</h1><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
+    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><nav className="market-nav" aria-label="Project tools"><a href="#project-tools">Choose market</a><a href="/massachusetts/heat-pumps">Massachusetts</a><a href="#oregon-project">Oregon</a></nav></header>
+    <section className="improvement-directory-intro"><p className="eyebrow">Independent heat-pump project guidance</p><h1>Compare the real project before accepting a contractor quote.</h1><p>Understand your program questions, spot differences in installation scope, and prepare informed contractor follow-ups. Incentives and permits require official confirmation; no personal account or proposal upload.</p></section>
+    <section className="improvement-directory" id="project-tools" aria-label="Available project planners">
+      <a href="/massachusetts/heat-pumps"><b>Massachusetts heat-pump quote review</b><span>Compare contractor bids, equipment and 2026 or announced 2027 Mass Save program conditions.</span><em>Open Massachusetts planner ↗</em></a>
+      <a href="#oregon-project"><b>Oregon installation and incentive questions</b><span>Review Portland permit considerations, Oregon HP3 funding limits and contractor quote completeness.</span><em>Open Oregon planner ↓</em></a>
+    </section>
+    <section className="hero oregon-project-section" id="oregon-project"><p className="eyebrow">Residential heat pump project planner</p><h1>Plan the work before you pay for it.</h1><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
     <div className="grid">
       <section className="panel"><h2>Tell us about the project</h2><p className="muted">Enter basic information. This prototype does not collect your address or income.</p>
         <label htmlFor="location">Property location</label>
@@ -64,7 +70,8 @@ export default function Home() {
         <div className="next"><h3>Before signing an installation contract</h3><ol><li>Verify the applicable permitting authority and contractor responsibilities.</li><li>Get multiple quotes from ODOE-approved contractors; ask whether a permit and final inspection are included.</li><li>Verify live incentive funding, program restrictions and any limitations on stacking before relying on savings.</li><li>Check that any HP3 discount is applied upfront on your quote and retain the signed final invoice.</li></ol></div>
       </section>
     </div>
-    <QuoteReview funding={result?.funding} />
+    <section id="oregon-quotes"><HeatPumpQuoteComparison location={location} property={property} hspf2={hspf2.trim()===""?null:Number(hspf2)} seer2={seer2.trim()===""?null:Number(seer2)} /></section>
+    <div id="review-quote"><QuoteReview funding={result?.funding} /></div>
     <section className="sources"><h2>Official government sources</h2><p className="muted">Reviewed {RULE_REVIEWED_ON}. ODOE funding numbers last updated {FUNDING_SNAPSHOT_AS_OF}. Confirm live before relying on any incentive.</p><ul>{SOURCES.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></li>)}</ul></section>
     <footer>Independent planning prototype. Not affiliated with Portland or the Oregon Department of Energy; does not issue permits, verify active incentive reservations or approve eligibility.</footer>
   </main>;
