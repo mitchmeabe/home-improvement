@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {EMPTY_MASS_INPUT,readMassSchedule,evaluateMassSave,newMassQuote,compareMassQuotes,massCopyPlan} from "../src/lib/mass-save.ts";
-const good={...EMPTY_MASS_INPUT,year:"2026",route:"whole",heatingFuel:"oil",residentialSponsorConfirmed:"yes",winterOccupied:"yes",hasOldHeatPump:"no",displacesPrimaryHeating:"yes",wholeWeatherization:"yes",wholeFormSigned:"yes",installerInNetwork:"yes",equipmentOnQualifiedList:"yes",newEquipment:"yes",coolingCapacityBtu:36000};
+const good={...EMPTY_MASS_INPUT,year:"2026",route:"whole",heatingFuel:"oil",inMassachusetts:"yes",residentialAccount:"yes",propertyUnits:"one-four",residentialSponsorConfirmed:"yes",winterOccupied:"yes",hasOldHeatPump:"no",displacesPrimaryHeating:"yes",wholeWeatherization:"yes",wholeFormSigned:"yes",installerInNetwork:"yes",equipmentOnQualifiedList:"yes",newEquipment:"yes",coolingCapacityBtu:36000};
 test("2026 published whole, partial, basic rebate schedule and caps",()=>{
  assert.deepEqual(readMassSchedule("2026","whole"),{rate:2650,cap:8500});
  assert.deepEqual(readMassSchedule("2026","partial"),{rate:1125,cap:8500});
@@ -85,4 +85,14 @@ test("copy plan warns and cites original authority",()=>{
  const t=massCopyPlan(r);
  assert.match(t,/NOT Mass Save preapproval/);
  assert.match(t,/masssave.com/);
+});
+
+test("outside MA or no residential account never passes the standard screen",()=>{
+ assert.equal(evaluateMassSave({...good,inMassachusetts:"no"}).status,"not-supported");
+ assert.equal(evaluateMassSave({...good,residentialAccount:"no"}).status,"not-supported");
+});
+test("multifamily 5+ requires case review for special conditions",()=>{
+ const r=evaluateMassSave({...good,propertyUnits:"five-plus"});
+ assert.equal(r.status,"needs-verification");
+ assert.equal(r.conditions.find(x=>x.id==="property-units").status,"verify");
 });
