@@ -7,6 +7,7 @@ import {
  emptyQuote,compareHeatPumpQuotes,quoteComparisonQuestions,QUOTE_REVIEWED_ON,QUOTE_SOURCES,
  type QuoteItem,type Answer,type PriceBasis,type QuoteScope,
 } from "../lib/heat-pump-quotes";
+import {ProposalTextImporter,type ProposalPatch} from "./proposal-text-import";
 import "./heat-pump-quote-comparison.css";
 const yn=[{value:"unsure",label:"Not documented"},{value:"yes",label:"Confirmed in writing"},{value:"no",label:"No"}] as const;
 const m=(n:number|null)=>n===null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
@@ -14,8 +15,7 @@ const n=(s:string)=>s.trim()===""?null:Number(s);
 type MoneyKey="installedPrice"|"otherDiscount"|"hp3ProposedDiscount"|"annualOperatingCost";
 type AnswerKey="otherDiscountConfirmed"|"hp3ApprovedContractor"|"hp3FundingConfirmed"|"hp3UpfrontReduction"|"modelAndRatingsDocumented"|"mechanicalPermitIncluded"|"electricalScopeIncluded"|"finalInspectionIncluded"|"warrantyInWriting"|"commissioningIncluded"|"ductAirflowTestingIncluded"|"oldSystemRemovalIncluded";
 function PriceInput({label,value,onChange,help}: {label:string;value:number|null;onChange:(x:number|null)=>void;help?:string}){
- const [raw,setRaw]=useState("");
- return <label className="hp-q-field">{label}{help&&<small>{help}</small>}<input type="number" min="0" step="0.01" inputMode="decimal" value={raw} placeholder="Unknown" onChange={e=>{setRaw(e.target.value);onChange(n(e.target.value))}}/></label>;
+ return <label className="hp-q-field">{label}{help&&<small>{help}</small>}<input type="number" min="0" step="0.01" inputMode="decimal" value={value??""} placeholder="Unknown" onChange={e=>onChange(n(e.target.value))}/></label>;
 }
 export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
  location:Location;property:Property;hspf2:number|null;seer2:number|null;
@@ -24,6 +24,13 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
  const [message,setMessage]=useState("");
  const update=<K extends keyof QuoteItem>(id:QuoteItem["id"],key:K,value:QuoteItem[K])=>
    setQuotes(old=>old.map(q=>q.id===id?{...q,[key]:value}:q));
+ const applyImported=(id:QuoteItem["id"],patch:ProposalPatch)=>{
+   setQuotes(old=>old.map(q=>q.id!==id?q:{
+     ...q,
+     ...(typeof patch.price==="number"?{installedPrice:patch.price}:{}),
+     ...(patch.scope?{scope:patch.scope as QuoteScope}:{})
+   }));
+ };
  const compared=useMemo(()=>{
    try{return {data:compareHeatPumpQuotes({location,property,hspf2,seer2,quotes}),error:null}}
    catch(e){return {data:null,error:e instanceof Error?e.message:"Invalid amount"}}
@@ -60,6 +67,8 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
         <option value="ductless">Ductless mini-splits</option><option value="mixed">Mixed ducted and ductless</option>
        </select>
       </label>
+       <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","scope"]}
+         onApply={patch=>applyImported(q.id,patch)}/>
       <details className="hp-q-advanced">
        <summary>Review discounts, rebates, permits and warranties</summary>
        <div className="hp-q-fields">

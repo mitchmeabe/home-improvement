@@ -1,0 +1,18 @@
+.proposal-import{margin:13px 0 18px;padding:12px 14px;border:1px solid #aabfc6;border-radius:10px;background:#f8fbfa;color:#193a37}
+.proposal-import summary{cursor:pointer;font-weight:700;font-size:14px}
+.proposal-import summary:focus-visible{outline:3px solid #297a6b;outline-offset:3px}
+.proposal-import-body{display:grid;gap:11px;padding-top:13px;font-size:13px;line-height:1.5}
+.proposal-import-body p{margin:0}
+.proposal-import-body textarea{width:100%;box-sizing:border-box;border:1px solid #849fa4;border-radius:6px;padding:10px;font:inherit;background:#fff;color:#172e2c}
+.proposal-import-body label,.proposal-import-body legend{font-weight:650}
+.proposal-file{display:grid;gap:6px}
+.proposal-import-body fieldset{border:1px solid #b5c8ce;border-radius:7px;padding:10px;min-width:0}
+.proposal-choice{display:flex;align-items:flex-start;gap:10px;margin:10px 0;cursor:pointer}
+.proposal-choice input{margin-top:4px}
+.proposal-choice small{display:block;font-size:12px;font-weight:400;overflow-wrap:anywhere}
+.proposal-warning{border-left:3px solid #ac7d33;padding:8px;background:#fff8e9}
+.proposal-mentions ul{margin:7px 0;padding-left:22px}
+.proposal-mentions li{margin-bottom:6px;overflow-wrap:anywhere}
+.proposal-import-body button{justify-self:start;padding:9px 14px;border-radius:7px;background:#185c4d;color:#fff;font-weight:700;border:0;cursor:pointer}
+.proposal-import-body button:disabled{opacity:.5;cursor:not-allowed}
+@media print{.proposal-import{display:none!important}}

@@ -8,6 +8,7 @@ import {
  MASS_REVIEWED_ON,MASS_SOURCES,EMPTY_MASS_INPUT,newMassQuote,compareMassQuotes,massCopyPlan,
  type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,type ProposalScope,
 } from "../../../lib/mass-save";
+import {ProposalTextImporter,type ProposalPatch} from "../../../components/proposal-text-import";
 import "./massachusetts.css";
 const answerOptions=[
  {value:"unsure",label:"I need to verify"},
@@ -60,6 +61,16 @@ export default function MassachusettsHeatPumpPage(){
  const set=<K extends keyof Common>(k:K,value:Common[K])=>setCommon(old=>({...old,[k]:value}));
  const updateBid=<K extends keyof MassQuote>(id:MassQuote["id"],key:K,value:MassQuote[K])=>
   setQuotes(old=>old.map(q=>q.id===id?{...q,[key]:value}:q));
+ const applyImported=(id:MassQuote["id"],patch:ProposalPatch)=>{
+   setQuotes(old=>old.map(q=>q.id!==id?q:{
+     ...q,
+     ...(typeof patch.price==="number"?{price:patch.price}:{}),
+     ...(typeof patch.rebate==="number"?{proposedRebate:patch.rebate}:{}),
+     ...(typeof patch.coolingCapacityBtu==="number"?{coolingCapacityBtu:patch.coolingCapacityBtu}:{}),
+     ...(patch.scope?{scope:patch.scope==="new-ductwork"?"replace-or-build-ducts":patch.scope as ProposalScope}:{}),
+     ...(patch.priceBasis?{priceBasis:patch.priceBasis as PriceBasis}:{})
+   }));
+ };
  const comparison=useMemo(()=>{
   try{return {result:compareMassQuotes(common,quotes),error:""}}
   catch(err){return {result:null,error:err instanceof Error?err.message:"Invalid quote"}}
@@ -127,6 +138,8 @@ export default function MassachusettsHeatPumpPage(){
      <Money id={"ma-"+q.id+"-rebate"} label="Rebate amount claimed by contractor ($)" value={q.proposedRebate} onChange={v=>updateBid(q.id,"proposedRebate",v)}/>
      <Money id={"ma-"+q.id+"-capacity"} label="AHRI cooling capacity (BTU/h)" hint="E.g., 36,000 BTU/h = 3 tons. Not the heating capacity or marketing model size." value={q.coolingCapacityBtu} onChange={v=>updateBid(q.id,"coolingCapacityBtu",v)}/>
     </div>
+     <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","rebate","coolingCapacityBtu","scope","priceBasis"]}
+       onApply={patch=>applyImported(q.id,patch)}/>
     <details className="ma-progressive ma-bid-details">
      <summary>Review rebate evidence, permits, equipment and warranties</summary>
      <div className="ma-bid-fields">
