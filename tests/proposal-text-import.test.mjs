@@ -38,3 +38,13 @@ test("oversized proposal rejected without extraction",()=>{
  assert.equal(x.candidates.length,0);
  assert.equal(x.warnings.length,1);
 });
+
+test("multiple amounts on the same labeled line are withheld, not taken as total",()=>{
+ const ambiguous=parseProposalText("Deposit $2,000; total installed price: $18,500");
+ assert.equal(field(ambiguous,"price"),undefined);
+ assert.ok(ambiguous.warnings.some(w=>/single reliable/.test(w)));
+ const other=parseProposalText("Total price: $22,000, optional electrical work $3,500");
+ assert.equal(field(other,"price"),undefined);
+ const clean=parseProposalText("Total installed price: $18,500");
+ assert.equal(field(clean,"price"),18500);
+});
