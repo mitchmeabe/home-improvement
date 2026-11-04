@@ -8,7 +8,7 @@ export type ProposalScope="reuse-existing-ducts"|"new-ductwork"|"ductless"|"mixe
 export type ProposalBasis="before-rebate"|"after-rebate";
 export type ProposalKey="price"|"rebate"|"coolingCapacityBtu"|"scope"|"priceBasis"|"ahriReference"|"outdoorModel"|"indoorModel";
 export interface ProposalCandidate {
- key:ProposalKey;label:string;value:number|ProposalScope|ProposalBasis;evidence:string;
+ key:ProposalKey;label:string;value:number|string;evidence:string;
 }
 export interface ProposalTextReview {
  candidates:ProposalCandidate[];
