@@ -39,8 +39,8 @@ test("missing amounts, bases, tank sizes or scope prevent numerical comparison",
  assert.equal(r.comparison.lowerTotalQuote,null);
 });
 test("same scope and price basis compare totals without treating seller incentive as award",()=>{
- const a={...newQuote("a"),installedTotal:4100,priceBasis:"before-incentives",scope:"same-location",tankGallons:65,proposedIncentive:1200};
- const b={...newQuote("b"),installedTotal:3600,priceBasis:"before-incentives",scope:"same-location",tankGallons:65};
+ const a={...newQuote("a"),installedTotal:4100,priceBasis:"before-incentives",scope:"same-location",tankGallons:65,proposedIncentive:1200,plumbingIncluded:"yes",electricalIncluded:"yes",condensateIncluded:"yes"};
+ const b={...newQuote("b"),installedTotal:3600,priceBasis:"before-incentives",scope:"same-location",tankGallons:65,plumbingIncluded:"yes",electricalIncluded:"yes",condensateIncluded:"yes"};
  const r=run({quotes:[a,b]});
  assert.equal(r.comparison.comparable,true);
  assert.equal(r.comparison.difference,500);
@@ -57,4 +57,21 @@ test("export includes sources and avoids funding clearance",()=>{
  const s=report(run());
  assert.match(s,/portland.gov/);
  assert.match(s,/no permits, funding, rebates or contractor guarantees/i);
+});
+
+test("missing or mismatched material inclusions suppress a cheaper-quote comparison",()=>{
+ const base={priceBasis:"before-incentives",scope:"same-location",tankGallons:65};
+ const a={...newQuote("a"),...base,installedTotal:4100,plumbingIncluded:"yes",electricalIncluded:"yes",condensateIncluded:"yes"};
+ const pending={...newQuote("b"),...base,installedTotal:3000};
+ const unknown=run({quotes:[a,pending]});
+ assert.equal(unknown.comparison.comparable,false);
+ assert.match(unknown.comparison.reason,/Confirm plumbing/);
+ const conflicting=run({quotes:[a,{...pending,plumbingIncluded:"yes",electricalIncluded:"no",condensateIncluded:"yes"}]});
+ assert.equal(conflicting.comparison.comparable,false);
+ assert.match(conflicting.comparison.reason,/different included/);
+});
+test("reported new ventilation changes contractor verification instructions without implying approval",()=>{
+ const x=run({place:"portland-verified",house:"one-two-family",newVentilation:"yes"});
+ assert.match(x.permits.find(y=>y.id==="ventilation").detail,/New ventilation/);
+ assert.equal(x.permits.find(y=>y.id==="ventilation").status,"check");
 });
