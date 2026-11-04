@@ -4,6 +4,7 @@
  * in browser state; no serial number or utility account identifier is needed.
  */
 import {compareMassQuotes,type MassBidComparison,type MassQuote,type MassInput,type MassYear} from "./mass-save.ts";
+import type {HPQPLMatch} from "./mass-hpqpl.ts";
 export const MASS_AUDIT_REVIEWED="2026-11-04";
 export const MA_AUDIT_SOURCES={
  rules:"https://www.masssave.com/en/residential/rebates-offers-services/heating-and-cooling/heat-pumps/air-source-heat-pumps",
@@ -38,13 +39,21 @@ export function auditMassachusettsProposals(
  common:Omit<MassInput,"installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"coolingCapacityBtu">,
  quotes:MassQuote[],
  evidence:Partial<Record<MassQuote["id"],EquipmentEvidence>>,
- timeline:TimelineEvidence
+ timeline:TimelineEvidence,
+ hpqplMatches?:Partial<Record<MassQuote["id"],HPQPLMatch>>
 ):MassachusettsProposalAudit{
  if(!timeline||typeof timeline.installationDate!=="string"||typeof timeline.submissionDate!=="string"||
   timeline.installationDate!==""&&!validDate(timeline.installationDate)||
   timeline.submissionDate!==""&&!validDate(timeline.submissionDate))
   throw new RangeError("Use valid calendar dates or leave dates unknown.");
- const comparison=compareMassQuotes(common,quotes);
+ const checkedQuotes=hpqplMatches?quotes.map(q=>{
+  const m=hpqplMatches[q.id];
+  if(m?.status==="listed-residential"&&q.equipmentOnQualifiedList!=="no")
+   return {...q,equipmentOnQualifiedList:"yes" as const,
+    coolingCapacityBtu:m.coolingBtu??q.coolingCapacityBtu};
+  return {...q,equipmentOnQualifiedList:"unsure" as const,coolingCapacityBtu:null};
+ }):quotes;
+ const comparison=compareMassQuotes(common,checkedQuotes);
  const problems:string[]=[];
  const documents:string[]=[
   "Keep the participating installer, actual indoor/outdoor model IDs, AHRI reference and installed capacity with each proposal.",
@@ -93,6 +102,14 @@ export function auditMassachusettsProposals(
    risks.push("A user-reported qualified-list match is not supported by enough system identifiers to independently cross-check it.");
   if(q.equipmentOnQualifiedList!=="yes")risks.push("Exact qualified-list status remains unverified (or marked not listed).");
   if(q.coolingCapacityBtu===null)risks.push("AHRI cooling capacity missing; the per-ton schedule example cannot be checked against a system certificate.");
+  const listed=hpqplMatches?.[q.id];
+  if(listed){
+   risks.push("Imported HPQPL workbook (not authenticated live): "+listed.reason);
+   if(listed.status==="listed-residential"&&listed.coolingBtu!==null&&
+      quotes.find(v=>v.id===q.id)?.coolingCapacityBtu!==null&&
+      quotes.find(v=>v.id===q.id)?.coolingCapacityBtu!==listed.coolingBtu)
+    risks.push("Quoted capacity conflicts with the matched product-list capacity; ask for the correct AHRI certificate.");
+  }
   let refrigerantFinding:EquipmentFinding["refrigerantFinding"]="not-established";
   const highGwp=e.refrigerant==="r410a"||e.refrigerant==="other-over-700";
   if(e.refrigerant==="at-most-700")refrigerantFinding="no-known-high-gwp-barrier";
@@ -127,7 +144,8 @@ export function auditMassachusettsProposals(
  // post-rebate arithmetic. Preserve original, as-quoted totals.
  for(const row of comparison.quotes){
   const item=findings.find(x=>x.id===row.quote.id);
-  if(missingSchedule||item?.readiness!=="reported-ready")row.conditionalPostRebate=null;
+  if(missingSchedule||item?.readiness!=="reported-ready"||
+     (hpqplMatches&&hpqplMatches[row.quote.id]?.status!=="listed-residential"))row.conditionalPostRebate=null;
  }
  const priorityQuestions=[
   ...(problems.length?[problems[0]]:[]),

@@ -11,6 +11,8 @@ import {
 import {auditMassachusettsProposals,blankEquipment,massAuditReport,MASS_AUDIT_REVIEWED,MA_AUDIT_SOURCES,
  type EquipmentEvidence,type TimelineEvidence,type RefrigerantClass,type SystemClass} from "../../../lib/massachusetts-proposal-audit";
 import {ProposalTextImporter,type ProposalPatch} from "../../../components/proposal-text-import";
+import {MassHPQPLImporter} from "../../../components/mass-hpqpl-importer";
+import {matchHPQPL,hpqplMatchReport,type HPQPLCatalog,type HPQPLMatch} from "../../../lib/mass-hpqpl";
 import "./massachusetts.css";
 const answerOptions=[
  {value:"unsure",label:"I need to verify"},
@@ -59,6 +61,7 @@ export default function MassachusettsHeatPumpPage(){
  const [quotes,setQuotes]=useState<MassQuote[]>([newMassQuote("a"),newMassQuote("b")]);
  const [timeline,setTimeline]=useState<TimelineEvidence>({installationDate:"",submissionDate:""});
  const [equipment,setEquipment]=useState<Partial<Record<MassQuote["id"],EquipmentEvidence>>>({});
+ const [hpqpl,setHpqpl]=useState<HPQPLCatalog|null>(null);
  const evidenceFor=(id:MassQuote["id"])=>equipment[id]??blankEquipment();
  const updateEquipment=<K extends keyof EquipmentEvidence>(id:MassQuote["id"],key:K,value:EquipmentEvidence[K])=>
   setEquipment(old=>({...old,[id]:{...blankEquipment(),...old[id],[key]:value}}));
@@ -84,14 +87,15 @@ export default function MassachusettsHeatPumpPage(){
       ...(typeof patch.indoorModel==="string"?{indoorModel:patch.indoorModel}:{})
     }}));
  };
+ const hpqplMatches=useMemo(()=>Object.fromEntries(quotes.map(q=>[q.id,matchHPQPL(hpqpl,equipment[q.id]??blankEquipment())])) as Partial<Record<MassQuote["id"],HPQPLMatch>>,[quotes,hpqpl,equipment]);
  const comparison=useMemo(()=>{
   try{
-   const audit=auditMassachusettsProposals(common,quotes,equipment,timeline);
+   const audit=auditMassachusettsProposals(common,quotes,equipment,timeline,hpqpl?hpqplMatches:undefined);
    return {result:audit.comparison,audit,error:""};
   }catch(err){return {result:null,audit:null,error:err instanceof Error?err.message:"Invalid quote"}}
- },[common,quotes,equipment,timeline]);
+ },[common,quotes,equipment,timeline,hpqpl,hpqplMatches]);
  const customerReport=()=>comparison.result&&comparison.audit?
-    massCopyPlan(comparison.result)+"\n\n"+massAuditReport(comparison.audit,equipment,timeline):"";
+    massCopyPlan(comparison.result)+"\n\n"+massAuditReport(comparison.audit,equipment,timeline)+"\n\n"+quotes.map(q=>hpqplMatchReport(q.id.toUpperCase(),hpqplMatches[q.id]!,hpqpl)).join("\n\n"):"";
  const copy=async()=>{
   if(!comparison.result)return;
   try{await navigator.clipboard.writeText(customerReport());track("mass_quote_report_copied");setCopyMessage("Comparison copied; no quote files or address were uploaded.");}
@@ -228,10 +232,15 @@ export default function MassachusettsHeatPumpPage(){
  comparison.audit.timeline.status==="unsupported"?"Outside supported rate periods":"Not established"}.
  Source reviewed {MASS_AUDIT_REVIEWED}; these findings are not official product approval or funding.</p>
  {comparison.audit.timeline.problems.map(x=><p className="ma-warning" key={x}>{x}</p>)}
+ <MassHPQPLImporter catalog={hpqpl} onChange={setHpqpl}/>
  <div className="ma-equipment-grid">{comparison.audit.quotes.map(f=><article key={f.id}>
   <h4>Quote {f.id.toUpperCase()} — {f.readiness==="blocked"?"Reported system barrier":
    f.readiness==="reported-ready"?"Conditions self-reported":"System verification pending"}</h4>
   <p>AHRI: {equipment[f.id]?.ahriReference||"not entered"}; outdoor: {equipment[f.id]?.outdoorModel||"not entered"}; indoor: {equipment[f.id]?.indoorModel||"not entered"}.</p>
+  <div className="ma-hpqpl-match"><strong>Workbook match: {hpqplMatches[f.id]?.status??"no-data"}</strong>
+    <p>{hpqplMatches[f.id]?.reason}</p>
+    {hpqplMatches[f.id]?.rows.map(r=><p key={r.sheet+"-"+r.line}>Sheet {r.sheet}, row {r.line}; {r.rebateType||"rebate category unknown"}; cooling {r.coolingBtu===null?"not established":r.coolingBtu.toLocaleString("en-US")+" BTU/h"}.</p>)}
+   </div>
   <ul>{f.risks.map(x=><li key={x}>{x}</li>)}</ul>
  </article>)}</div>
  <h4>Required documents and next questions</h4>
@@ -253,6 +262,7 @@ export default function MassachusettsHeatPumpPage(){
        {label:"AHRI reference (self-reported)",values:comparison.result.quotes.map(e=>equipment[e.quote.id]?.ahriReference||"Not entered")},
        {label:"Indoor/outdoor model IDs",values:comparison.result.quotes.map(e=>
         (equipment[e.quote.id]?.indoorModel||"Not entered")+" / "+(equipment[e.quote.id]?.outdoorModel||"Not entered"))},
+       {label:"HPQPL workbook match",values:comparison.result.quotes.map(e=>hpqplMatches[e.quote.id]?.status??"no-data")},
        {label:"Equipment evidence status",values:comparison.result.quotes.map(e=>{
         const f=comparison.audit?.quotes.find(x=>x.id===e.quote.id);
         return f?.readiness==="blocked"?"Reported equipment barrier":f?.readiness==="reported-ready"?
