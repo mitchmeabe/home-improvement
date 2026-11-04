@@ -8,6 +8,8 @@ import {
  MASS_REVIEWED_ON,MASS_SOURCES,EMPTY_MASS_INPUT,newMassQuote,compareMassQuotes,massCopyPlan,
  type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,type ProposalScope,
 } from "../../../lib/mass-save";
+import {auditMassachusettsProposals,blankEquipment,massAuditReport,MASS_AUDIT_REVIEWED,MA_AUDIT_SOURCES,
+ type EquipmentEvidence,type TimelineEvidence,type RefrigerantClass,type SystemClass} from "../../../lib/massachusetts-proposal-audit";
 import {ProposalTextImporter,type ProposalPatch} from "../../../components/proposal-text-import";
 import "./massachusetts.css";
 const answerOptions=[
@@ -55,6 +57,11 @@ export default function MassachusettsHeatPumpPage(){
   removedFuelEvidence:initial.removedFuelEvidence,
  });
  const [quotes,setQuotes]=useState<MassQuote[]>([newMassQuote("a"),newMassQuote("b")]);
+ const [timeline,setTimeline]=useState<TimelineEvidence>({installationDate:"",submissionDate:""});
+ const [equipment,setEquipment]=useState<Partial<Record<MassQuote["id"],EquipmentEvidence>>>({});
+ const evidenceFor=(id:MassQuote["id"])=>equipment[id]??blankEquipment();
+ const updateEquipment=<K extends keyof EquipmentEvidence>(id:MassQuote["id"],key:K,value:EquipmentEvidence[K])=>
+  setEquipment(old=>({...old,[id]:{...blankEquipment(),...old[id],[key]:value}}));
  const [copyMessage,setCopyMessage]=useState("");
  const [feedback,setFeedback]=useState<null|boolean>(null);
  const [hasQuotes,setHasQuotes]=useState<null|boolean>(null);
@@ -70,14 +77,24 @@ export default function MassachusettsHeatPumpPage(){
      ...(patch.scope?{scope:patch.scope==="new-ductwork"?"replace-or-build-ducts":patch.scope as ProposalScope}:{}),
      ...(patch.priceBasis?{priceBasis:patch.priceBasis as PriceBasis}:{})
    }));
+   if(typeof patch.ahriReference==="string"||typeof patch.outdoorModel==="string"||typeof patch.indoorModel==="string")
+    setEquipment(old=>({...old,[id]:{...blankEquipment(),...old[id],
+      ...(typeof patch.ahriReference==="string"?{ahriReference:patch.ahriReference}:{}),
+      ...(typeof patch.outdoorModel==="string"?{outdoorModel:patch.outdoorModel}:{}),
+      ...(typeof patch.indoorModel==="string"?{indoorModel:patch.indoorModel}:{})
+    }}));
  };
  const comparison=useMemo(()=>{
-  try{return {result:compareMassQuotes(common,quotes),error:""}}
-  catch(err){return {result:null,error:err instanceof Error?err.message:"Invalid quote"}}
- },[common,quotes]);
+  try{
+   const audit=auditMassachusettsProposals(common,quotes,equipment,timeline);
+   return {result:audit.comparison,audit,error:""};
+  }catch(err){return {result:null,audit:null,error:err instanceof Error?err.message:"Invalid quote"}}
+ },[common,quotes,equipment,timeline]);
+ const customerReport=()=>comparison.result&&comparison.audit?
+    massCopyPlan(comparison.result)+"\n\n"+massAuditReport(comparison.audit,equipment,timeline):"";
  const copy=async()=>{
   if(!comparison.result)return;
-  try{await navigator.clipboard.writeText(massCopyPlan(comparison.result));track("mass_quote_report_copied");setCopyMessage("Comparison copied; no quote files or address were uploaded.");}
+  try{await navigator.clipboard.writeText(customerReport());track("mass_quote_report_copied");setCopyMessage("Comparison copied; no quote files or address were uploaded.");}
   catch{setCopyMessage("Clipboard not available. Review the information on this page.")}
  };
  const commonChoice=(key:CommonAnswerKey,id:string,label:string,hint?:string)=>
@@ -138,7 +155,7 @@ export default function MassachusettsHeatPumpPage(){
      <Money id={"ma-"+q.id+"-rebate"} label="Rebate amount claimed by contractor ($)" value={q.proposedRebate} onChange={v=>updateBid(q.id,"proposedRebate",v)}/>
      <Money id={"ma-"+q.id+"-capacity"} label="AHRI cooling capacity (BTU/h)" hint="E.g., 36,000 BTU/h = 3 tons. Not the heating capacity or marketing model size." value={q.coolingCapacityBtu} onChange={v=>updateBid(q.id,"coolingCapacityBtu",v)}/>
     </div>
-     <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","rebate","coolingCapacityBtu","scope","priceBasis"]}
+     <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","rebate","coolingCapacityBtu","scope","priceBasis","ahriReference","outdoorModel","indoorModel"]}
        onApply={patch=>applyImported(q.id,patch)}/>
     <details className="ma-progressive ma-bid-details">
      <summary>Review rebate evidence, permits, equipment and warranties</summary>
@@ -217,7 +234,7 @@ export default function MassachusettsHeatPumpPage(){
     <p className="ma-summary">{comparison.result.comparisonExplanation}</p>}
     <p className="ma-warning">For 2026, complete equipment installations must occur by December 31, 2026, with forms and supporting documents received by February 28, 2027. As of October 1, 2026, serial-number/nameplate photos are required. For 2027, only the announced whole-home and partial-home **rate and cap changes** are encoded. Obtain current 2027 terms and confirmation from the program before relying on any amount.</p>
     <div className="ma-buttons"><button type="button" className="ma-main-button" onClick={copy}>Copy my contractor questions</button>
-     <button type="button" onClick={()=>{if(comparison.result){downloadTextReport("massachusetts-quote-review",massCopyPlan(comparison.result));track("mass_quote_report_downloaded")}}}>Download report (.txt)</button>
+     <button type="button" onClick={()=>{if(comparison.result){downloadTextReport("massachusetts-quote-review",customerReport());track("mass_quote_report_downloaded")}}}>Download report (.txt)</button>
      <a href={MASS_SOURCES.air.url} target="_blank" rel="noreferrer" onClick={()=>track("mass_save_program_click")}>Official Mass Save rebate rules ↗</a>
     </div>
     {copyMessage&&<p role="status" className="ma-muted">{copyMessage}</p>}
