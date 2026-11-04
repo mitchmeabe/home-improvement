@@ -98,10 +98,20 @@ test("keyboard can reach the Massachusetts project details and quote entry",asyn
  await expect(page.locator("#ma-year")).toBeFocused();
  await page.keyboard.press("Tab");
  await expect(page.locator("#ma-install-date")).toBeFocused();
- await page.keyboard.press("Tab");
- await expect(page.locator("#ma-submit-date")).toBeFocused();
- await page.keyboard.press("Tab");
- await expect(page.locator("#ma-route")).toBeFocused();
+ // Native date inputs can have multiple tab stops (month/day/year) in Chromium.
+ // Confirm the next field remains keyboard-reachable without hardcoding those stops.
+ let reachedSubmit=false;
+ for(let i=0;i<8;i++){
+  await page.keyboard.press("Tab");
+  if(await page.locator("#ma-submit-date").evaluate(el=>el===document.activeElement)){reachedSubmit=true;break}
+ }
+ expect(reachedSubmit).toBe(true);
+ let reachedRoute=false;
+ for(let i=0;i<8;i++){
+  await page.keyboard.press("Tab");
+  if(await page.locator("#ma-route").evaluate(el=>el===document.activeElement)){reachedRoute=true;break}
+ }
+ expect(reachedRoute).toBe(true);
 });
 
 test("Oregon does not credit a reported above-cap HP3 incentive",async({page})=>{
