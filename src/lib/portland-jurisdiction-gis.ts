@@ -82,15 +82,17 @@ export function buildPortlandGISQuery(address:StreetAddress):string{
  if(!Number.isInteger(address.houseNumber)||address.houseNumber<1||
   !/^[A-Z0-9 -]{1,60}$/.test(address.streetName)||
   !Object.values(streetTypes).includes(address.streetType)||
-  (address.direction!==""&&!/^(N|S|E|W|NE|NW|SE|SW)$/.test(address.direction)))
+  (address.direction!==""&&!/^(N|S|E|W|NE|NW|SE|SW)$/.test(address.direction))||
+  (address.unit!==null&&!/^[A-Z0-9-]{1,12}$/.test(address.unit))||
+  (address.zip!==null&&!/^\d{5}$/.test(address.zip)))
   throw new RangeError("Invalid address components.");
  const where=[
   "ADDRESS_NUMBER = "+address.houseNumber,
   "STREET_NAME = '"+address.streetName+"'",
   "STREET_TYPE_CODE = '"+address.streetType+"'",
-  "STREET_PREFIX_DIRECTION "+(address.direction?"= '"+address.direction+"'":"IS NULL"),
   "STATUS = 'Active'"
  ];
+ if(address.direction)where.push("STREET_PREFIX_DIRECTION = '"+address.direction+"'");
  if(address.zip)where.push("ZIP_CODE = '"+address.zip+"'");
  const url=new URL(PORTLAND_GIS_QUERY);
  url.searchParams.set("f","json");
