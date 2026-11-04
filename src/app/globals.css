@@ -15,3 +15,11 @@
 .improvement-directory a b{font-size:18px}.improvement-directory a span{font-size:13px;line-height:1.6;color:var(--muted)}.improvement-directory a em{font-size:12px;font-weight:750;font-style:normal;color:var(--green);margin-top:auto}
 .oregon-project-section{padding-top:22px;border-top:1px solid var(--line)}
 @media(max-width:630px){.improvement-directory{grid-template-columns:1fr}.improvement-directory a{min-height:130px}}
+
+.local-project-conditions{margin:20px 0;border:1px solid #d4e1d8;border-radius:11px;padding:14px;background:#f8fbf9}
+.local-project-conditions h3{margin:5px 0}.local-project-conditions label{margin-top:15px}
+.local-project-results{border-bottom:1px solid #d4e1d8;padding-bottom:15px;margin-bottom:20px}
+.local-project-results summary{cursor:pointer;padding:12px 2px;color:#206849}
+.local-project-results summary:focus-visible{outline:3px solid #277f55}
+.local-project-results ul{padding-left:22px;font-size:13px;line-height:1.55}
+.local-project-results .finding{grid-template-columns:86px 1fr}
