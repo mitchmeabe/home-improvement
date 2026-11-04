@@ -9,9 +9,7 @@ import "./mass-hpqpl-importer.css";
  * main ASHP tab alone includes over 204,000 parsed rows.
  */
 const HPQPL_SHEETS=[
- "Air Source Heat Pump","High Velocity ASHPs","Residential Air to Water HPs",
- "Commercial Air Source VRF","Commercial Ground Water HP","Commercial Ground Loop HP",
- "Residential GSHP"
+ "Air Source Heat Pump","High Velocity ASHPs"
 ] as const;
 type HPQPLSheet=typeof HPQPL_SHEETS[number];
 const MAX_HPQPL_BYTES=64*1024*1024;
@@ -73,7 +71,7 @@ export function MassHPQPLImporter({catalog,onChange}:{catalog:HPQPLCatalog|null;
      if(currentFile.current)void load(currentFile.current,next);
      else {generation.current++;onChange(null);}
    }}>{HPQPL_SHEETS.map(s=><option value={s} key={s}>{s}</option>)}</select>
-   <p>For performance and accurate category-specific results, this loads one workbook tab at a time. Switch category to recheck a different system type; the selected file remains on your device.</p>
+   <p>The residential air-source workflow supports the two Mass Save air-source workbook tabs. Other tabs either do not expose comparable AHRI/paired-model records or do not establish residential rebate scope. Only one tab is loaded at a time; switch tab to recheck high-velocity systems. The file remains on your device.</p>
    <label htmlFor="ma-hpqpl-file">Mass Save HPQPL workbook (.xlsx; up to 64 MiB)</label>
    <input ref={fileInput} id="ma-hpqpl-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
      disabled={working} onChange={e=>void load(e.target.files?.[0])}/>
