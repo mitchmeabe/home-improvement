@@ -166,6 +166,7 @@ export function evaluateMassSave(input:MassInput):MassResult {
   };
 }
 
+import {findExplicitScopeDifferences} from "./scope-coverage.ts";
 export type PriceBasis="before-rebate"|"after-rebate"|"unsure";
 export type ProposalScope="reuse-existing-ducts"|"replace-or-build-ducts"|"ductless"|"mixed"|"unknown";
 export interface MassQuote {
@@ -182,12 +183,16 @@ export interface MassQuote {
   loadCalculationProvided:Answer;
   scopeAndEquipmentIdentified:Answer;
   warrantyInWriting:Answer;
+  commissioningIncluded:Answer;
+  ductAirflowTestingIncluded:Answer;
+  oldSystemRemovalIncluded:Answer;
 }
 export function newMassQuote(id:MassQuote["id"]):MassQuote{
  return {id,price:null,priceBasis:"unsure",scope:"unknown",proposedRebate:null,rebateDocumentation:"unsure",
   installerInNetwork:"unsure",equipmentOnQualifiedList:"unsure",newEquipment:"unsure",
   coolingCapacityBtu:null,permitsAndElectrical:"unsure",loadCalculationProvided:"unsure",
-  scopeAndEquipmentIdentified:"unsure",warrantyInWriting:"unsure"};
+  scopeAndEquipmentIdentified:"unsure",warrantyInWriting:"unsure",
+  commissioningIncluded:"unsure",ductAirflowTestingIncluded:"unsure",oldSystemRemovalIncluded:"unsure"};
 }
 export interface QuoteEvaluation {
   quote:MassQuote;
@@ -202,6 +207,7 @@ export interface MassBidComparison{
   comparablePriceGap:number|null;
   comparativeWinner:MassQuote["id"]|null;
   comparisonExplanation:string;
+  scopeDifferences:string[];
 }
 export function compareMassQuotes(common:Omit<MassInput,"installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"coolingCapacityBtu">,quotes:MassQuote[]):MassBidComparison{
  if(quotes.length<2||quotes.length>3||new Set(quotes.map(q=>q.id)).size!==quotes.length)throw new RangeError("Enter 2–3 distinct quotes.");
@@ -222,6 +228,9 @@ export function compareMassQuotes(common:Omit<MassInput,"installerInNetwork"|"eq
   if(quote.loadCalculationProvided!=="yes")risks.push("Request Manual J load calculation and AHRI cooling capacity.");
   if(quote.scopeAndEquipmentIdentified!=="yes")risks.push("Ask for matching indoor/outdoor model numbers, installation scope and refrigerant details.");
   if(quote.warrantyInWriting!=="yes")risks.push("Ask for equipment and workmanship warranties in writing.");
+  if(quote.commissioningIncluded!=="yes")risks.push("Ask whether startup commissioning and a written system performance/airflow check are included.");
+  if(quote.ductAirflowTestingIncluded!=="yes")risks.push("Clarify duct leakage, sealing and airflow testing or explicitly confirm ductless exception.");
+  if(quote.oldSystemRemovalIncluded!=="yes")risks.push("Confirm whether existing heating equipment removal and disposal are included or excluded.");
   if(quote.rebateDocumentation!=="yes")risks.push("No written rebate confirmation; no rebate deduction assumed.");
   if(program.status!=="requirements-reported")risks.push("Mass Save eligibility/funding not established. The published schedule is not an award.");
   const canShowScenario=quote.price!==null&&quote.priceBasis==="before-rebate"&&
@@ -233,29 +242,43 @@ export function compareMassQuotes(common:Omit<MassInput,"installerInNetwork"|"eq
    risks.push("Proposed rebate exceeds standard published per-ton/cap formula; seek an explanation of any separate approved program.");
   }
   return {quote,program,statedPrice:quote.price,conditionalPostRebate:postRebate,
-    risks,itemsDocumented:[quote.permitsAndElectrical,quote.loadCalculationProvided,quote.scopeAndEquipmentIdentified,quote.warrantyInWriting].filter(x=>x==="yes").length};
+    risks,itemsDocumented:[
+      quote.permitsAndElectrical,quote.loadCalculationProvided,quote.scopeAndEquipmentIdentified,
+      quote.warrantyInWriting,quote.commissioningIncluded,quote.ductAirflowTestingIncluded,
+      quote.oldSystemRemovalIncluded
+    ].filter(x=>x==="yes").length};
  });
- const comparable=evaluated.every(x=>x.statedPrice!==null)&&
+ const scopeDifferences=findExplicitScopeDifferences(quotes.map(q=>({id:q.id,fields:[
+   {id:"commissioning",label:"Startup commissioning included",value:q.commissioningIncluded},
+   {id:"duct-airflow",label:"Duct/airflow testing included",value:q.ductAirflowTestingIncluded},
+   {id:"old-system",label:"Old equipment removal and disposal included",value:q.oldSystemRemovalIncluded},
+ ]})));
+ const comparable=scopeDifferences.length===0&&evaluated.every(x=>x.statedPrice!==null)&&
    quotes.every(q=>q.priceBasis!=="unsure")&&quotes.every(q=>q.priceBasis===quotes[0].priceBasis)&&
    quotes.every(q=>q.scope!=="unknown")&&quotes.every(q=>q.scope===quotes[0].scope);
  const ordered=comparable?[...evaluated].sort((a,b)=>a.statedPrice!-b.statedPrice!):[];
  const min=ordered.length?ordered[0].statedPrice!:null;
  const max=ordered.length?ordered[ordered.length-1].statedPrice!:null;
  return {quotes:evaluated,comparablePriceGap:min!==null&&max!==null?Math.round((max-min)*100)/100:null,
-  comparativeWinner:ordered[0]?.quote.id??null,
+  comparativeWinner:ordered[0]?.quote.id??null,scopeDifferences,
   comparisonExplanation:comparable?
     "Ranked only by self-reported quoted totals on the same before/after rebate basis and broad project scope. Different loads, equipment sizes, duct condition, labor and unlisted work can still make comparison misleading; this is not a best-contractor recommendation.":
-    "Enter prices, the same before/after rebate basis, and the same broad installation scope for every bid. Comparing new ductwork to duct reuse or ductless systems on price alone is misleading."};
+    "Do not rank totals until before/after rebate basis, installation type, and explicitly different included work are resolved. Comparing new ductwork to duct reuse or ductless systems on price alone is misleading."+
+    (scopeDifferences.length?" Conflicting included work: "+scopeDifferences.join("; ")+".":"")};
 }
 export function massCopyPlan(r:MassBidComparison):string{
  return ["MASSACHUSETTS HEAT-PUMP QUOTE REVIEW — "+MASS_REVIEWED_ON,
  "Independent, self-reported; NOT Mass Save preapproval or guaranteed incentive.",
+ "Explicit differences requiring contractor reconciliation: "+(r.scopeDifferences.join("; ")||"None identified from yes/no responses; unknowns remain"),
  ...r.quotes.flatMap(x=>["QUOTE "+x.quote.id.toUpperCase()+" listed price: "+(x.statedPrice??"unknown"),
   "Broad installation scope: "+x.quote.scope,
   "Equipment / installed scope documented (self-reported): "+x.quote.scopeAndEquipmentIdentified,
   "Heat-load calculation documented: "+x.quote.loadCalculationProvided,
   "Permits & electrical documented: "+x.quote.permitsAndElectrical,
   "Warranty documented: "+x.quote.warrantyInWriting,
+  "Startup commissioning included: "+x.quote.commissioningIncluded,
+  "Duct and airflow testing included: "+x.quote.ductAirflowTestingIncluded,
+  "Existing system disposal included: "+x.quote.oldSystemRemovalIncluded,
   "Written rebate documentation: "+x.quote.rebateDocumentation,
   "Published schedule arithmetic ONLY: "+(x.program.theoreticalScheduleAmount??"unknown"),
   "Conditional post-rebate scenario (not an award): "+(x.conditionalPostRebate??"not established"),

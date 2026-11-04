@@ -125,3 +125,22 @@ test("HP3 is not counted when Oregon location or residential category remains un
  const known=screen({location:"other-oregon",property:"new-construction",quotes:[quote,b]});
  assert.equal(known.evaluations[0].arithmeticNet,13000);
 });
+
+test("Oregon explicit permit, commissioning and disposal differences suppress ranking",()=>{
+ const x={...a,mechanicalPermitIncluded:"yes",commissioningIncluded:"yes",oldSystemRemovalIncluded:"yes"};
+ const y={...b,mechanicalPermitIncluded:"no",commissioningIncluded:"no",oldSystemRemovalIncluded:"no"};
+ const r=screen({quotes:[x,y]});
+ assert.equal(r.lowestComparableQuote,null);
+ assert.equal(r.priceDifference,null);
+ assert.deepEqual(r.scopeDifferences,[
+  "Mechanical permit and fee included","Startup commissioning included",
+  "Old equipment removal and disposal included"]);
+ assert.match(quoteComparisonQuestions(r),/Explicit included-scope differences/);
+});
+test("Oregon uncertainty is retained and does not invent a concrete scope mismatch",()=>{
+ const x={...a,commissioningIncluded:"yes"},y={...b,commissioningIncluded:"unsure"};
+ const r=screen({quotes:[x,y]});
+ assert.deepEqual(r.scopeDifferences,[]);
+ assert.equal(r.priceDifference,2000);
+ assert.ok(r.evaluations[1].warnings.some(w=>/Confirm startup commissioning/i.test(w)));
+});

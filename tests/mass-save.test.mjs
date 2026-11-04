@@ -120,3 +120,23 @@ test("downloaded text explains differences in bid scope and evidence without cla
  assert.match(report,/Permits & electrical documented/);
  assert.match(report,/NOT Mass Save preapproval/);
 });
+
+test("Massachusetts explicit differences in commissioning/disposal prevent price ranking",()=>{
+ const a=make("a",22000),b=make("b",26000);
+ a.commissioningIncluded="yes";b.commissioningIncluded="no";
+ a.oldSystemRemovalIncluded="yes";b.oldSystemRemovalIncluded="no";
+ const r=compareMassQuotes(shared,[a,b]);
+ assert.equal(r.comparablePriceGap,null);
+ assert.equal(r.comparativeWinner,null);
+ assert.deepEqual(r.scopeDifferences,[
+  "Startup commissioning included","Old equipment removal and disposal included"]);
+ assert.match(massCopyPlan(r),/Explicit differences requiring contractor reconciliation/);
+});
+test("Massachusetts unknown scope evidence warns without fabricating exclusion",()=>{
+ const a=make("a",22000),b=make("b",26000);
+ a.commissioningIncluded="yes";b.commissioningIncluded="unsure";
+ const r=compareMassQuotes(shared,[a,b]);
+ assert.deepEqual(r.scopeDifferences,[]);
+ assert.equal(r.comparablePriceGap,4000);
+ assert.ok(r.quotes[1].risks.some(x=>/startup commissioning/i.test(x)));
+});

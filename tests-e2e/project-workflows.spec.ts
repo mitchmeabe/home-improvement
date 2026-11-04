@@ -112,3 +112,35 @@ test("Oregon does not credit a reported above-cap HP3 incentive",async({page})=>
  await expect(page.getByText(/proposed HP3 discount exceeds the official/i).first()).toBeVisible();
  await expect(page.getByRole("region",{name:/Quote A priority contractor questions/i})).toBeVisible();
 });
+
+test("Massachusetts recognizes explicitly different commissioning scope and withholds ranking",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ await page.locator("#ma-a-price").fill("22000");
+ await page.locator("#ma-b-price").fill("26000");
+ await page.locator("#ma-a-scope").selectOption("reuse-existing-ducts");
+ await page.locator("#ma-b-scope").selectOption("reuse-existing-ducts");
+ await page.locator("#ma-a-basis").selectOption("before-rebate");
+ await page.locator("#ma-b-basis").selectOption("before-rebate");
+ await page.locator(".ma-bid-details summary").first().click();
+ await page.locator(".ma-bid-details summary").nth(1).click();
+ await page.locator("#ma-a-commissioningIncluded").selectOption("yes");
+ await page.locator("#ma-b-commissioningIncluded").selectOption("no");
+ await expect(page.getByRole("region",{name:"Material contractor scope differences"})).toContainText("Startup commissioning included");
+ await expect(page.getByText(/Difference between comparable reported price totals/i)).toHaveCount(0);
+});
+test("Oregon quote comparison exposes excluded work independently of broad scope labels",async({page})=>{
+ await page.goto("/");
+ await page.getByLabel("Total installed quote ($)").nth(0).fill("15000");
+ await page.getByLabel("Total installed quote ($)").nth(1).fill("20000");
+ await page.getByLabel("Quote A installation scope").selectOption("reuse-existing-ducts");
+ await page.getByLabel("Quote B installation scope").selectOption("reuse-existing-ducts");
+ await page.getByLabel("Is this total before or after incentives?").nth(0).selectOption("before-discounts");
+ await page.getByLabel("Is this total before or after incentives?").nth(1).selectOption("before-discounts");
+ const details=page.locator(".hp-q-advanced");
+ await details.nth(0).locator("summary").click();
+ await details.nth(1).locator("summary").click();
+ await page.getByLabel("Startup commissioning and documented performance checks included?").nth(0).selectOption("yes");
+ await page.getByLabel("Startup commissioning and documented performance checks included?").nth(1).selectOption("no");
+ await expect(page.getByRole("region",{name:"Material Oregon bid scope differences"})).toContainText("Startup commissioning included");
+ await expect(page.getByText(/Difference between comparable as-quoted totals/i)).toHaveCount(0);
+});

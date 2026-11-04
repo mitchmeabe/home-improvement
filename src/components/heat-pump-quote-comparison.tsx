@@ -12,7 +12,7 @@ const yn=[{value:"unsure",label:"Not documented"},{value:"yes",label:"Confirmed 
 const m=(n:number|null)=>n===null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
 const n=(s:string)=>s.trim()===""?null:Number(s);
 type MoneyKey="installedPrice"|"otherDiscount"|"hp3ProposedDiscount"|"annualOperatingCost";
-type AnswerKey="otherDiscountConfirmed"|"hp3ApprovedContractor"|"hp3FundingConfirmed"|"hp3UpfrontReduction"|"modelAndRatingsDocumented"|"mechanicalPermitIncluded"|"electricalScopeIncluded"|"finalInspectionIncluded"|"warrantyInWriting";
+type AnswerKey="otherDiscountConfirmed"|"hp3ApprovedContractor"|"hp3FundingConfirmed"|"hp3UpfrontReduction"|"modelAndRatingsDocumented"|"mechanicalPermitIncluded"|"electricalScopeIncluded"|"finalInspectionIncluded"|"warrantyInWriting"|"commissioningIncluded"|"ductAirflowTestingIncluded"|"oldSystemRemovalIncluded";
 function PriceInput({label,value,onChange,help}: {label:string;value:number|null;onChange:(x:number|null)=>void;help?:string}){
  const [raw,setRaw]=useState("");
  return <label className="hp-q-field">{label}{help&&<small>{help}</small>}<input type="number" min="0" step="0.01" inputMode="decimal" value={raw} placeholder="Unknown" onChange={e=>{setRaw(e.target.value);onChange(n(e.target.value))}}/></label>;
@@ -75,6 +75,9 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
       {ynSelect(q,"electricalScopeIncluded","Electrical scope/permit and any panel upgrade covered?")}
       {ynSelect(q,"finalInspectionIncluded","Final inspection responsibility documented?")}
       {ynSelect(q,"warrantyInWriting","Equipment and labor warranties in writing?")}
+      {ynSelect(q,"commissioningIncluded","Startup commissioning and documented performance checks included?")}
+      {ynSelect(q,"ductAirflowTestingIncluded","Duct sealing / airflow or leakage testing included where applicable?")}
+      {ynSelect(q,"oldSystemRemovalIncluded","Old heating equipment removal and disposal included?")}
       {cost(q,"annualOperatingCost","Optional estimated annual operating cost ($)","Only your own estimate; used for a simple ten-year arithmetic scenario.")}
        </div>
       </details>
@@ -84,6 +87,11 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
   {compared.error&&<p role="alert" className="warning">{compared.error}</p>}
   {compared.data&&<div className="hp-q-analysis" aria-live="polite">
     <h3>Side-by-side quote analysis</h3>
+    {compared.data.scopeDifferences.length>0&&<section className="hp-q-scope-warning" aria-label="Material Oregon bid scope differences">
+      <h4>Confirmed differences in included work — price ranking withheld</h4>
+      <p>These items were marked included in at least one quote and excluded in another. Ask contractors to issue comparable, itemized proposals.</p>
+      <ul>{compared.data.scopeDifferences.map(label=><li key={label}>{label}</li>)}</ul>
+    </section>}
     <div className="hp-q-table-scroll"><table className="hp-q-table" aria-label="Oregon heat pump quote completeness comparison">
       <caption>Side-by-side coverage. All answers are self-reported; a checked item is not verified by this website.</caption>
       <thead><tr><th scope="col">Comparison</th>{quotes.map(q=><th scope="col" key={q.id}>Quote {q.id.toUpperCase()}</th>)}</tr></thead>
@@ -97,6 +105,9 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
         {label:"Electrical scope included",values:quotes.map(q=>q.electricalScopeIncluded)},
         {label:"Final inspection included",values:quotes.map(q=>q.finalInspectionIncluded)},
         {label:"Written warranty",values:quotes.map(q=>q.warrantyInWriting)},
+        {label:"Startup commissioning included",values:quotes.map(q=>q.commissioningIncluded)},
+        {label:"Duct/airflow testing included",values:quotes.map(q=>q.ductAirflowTestingIncluded)},
+        {label:"Old equipment disposal included",values:quotes.map(q=>q.oldSystemRemovalIncluded)},
        ].map(row=><tr key={row.label}><th scope="row">{row.label}</th>{row.values.map((value,i)=><td key={quotes[i].id}>{value}</td>)}</tr>)}</tbody>
      </table></div>
     <div className="hp-q-results">{compared.data.evaluations.map(e=><article key={e.id}>
