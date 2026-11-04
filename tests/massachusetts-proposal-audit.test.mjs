@@ -76,3 +76,12 @@ test("malformed dates and model IDs are rejected and out-of-period installs unsu
  assert.equal(previous.timeline.status,"unsupported");
  assert.equal(previous.comparison.quotes[0].conditionalPostRebate,null);
 });
+
+test("unknown equipment configuration keeps high-GWP claims out of conditional price arithmetic",()=>{
+ const e={...full,refrigerant:"r410a",systemClass:"unsure"};
+ const x=run({evidence:{a:e,b:full}});
+ assert.equal(x.quotes[0].readiness,"verify");
+ assert.equal(x.comparison.quotes[0].conditionalPostRebate,null);
+ const y=run({evidence:{a:{...full,systemClass:"unsure"},b:full}});
+ assert.equal(y.quotes[0].readiness,"verify");
+});
