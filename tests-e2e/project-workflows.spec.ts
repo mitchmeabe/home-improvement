@@ -221,6 +221,11 @@ test("Oregon HPWH compares matched bids without awarding incentive or unverified
   await page.locator("#hw-"+id+"-basis").selectOption("before-incentives");
   await page.locator("#hw-"+id+"-scope").selectOption("same-location");
   await page.locator("#hw-"+id+"-tank").fill("65");
+  const details=page.locator(".hpwh-quote").filter({has:page.getByRole("heading",{name:"Quote "+id.toUpperCase()})});
+  await details.locator("summary").click();
+  for(const key of ["plumbingIncluded","electricalIncluded","condensateIncluded"]){
+   await page.locator("#hw-"+id+"-"+key).selectOption("yes");
+  }
  }
  await expect(result).toContainText("Lowest listed total: quote B");
  await expect(result).toContainText("$600");
