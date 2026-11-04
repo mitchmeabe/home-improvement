@@ -67,6 +67,8 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
         <option value="ductless">Ductless mini-splits</option><option value="mixed">Mixed ducted and ductless</option>
        </select>
       </label>
+       <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","scope"]}
+         onApply={patch=>applyImported(q.id,patch)}/>
       <details className="hp-q-advanced">
        <summary>Review discounts, rebates, permits and warranties</summary>
        <div className="hp-q-fields">
