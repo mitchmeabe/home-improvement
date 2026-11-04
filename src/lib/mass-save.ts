@@ -263,7 +263,7 @@ export function compareMassQuotes(common:Omit<MassInput,"installerInNetwork"|"eq
   comparativeWinner:ordered[0]?.quote.id??null,scopeDifferences,
   comparisonExplanation:comparable?
     "Ranked only by self-reported quoted totals on the same before/after rebate basis and broad project scope. Different loads, equipment sizes, duct condition, labor and unlisted work can still make comparison misleading; this is not a best-contractor recommendation.":
-    "Do not rank totals until before/after rebate basis, installation type, and explicitly different included work are resolved."+
+    "Do not rank totals until before/after rebate basis, installation type, and explicitly different included work are resolved. Comparing new ductwork to duct reuse or ductless systems on price alone is misleading."+
     (scopeDifferences.length?" Conflicting included work: "+scopeDifferences.join("; ")+".":"")};
 }
 export function massCopyPlan(r:MassBidComparison):string{
