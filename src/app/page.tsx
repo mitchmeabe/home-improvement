@@ -26,8 +26,14 @@ export default function Home() {
   }, [location, property, equipment, wiring, hspf2, seer2]);
 
   return <main className="container">
-    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><span className="edition">Early research prototype · Oregon</span></header>
-    <section className="hero"><p className="eyebrow">Residential heat pump project planner</p><h1>Plan the work before you pay for it.</h1><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
+    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><nav className="market-nav" aria-label="Heat pump markets"><a href="/massachusetts/heat-pumps">Massachusetts quote planner</a><a href="#oregon-project">Oregon project planner</a></nav></header>
+    <section className="market-feature">
+      <p className="eyebrow">NEW · MASSACHUSETTS HEAT PUMPS</p>
+      <h2>Compare your installer bids before counting rebates.</h2>
+      <p>Mass Save's 2026 and announced 2027 rebate amounts differ. Check eligible utility, installer, weatherization and product requirements and compare two or three heat-pump proposals without assuming a rebate.</p>
+      <a href="/massachusetts/heat-pumps">Open the Massachusetts heat-pump evaluator ↗</a>
+    </section>
+    <section className="hero" id="oregon-project"><p className="eyebrow">Residential heat pump project planner</p><h1>Plan the work before you pay for it.</h1><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
     <div className="grid">
       <section className="panel"><h2>Tell us about the project</h2><p className="muted">Enter basic information. This prototype does not collect your address or income.</p>
         <label htmlFor="location">Property location</label>
