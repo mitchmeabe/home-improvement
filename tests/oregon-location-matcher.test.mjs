@@ -8,7 +8,7 @@ const make=(p={})=>resolveOregonProject({
 });
 test("mailing Portland alone cannot trigger city-specific permit requirements",()=>{
  const x=make();assert.equal(x.permitAuthority,"not-established");
- assert.equal(x.effectiveLocation,"unknown");
+ assert.equal(x.effectiveLocation,"other-oregon");
  assert.equal(x.locationFindings[0].status,"check");
  assert.ok(x.locationFindings[0].detail.includes("Jurisdiction"));
 });
@@ -52,5 +52,18 @@ test("Oregon non-Portland retains statewide HP3 review but no municipal determin
  assert.equal(x.permitAuthority,"outside-portland");
  assert.ok(x.programs.some(y=>y.id==="hp3"));
  assert.ok(x.programs.some(y=>y.id==="eto"));
+ assert.equal(x.locationFindings.some(y=>y.status==="required"),false);
+});
+
+test("unsure state never becomes a confirmed Oregon incentive route",()=>{
+ const x=make({location:"unknown",electricUtility:"pge"});
+ assert.equal(x.effectiveLocation,"unknown");
+ assert.equal(x.programs.length,1);
+ assert.equal(x.programs[0].status,"check");
+ assert.equal(x.programs.some(y=>y.id==="eto"),false);
+});
+test("city jurisdiction does not authorize one-family rules for unsupported larger buildings",()=>{
+ const x=make({jurisdiction:"portland-confirmed",building:"multifamily-other"});
+ assert.equal(x.effectiveLocation,"other-oregon");
  assert.equal(x.locationFindings.some(y=>y.status==="required"),false);
 });
