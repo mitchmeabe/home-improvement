@@ -29,6 +29,13 @@ export default function Projects(){
    </div>
    <p className="project-match-count" role="status">{matches.length} matching project planner{matches.length===1?"":"s"}</p>
   </section>
+  <section className="project-dossier-callout" aria-labelledby="oregon-dossier-link">
+    <div><p className="project-kicker">NEW · INTEGRATED OREGON PROJECT DOSSIER</p>
+     <h2 id="oregon-dossier-link">Get one combined permit, incentive and documentation plan</h2>
+     <p>For Oregon space heat pumps, heat-pump water heaters, or panel/service work. It assembles applicable published rules, identified uncertainties, evidence to request and the next actions. No address or utility account is needed.</p>
+    </div>
+    <Link href="/projects/oregon-requirements">Create an Oregon project dossier <span aria-hidden="true">→</span></Link>
+  </section>
   <section aria-labelledby="project-options-heading">
    <h2 id="project-options-heading">Choose a supported workflow</h2>
    {matches.length?<ul className="project-card-grid">{matches.map(p=><li key={p.id} className="project-finder-card">

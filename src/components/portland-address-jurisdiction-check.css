@@ -1,0 +1,19 @@
+.city-jurisdiction{margin:18px 0;padding:16px;border:1px solid #b8cdbc;border-radius:11px;background:#f6fbf7}
+.city-jurisdiction h3{font-size:15px;margin:0 0 10px}.city-jurisdiction p{font-size:12px;line-height:1.6;margin:7px 0}
+.city-jurisdiction-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(68px,1fr) minmax(90px,1fr);gap:10px}
+.city-jurisdiction-grid label{min-width:0;font-size:12px!important;margin:5px 0!important}
+.city-jurisdiction-grid input{background:#fff;font:inherit;font-weight:400;min-width:0;padding:10px;margin-top:6px}
+.city-jurisdiction-privacy{background:#eef5f0;border-left:3px solid #87af95;padding:10px;margin:12px 0!important}
+.city-jurisdiction-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+.city-jurisdiction-actions button{cursor:pointer;background:#225c43;color:white;border:1px solid #225c43;border-radius:7px;padding:10px;font:700 12px/1.5 Arial,sans-serif}
+.city-jurisdiction-actions button:disabled{cursor:not-allowed;opacity:.55}
+.city-jurisdiction-actions .city-jurisdiction-secondary{background:#fff;color:#225c43}
+.city-jurisdiction-actions a{font-size:12px;line-height:1.5}
+.city-jurisdiction-message{border-radius:7px;background:#fff;border:1px solid #c4d5ca;padding:10px}
+.city-jurisdiction-success{border-radius:8px;border:1px solid #a2c7ad;background:#eaf6ee;padding:13px;margin-top:12px}
+.city-jurisdiction-success strong,.city-jurisdiction-unresolved strong{font-size:13px}
+.city-jurisdiction-success p,.city-jurisdiction-unresolved p{line-height:1.6}
+.city-jurisdiction-unresolved{border-radius:8px;border:1px solid #e5c8a1;background:#fff9ec;padding:13px;margin-top:12px}
+.city-jurisdiction-foot{font-size:11px!important;color:#68766e}
+.city-jurisdiction input:focus-visible,.city-jurisdiction button:focus-visible{outline:3px solid #246c8a;outline-offset:2px}
+@media(max-width:650px){.city-jurisdiction-grid{grid-template-columns:1fr 1fr}.city-jurisdiction-grid label:first-child{grid-column:1/-1}}

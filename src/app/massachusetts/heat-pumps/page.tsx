@@ -8,7 +8,11 @@ import {
  MASS_REVIEWED_ON,MASS_SOURCES,EMPTY_MASS_INPUT,newMassQuote,compareMassQuotes,massCopyPlan,
  type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,type ProposalScope,
 } from "../../../lib/mass-save";
+import {auditMassachusettsProposals,blankEquipment,massAuditReport,MASS_AUDIT_REVIEWED,MA_AUDIT_SOURCES,
+ type EquipmentEvidence,type TimelineEvidence,type RefrigerantClass,type SystemClass} from "../../../lib/massachusetts-proposal-audit";
 import {ProposalTextImporter,type ProposalPatch} from "../../../components/proposal-text-import";
+import {MassHPQPLImporter} from "../../../components/mass-hpqpl-importer";
+import {matchHPQPL,hpqplMatchReport,type HPQPLCatalog,type HPQPLMatch} from "../../../lib/mass-hpqpl";
 import "./massachusetts.css";
 const answerOptions=[
  {value:"unsure",label:"I need to verify"},
@@ -55,6 +59,12 @@ export default function MassachusettsHeatPumpPage(){
   removedFuelEvidence:initial.removedFuelEvidence,
  });
  const [quotes,setQuotes]=useState<MassQuote[]>([newMassQuote("a"),newMassQuote("b")]);
+ const [timeline,setTimeline]=useState<TimelineEvidence>({installationDate:"",submissionDate:""});
+ const [equipment,setEquipment]=useState<Partial<Record<MassQuote["id"],EquipmentEvidence>>>({});
+ const [hpqpl,setHpqpl]=useState<HPQPLCatalog|null>(null);
+ const evidenceFor=(id:MassQuote["id"])=>equipment[id]??blankEquipment();
+ const updateEquipment=<K extends keyof EquipmentEvidence>(id:MassQuote["id"],key:K,value:EquipmentEvidence[K])=>
+  setEquipment(old=>({...old,[id]:{...blankEquipment(),...old[id],[key]:value}}));
  const [copyMessage,setCopyMessage]=useState("");
  const [feedback,setFeedback]=useState<null|boolean>(null);
  const [hasQuotes,setHasQuotes]=useState<null|boolean>(null);
@@ -70,14 +80,25 @@ export default function MassachusettsHeatPumpPage(){
      ...(patch.scope?{scope:patch.scope==="new-ductwork"?"replace-or-build-ducts":patch.scope as ProposalScope}:{}),
      ...(patch.priceBasis?{priceBasis:patch.priceBasis as PriceBasis}:{})
    }));
+   if(typeof patch.ahriReference==="string"||typeof patch.outdoorModel==="string"||typeof patch.indoorModel==="string")
+    setEquipment(old=>({...old,[id]:{...blankEquipment(),...old[id],
+      ...(typeof patch.ahriReference==="string"?{ahriReference:patch.ahriReference}:{}),
+      ...(typeof patch.outdoorModel==="string"?{outdoorModel:patch.outdoorModel}:{}),
+      ...(typeof patch.indoorModel==="string"?{indoorModel:patch.indoorModel}:{})
+    }}));
  };
+ const hpqplMatches=useMemo(()=>Object.fromEntries(quotes.map(q=>[q.id,matchHPQPL(hpqpl,equipment[q.id]??blankEquipment())])) as Partial<Record<MassQuote["id"],HPQPLMatch>>,[quotes,hpqpl,equipment]);
  const comparison=useMemo(()=>{
-  try{return {result:compareMassQuotes(common,quotes),error:""}}
-  catch(err){return {result:null,error:err instanceof Error?err.message:"Invalid quote"}}
- },[common,quotes]);
+  try{
+   const audit=auditMassachusettsProposals(common,quotes,equipment,timeline,hpqpl?hpqplMatches:undefined);
+   return {result:audit.comparison,audit,error:""};
+  }catch(err){return {result:null,audit:null,error:err instanceof Error?err.message:"Invalid quote"}}
+ },[common,quotes,equipment,timeline,hpqpl,hpqplMatches]);
+ const customerReport=()=>comparison.result&&comparison.audit?
+    massCopyPlan(comparison.result)+"\n\n"+massAuditReport(comparison.audit,equipment,timeline)+"\n\n"+quotes.map(q=>hpqplMatchReport(q.id.toUpperCase(),hpqplMatches[q.id]!,hpqpl)).join("\n\n"):"";
  const copy=async()=>{
   if(!comparison.result)return;
-  try{await navigator.clipboard.writeText(massCopyPlan(comparison.result));track("mass_quote_report_copied");setCopyMessage("Comparison copied; no quote files or address were uploaded.");}
+  try{await navigator.clipboard.writeText(customerReport());track("mass_quote_report_copied");setCopyMessage("Comparison copied; no quote files or address were uploaded.");}
   catch{setCopyMessage("Clipboard not available. Review the information on this page.")}
  };
  const commonChoice=(key:CommonAnswerKey,id:string,label:string,hint?:string)=>
@@ -100,6 +121,14 @@ export default function MassachusettsHeatPumpPage(){
     {commonChoice("residentialAccount","ma-residential","Is this a residential utility account?")}
     <Choice id="ma-units" label="Building size" value={common.propertyUnits} options={[{value:"unsure",label:"Not sure"},{value:"one-four",label:"1–4 residential units"},{value:"five-plus",label:"5+ units — special program review needed"}]} onChange={v=>set("propertyUnits",v as Common["propertyUnits"])}/>
     <Choice id="ma-year" label="Expected installation year" value={common.year} options={[{value:"unknown",label:"Not yet known"},{value:"2026",label:"2026 — published program"},{value:"2027",label:"2027 — announced changes only"}]} onChange={v=>set("year",v as MassYear)}/>
+     <div className="ma-field"><label htmlFor="ma-install-date">Planned or actual equipment installation date</label>
+      <p>Use the installation schedule, not the date the proposal was signed.</p>
+      <input id="ma-install-date" type="date" value={timeline.installationDate}
+       onChange={e=>setTimeline(old=>({...old,installationDate:e.target.value}))}/></div>
+     <div className="ma-field"><label htmlFor="ma-submit-date">Planned rebate submission date (optional)</label>
+      <p>2026 installations have a published February 28, 2027 document receipt deadline.</p>
+      <input id="ma-submit-date" type="date" value={timeline.submissionDate}
+       onChange={e=>setTimeline(old=>({...old,submissionDate:e.target.value}))}/></div>
     <Choice id="ma-route" label="How will the heat pump be used?" value={common.route} options={[{value:"unsure",label:"Not yet decided"},{value:"whole",label:"Whole-home — sole heating and cooling"},{value:"partial",label:"Partial-home — supplemental heating"},{value:"basic",label:"Basic — replacement heat pump / new cooling / addition"}]} onChange={v=>set("route",v as MassRoute)}/>
     <Choice id="ma-fuel" label="What heats the home today?" value={common.heatingFuel} options={[{value:"unsure",label:"Need to confirm"},{value:"oil",label:"Heating oil"},{value:"propane",label:"Propane"},{value:"electric-resistance",label:"Electric resistance / baseboards"},{value:"natural-gas",label:"Natural gas"},{value:"existing-heat-pump",label:"Existing heat pump"},{value:"other",label:"Another fuel / other"}]} onChange={v=>set("heatingFuel",v as HeatingFuel)}/>
    </div>
@@ -138,11 +167,33 @@ export default function MassachusettsHeatPumpPage(){
      <Money id={"ma-"+q.id+"-rebate"} label="Rebate amount claimed by contractor ($)" value={q.proposedRebate} onChange={v=>updateBid(q.id,"proposedRebate",v)}/>
      <Money id={"ma-"+q.id+"-capacity"} label="AHRI cooling capacity (BTU/h)" hint="E.g., 36,000 BTU/h = 3 tons. Not the heating capacity or marketing model size." value={q.coolingCapacityBtu} onChange={v=>updateBid(q.id,"coolingCapacityBtu",v)}/>
     </div>
-     <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","rebate","coolingCapacityBtu","scope","priceBasis"]}
+     <ProposalTextImporter quoteLabel={"quote-"+q.id} allowedKeys={["price","rebate","coolingCapacityBtu","scope","priceBasis","ahriReference","outdoorModel","indoorModel"]}
        onApply={patch=>applyImported(q.id,patch)}/>
     <details className="ma-progressive ma-bid-details">
      <summary>Review rebate evidence, permits, equipment and warranties</summary>
+     <p className="ma-muted">Enter exact paired equipment identifiers from the contractor proposal or AHRI certificate. This does not independently verify product approval; serial numbers are not collected.</p>
      <div className="ma-bid-fields">
+      {([
+       ["ahriReference","AHRI certificate / reference number"],
+       ["outdoorModel","Outdoor unit model number"],
+       ["indoorModel","Indoor unit model number"]
+      ] as const).map(([key,label])=><div className="ma-field" key={key}>
+       <label htmlFor={"ma-"+q.id+"-"+key}>{label}</label>
+       <input type="text" id={"ma-"+q.id+"-"+key} maxLength={80}
+        value={evidenceFor(q.id)[key]} placeholder="Exact model or certificate ID"
+        onChange={e=>updateEquipment(q.id,key,e.target.value)}/>
+      </div>)}
+      <Choice id={"ma-"+q.id+"-refrigerant"} label="Proposed refrigerant GWP category"
+       value={evidenceFor(q.id).refrigerant} options={[
+        {value:"unsure",label:"Not verified"},{value:"at-most-700",label:"GWP at most 700 (self-reported)"},
+        {value:"r410a",label:"R-410A / high GWP"},{value:"other-over-700",label:"Other GWP above 700"}]}
+       onChange={v=>updateEquipment(q.id,"refrigerant",v as RefrigerantClass)}/>
+      <Choice id={"ma-"+q.id+"-system"} label="Equipment configuration"
+       value={evidenceFor(q.id).systemClass} options={[
+        {value:"unsure",label:"Not verified"},{value:"split",label:"Indoor/outdoor split system"},
+        {value:"vrf",label:"Variable refrigerant flow (VRF)"},
+        {value:"self-contained",label:"Factory-charged packaged product"}]}
+       onChange={v=>updateEquipment(q.id,"systemClass",v as SystemClass)}/>
      {bidChoice(q,"rebateDocumentation","Written rebate confirmation exists?")}
      {bidChoice(q,"installerInNetwork","Installer appears in Mass Save Heat Pump Installer Network?")}
      {bidChoice(q,"equipmentOnQualifiedList","Exact paired system appears on Mass Save qualified list?")}
@@ -174,7 +225,31 @@ export default function MassachusettsHeatPumpPage(){
       <p>There are {comparison.result.quotes.length} reported proposals. These figures are not approved Mass Save awards; a lower entered price never certifies equipment, contractor or program eligibility.</p>
       <a href="#ma-bids">Return to proposal inputs <span aria-hidden="true">↑</span></a>
     </div>
-    {comparison.result.scopeDifferences.length>0&&<section className="ma-scope-warning" aria-label="Material contractor scope differences">
+    {comparison.audit&&<section className="ma-proposal-audit" aria-label="Massachusetts installation and equipment verification">
+ <h3>Installation date and exact equipment checks</h3>
+ <p><strong>Reported period:</strong> {comparison.audit.timeline.status==="2026"?"2026 published incentive schedule":
+ comparison.audit.timeline.status==="2027-announced"?"2027 announced whole/partial rates only":
+ comparison.audit.timeline.status==="unsupported"?"Outside supported rate periods":"Not established"}.
+ Source reviewed {MASS_AUDIT_REVIEWED}; these findings are not official product approval or funding.</p>
+ {comparison.audit.timeline.problems.map(x=><p className="ma-warning" key={x}>{x}</p>)}
+ <MassHPQPLImporter catalog={hpqpl} onChange={setHpqpl}/>
+ <div className="ma-equipment-grid">{comparison.audit.quotes.map(f=><article key={f.id}>
+  <h4>Quote {f.id.toUpperCase()} — {f.readiness==="blocked"?"Reported system barrier":
+   f.readiness==="reported-ready"?"Conditions self-reported":"System verification pending"}</h4>
+  <p>AHRI: {equipment[f.id]?.ahriReference||"not entered"}; outdoor: {equipment[f.id]?.outdoorModel||"not entered"}; indoor: {equipment[f.id]?.indoorModel||"not entered"}.</p>
+  <div className="ma-hpqpl-match"><strong>Workbook match: {hpqplMatches[f.id]?.status??"no-data"}</strong>
+    <p>{hpqplMatches[f.id]?.reason}</p>
+    {hpqplMatches[f.id]?.rows.map(r=><p key={r.sheet+"-"+r.line}>Sheet {r.sheet}, row {r.line}; {r.rebateType||"rebate category unknown"}; cooling {r.coolingBtu===null?"not established":r.coolingBtu.toLocaleString("en-US")+" BTU/h"}.</p>)}
+   </div>
+  <ul>{f.risks.map(x=><li key={x}>{x}</li>)}</ul>
+ </article>)}</div>
+ <h4>Required documents and next questions</h4>
+ <ul>{comparison.audit.timeline.documents.map(x=><li key={x}>{x}</li>)}</ul>
+ <details><summary>Priority contractor follow-ups</summary>
+  <ol>{comparison.audit.priorityQuestions.map((x,i)=><li key={i}>{x}</li>)}</ol></details>
+ <p><a href={MA_AUDIT_SOURCES.equipment} target="_blank" rel="noreferrer">Check the paired system in Mass Save's qualified-products list ↗</a></p>
+</section>}
+{comparison.result.scopeDifferences.length>0&&<section className="ma-scope-warning" aria-label="Material contractor scope differences">
       <h3>These bids do not cover identical documented work</h3>
       <p>The following items are explicitly marked included in at least one bid and excluded in another. Resolve them before ranking prices:</p>
       <ul>{comparison.result.scopeDifferences.map(label=><li key={label}>{label}</li>)}</ul>
@@ -184,6 +259,15 @@ export default function MassachusettsHeatPumpPage(){
      <thead><tr><th scope="col">Comparison item</th>{comparison.result.quotes.map(e=><th scope="col" key={e.quote.id}>Quote {e.quote.id.toUpperCase()}</th>)}</tr></thead>
      <tbody>{[
        {label:"Proposed installation scope",values:comparison.result.quotes.map(e=>scopeNames[e.quote.scope])},
+       {label:"AHRI reference (self-reported)",values:comparison.result.quotes.map(e=>equipment[e.quote.id]?.ahriReference||"Not entered")},
+       {label:"Indoor/outdoor model IDs",values:comparison.result.quotes.map(e=>
+        (equipment[e.quote.id]?.indoorModel||"Not entered")+" / "+(equipment[e.quote.id]?.outdoorModel||"Not entered"))},
+       {label:"HPQPL workbook match",values:comparison.result.quotes.map(e=>hpqplMatches[e.quote.id]?.status??"no-data")},
+       {label:"Equipment evidence status",values:comparison.result.quotes.map(e=>{
+        const f=comparison.audit?.quotes.find(x=>x.id===e.quote.id);
+        return f?.readiness==="blocked"?"Reported equipment barrier":f?.readiness==="reported-ready"?
+          "Reported only — official check needed":"Identity/list verification needed";
+       })},
        {label:"As-quoted total",values:comparison.result.quotes.map(e=>currency(e.statedPrice))},
        {label:"Rebate already in quoted total?",values:comparison.result.quotes.map(e=>e.quote.priceBasis==="before-rebate"?"No — before rebate":e.quote.priceBasis==="after-rebate"?"Yes — after rebate":"Unknown")},
        {label:"Equipment models and scope",values:comparison.result.quotes.map(e=>statusName(e.quote.scopeAndEquipmentIdentified))},
@@ -217,7 +301,7 @@ export default function MassachusettsHeatPumpPage(){
     <p className="ma-summary">{comparison.result.comparisonExplanation}</p>}
     <p className="ma-warning">For 2026, complete equipment installations must occur by December 31, 2026, with forms and supporting documents received by February 28, 2027. As of October 1, 2026, serial-number/nameplate photos are required. For 2027, only the announced whole-home and partial-home **rate and cap changes** are encoded. Obtain current 2027 terms and confirmation from the program before relying on any amount.</p>
     <div className="ma-buttons"><button type="button" className="ma-main-button" onClick={copy}>Copy my contractor questions</button>
-     <button type="button" onClick={()=>{if(comparison.result){downloadTextReport("massachusetts-quote-review",massCopyPlan(comparison.result));track("mass_quote_report_downloaded")}}}>Download report (.txt)</button>
+     <button type="button" onClick={()=>{if(comparison.result){downloadTextReport("massachusetts-quote-review",customerReport());track("mass_quote_report_downloaded")}}}>Download report (.txt)</button>
      <a href={MASS_SOURCES.air.url} target="_blank" rel="noreferrer" onClick={()=>track("mass_save_program_click")}>Official Mass Save rebate rules ↗</a>
     </div>
     {copyMessage&&<p role="status" className="ma-muted">{copyMessage}</p>}

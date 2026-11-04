@@ -48,3 +48,18 @@ test("multiple amounts on the same labeled line are withheld, not taken as total
  const clean=parseProposalText("Total installed price: $18,500");
  assert.equal(field(clean,"price"),18500);
 });
+
+test("labeled proposal AHRI and indoor/outdoor identifiers require manual confirmation",()=>{
+ const x=parseProposalText("AHRI #: 123456789\nOutdoor unit model: AOU36RLXFZ\nIndoor unit model: ASU36RLXFZ");
+ assert.equal(field(x,"ahriReference"),"123456789");
+ assert.equal(field(x,"outdoorModel"),"AOU36RLXFZ");
+ assert.equal(field(x,"indoorModel"),"ASU36RLXFZ");
+ assert.equal(x.candidates.some(c=>c.key==="equipmentOnQualifiedList"),false);
+});
+test("conflicting AHRI references withheld and marketing model mentions ignored",()=>{
+ const x=parseProposalText("AHRI #: 123456789\nAHRI #: 987654321\nPremium AOU36RLXFZ system\nIndoor model excluded");
+ assert.equal(field(x,"ahriReference"),undefined);
+ assert.equal(field(x,"outdoorModel"),undefined);
+ assert.equal(field(x,"indoorModel"),undefined);
+ assert.ok(x.warnings.some(w=>/Conflicting AHRI/.test(w)));
+});

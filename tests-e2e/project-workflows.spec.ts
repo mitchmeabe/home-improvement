@@ -97,7 +97,21 @@ test("keyboard can reach the Massachusetts project details and quote entry",asyn
  await page.locator("#ma-year").focus();
  await expect(page.locator("#ma-year")).toBeFocused();
  await page.keyboard.press("Tab");
- await expect(page.locator("#ma-route")).toBeFocused();
+ await expect(page.locator("#ma-install-date")).toBeFocused();
+ // Native date inputs can have multiple tab stops (month/day/year) in Chromium.
+ // Confirm the next field remains keyboard-reachable without hardcoding those stops.
+ let reachedSubmit=false;
+ for(let i=0;i<8;i++){
+  await page.keyboard.press("Tab");
+  if(await page.locator("#ma-submit-date").evaluate(el=>el===document.activeElement)){reachedSubmit=true;break}
+ }
+ expect(reachedSubmit).toBe(true);
+ let reachedRoute=false;
+ for(let i=0;i<8;i++){
+  await page.keyboard.press("Tab");
+  if(await page.locator("#ma-route").evaluate(el=>el===document.activeElement)){reachedRoute=true;break}
+ }
+ expect(reachedRoute).toBe(true);
 });
 
 test("Oregon does not credit a reported above-cap HP3 incentive",async({page})=>{
@@ -291,4 +305,44 @@ test("Oregon location and utility matching keeps Portland postal addresses unver
  await page.locator("#portland-jurisdiction").selectOption("not-portland");
  await expect(match).toContainText("Identify correct permit authority");
  await expect(match).not.toContainText("Portland residential mechanical permit");
+});
+
+test("Massachusetts conflicting installation year and late rebate receipt remain unresolved",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ await page.locator("#ma-year").selectOption("2026");
+ await page.locator("#ma-install-date").fill("2027-01-01");
+ const audit=page.getByRole("region",{name:"Massachusetts installation and equipment verification"});
+ await expect(audit).toContainText("Installation date and selected rebate year conflict");
+ await expect(audit).toContainText("2027 announced whole/partial rates only");
+ await page.locator("#ma-install-date").fill("2026-12-10");
+ await page.locator("#ma-submit-date").fill("2027-03-01");
+ await expect(audit).toContainText("after the published February 28, 2027");
+});
+test("Massachusetts 2026 R410A proposal displays a reported system barrier",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ await page.locator("#ma-year").selectOption("2026");
+ await page.locator("#ma-install-date").fill("2026-11-05");
+ const bid=page.locator(".ma-bid").first();
+ await bid.locator(".ma-bid-details summary").click();
+ await page.locator("#ma-a-ahriReference").fill("123456789");
+ await page.locator("#ma-a-outdoorModel").fill("AOU36RLXFZ");
+ await page.locator("#ma-a-indoorModel").fill("ASU36RLXFZ");
+ await page.locator("#ma-a-refrigerant").selectOption("r410a");
+ await page.locator("#ma-a-system").selectOption("split");
+ const audit=page.getByRole("region",{name:"Massachusetts installation and equipment verification"});
+ await expect(audit).toContainText("Reported system barrier");
+ await expect(audit).toContainText("R-410A");
+ await expect(audit).toContainText("nameplate photographs");
+});
+test("Massachusetts proposal text requires selection before applying AHRI/model identifiers",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ const bid=page.locator(".ma-bid").first();
+ await bid.locator(".proposal-import summary").click();
+ await bid.locator("textarea").fill("AHRI #: 123456789\nOutdoor model: AOU36RLXFZ\nIndoor model: ASU36RLXFZ");
+ await expect(bid).toContainText("AHRI reference");
+ await bid.locator('.proposal-choice input[type="checkbox"]').first().check();
+ await bid.getByRole("button",{name:/Apply 1 confirmed field/}).click();
+ await bid.locator(".ma-bid-details summary").click();
+ await expect(page.locator("#ma-a-ahriReference")).toHaveValue("123456789");
+ await expect(page.locator("#ma-a-outdoorModel")).toHaveValue("");
 });

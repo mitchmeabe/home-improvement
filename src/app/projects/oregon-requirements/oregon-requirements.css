@@ -1,0 +1,50 @@
+.or-dossier{max-width:1190px;margin:auto;padding:28px 24px 68px;color:#20352e;font-family:Arial,sans-serif}
+.or-dossier>nav{font-size:13px;margin-bottom:26px}
+.or-dossier header{max-width:950px;margin-bottom:27px}
+.or-dossier header h1{font-size:clamp(29px,4.2vw,48px);letter-spacing:-1.5px;line-height:1.12;margin:9px 0}
+.or-dossier header>p{line-height:1.65;font-size:15px;max-width:840px}
+.or-dossier-kicker{text-transform:uppercase;color:#206849;font-size:12px!important;font-weight:850;letter-spacing:.08em}
+.or-dossier-private{border-left:3px solid #c1d8c5;padding:8px 12px;background:#f2f8f2}
+.or-dossier-columns{display:grid;grid-template-columns:minmax(290px,1fr) minmax(0,1.35fr);gap:19px;align-items:start}
+.or-dossier-form,.or-dossier-result{background:#fff;border:1px solid #d1ded2;border-radius:14px;padding:22px;min-width:0}
+.or-dossier h2{font-size:21px;margin:0 0 18px}
+.or-dossier h3{font-size:16px;margin:20px 0 11px}
+.or-dossier-form>label,.or-dossier-form fieldset label{display:block;font-size:13px;font-weight:700;line-height:1.45;margin:13px 0}
+.or-dossier select,.or-dossier input{display:block;margin-top:7px;width:100%;max-width:100%;padding:10px;border:1px solid #a9bdaf;border-radius:7px;color:#263d33;background:#fff;font:inherit}
+.or-dossier select:focus-visible,.or-dossier input:focus-visible,.or-dossier button:focus-visible{outline:3px solid #338569;outline-offset:3px}
+.or-dossier-form fieldset{border:1px solid #d1ddd5;border-radius:9px;margin:18px 0;padding:13px;min-width:0}
+.or-dossier-form legend{font-size:14px;font-weight:750;padding:0 4px}
+.or-dossier-twocol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.or-dossier-twocol label{min-width:0}
+.or-dossier-hint{font-size:12px;line-height:1.65;background:#f5f9f4;border:1px solid #d9e5d8;border-radius:8px;padding:12px}
+.or-dossier-muted{font-size:11px!important;color:#60716b;line-height:1.65;overflow-wrap:anywhere}
+.or-dossier-overview{border:1px solid #b8d6c1;border-radius:11px;background:#f3faf5;padding:15px;margin-bottom:17px}
+.or-dossier-overview strong{font-size:16px}
+.or-dossier-overview p{line-height:1.5;font-size:13px;margin:7px 0}
+.or-dossier-overview small{font-size:12px;color:#285d46;font-weight:750}
+.or-dossier-steps{padding-left:24px;font-size:13px;line-height:1.55}
+.or-dossier-steps li{padding-left:2px;margin:0 0 10px}
+.or-dossier-section{margin-top:22px;border-top:1px solid #dce5dd;padding-top:2px}
+.or-dossier-finding{border-bottom:1px solid #e5ebe4;padding:13px 0}
+.or-dossier-finding>div{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.or-dossier-finding strong{font-size:13px}
+.or-dossier-finding p{font-size:12px;line-height:1.65;margin:8px 0 0}
+.or-dossier-status{display:inline-block;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:800;background:#f5eacb;color:#875713}
+.or-dossier-status.required{background:#e6f3eb;color:#236746}
+.or-dossier-status.historical-limit{background:#fbeed3;color:#744b0e}
+.or-dossier-status.not-applicable{background:#eee;color:#56615a}
+.or-dossier-document{border:1px solid #e1e9e0;background:#fbfcfb;border-radius:9px;padding:11px;margin:8px 0}
+.or-dossier-document strong{font-size:13px}
+.or-dossier-document p{font-size:12px;line-height:1.5;margin:6px 0}
+.or-dossier-document a{font-size:12px}
+.or-dossier-result details{border:1px solid #deded0;background:#fffdf7;border-radius:8px;padding:12px;margin:14px 0;font-size:13px}
+.or-dossier-result details summary{cursor:pointer;font-weight:750}
+.or-dossier-result details li{margin:7px 0;line-height:1.55}
+.or-dossier-actions{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+.or-dossier-actions button{padding:11px 14px;cursor:pointer;border-radius:8px;border:1px solid #206849;background:#206849;color:white;font-size:12px;font-weight:800}
+.or-dossier-actions button+button{background:white;color:#206849}
+.or-dossier-error{background:#fff0eb;color:#a83920;padding:15px;border-radius:9px;font-size:13px}
+.or-dossier-more{margin-top:28px;border-top:1px solid #d6e1d6;padding:23px 0;display:flex;flex-wrap:wrap;gap:20px;align-items:center;font-size:13px}
+@media(max-width:880px){.or-dossier-columns{grid-template-columns:1fr}.or-dossier{padding:18px 14px 45px}}
+@media(max-width:550px){.or-dossier-form,.or-dossier-result{padding:15px}.or-dossier-twocol{grid-template-columns:1fr}.or-dossier-finding>div{align-items:flex-start}}
+@media print{.or-dossier-form,.or-dossier-actions,.or-dossier-more,.or-dossier>nav{display:none}.or-dossier-columns{display:block}.or-dossier-result{border:0;padding:0}.or-dossier-result details{break-inside:avoid}}

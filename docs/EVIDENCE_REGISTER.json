@@ -61,6 +61,18 @@
       "lastChecked": "2026-11-04",
       "reviewAfterDays": 7,
       "reviewNote": "October 1 table is not live availability; cannot be used as reserved or awarded funding."
+    },
+    {
+      "id": "masssave-hpqpl-high-gwp-2026",
+      "market": "Massachusetts heat pumps",
+      "kind": "incentive",
+      "title": "Mass Save qualified-product restrictions for high-GWP systems",
+      "status": "program-published",
+      "sourceUrl": "https://www.masssave.com/heat-pump-qualified-list",
+      "lastChecked": "2026-11-04",
+      "reviewAfterDays": 21,
+      "effectiveFrom": "2026-01-01",
+      "reviewNote": "Published catalog criteria, not proof any model or project is approved; VRF and packaged exceptions need exact review."
     }
   ]
 }
