@@ -90,7 +90,9 @@ export function evaluate(input:Input):Result{
     input.newWiring==="yes"?"New or altered hard-wired electrical work requires a Portland electrical permit.":
      "The electrical connection may require new wiring or a circuit. Confirm requirements with the city and installer.","electrical");
    add(permits,"ventilation","check","Ventilation / condensate / placement",
-    "A heat-pump water heater may change air movement, noise, clearance and condensate drainage. Verify any mechanical-permit implications and installation instructions; no mechanical permit decision is made here.","permits");
+    input.newVentilation==="yes"?
+     "New ventilation or ducting was reported. Ask Portland whether that creates separate mechanical-permit requirements; also verify condensate drainage, airflow, noise and equipment clearance.":
+     "Confirm whether the model requires changed air movement, clearances, noise controls or condensate drainage. No mechanical permit determination is made here.","permits");
  }else{
    add(permits,"jurisdiction","check","Determine the responsible permitting authority",
     input.place==="portland-unverified"?
@@ -143,13 +145,20 @@ export function evaluate(input:Input):Result{
  let lowerTotalQuote:Quote["id"]|null=null,difference:number|null=null;
  if(quotes.every(x=>x.quote.installedTotal!==null&&x.quote.priceBasis!=="unknown"&&x.quote.scope!=="unknown"&&x.quote.tankGallons!==null)){
   const first=quotes[0].quote;
-  comparable=quotes.every(x=>x.quote.priceBasis===first.priceBasis&&x.quote.scope===first.scope&&x.quote.tankGallons===first.tankGallons);
+  const coreFields=["plumbingIncluded","electricalIncluded","condensateIncluded"] as const;
+  const sameBroadScope=quotes.every(x=>x.quote.priceBasis===first.priceBasis&&x.quote.scope===first.scope&&x.quote.tankGallons===first.tankGallons);
+  const completeScope=quotes.every(x=>coreFields.every(key=>x.quote[key]!=="unknown"));
+  const sameInclusions=quotes.every(x=>coreFields.every(key=>x.quote[key]===first[key]));
+  comparable=sameBroadScope&&completeScope&&sameInclusions;
   if(comparable){
    const sorted=[...quotes].sort((a,b)=>a.quote.installedTotal!-b.quote.installedTotal!);
    lowerTotalQuote=sorted[0].quote.id;
    difference=sorted[sorted.length-1].quote.installedTotal!-sorted[0].quote.installedTotal!;
    reason="Only listed installed totals have a comparable broad basis and tank size. The lower total does not establish quality, eligibility, included work or best value.";
-  }else reason="Quotes differ in scope, tank capacity or before/after-incentive basis. Ask for matching itemized bids before comparing.";
+  }else reason=!sameBroadScope?
+    "Quotes differ in scope, tank capacity or before/after-incentive basis. Ask for matching itemized bids before comparing.":
+    !completeScope?"Confirm plumbing, electrical and condensate inclusion in every proposal before comparing totals.":
+    "Quotes document different included plumbing, electrical or condensate work. Normalize scope before comparing totals.";
  }
  return {permits,programs,questions,comparison:{comparable,reason,lowerTotalQuote,difference,quotes},notes};
 }
