@@ -23,9 +23,8 @@ export default function Home() {
   const [hspf2, setHspf2] = useState("");
   const [seer2, setSeer2] = useState("");
   const locationMatch = useMemo(()=>resolveOregonProject({
-    location,jurisdiction,building,electricUtility,property,equipment,wiring,
-    hspf2:numberOrUndefined(hspf2),seer2:numberOrUndefined(seer2)
-  }),[location,jurisdiction,building,electricUtility,property,equipment,wiring,hspf2,seer2]);
+    location,jurisdiction,building,electricUtility,property,equipment,wiring
+  }),[location,jurisdiction,building,electricUtility,property,equipment,wiring]);
   const { result, error } = useMemo(() => {
     try {
       return { result: evaluateHeatPump({ location:locationMatch.effectiveLocation, property, equipment, wiring, hspf2: numberOrUndefined(hspf2), seer2: numberOrUndefined(seer2) }), error: "" };
