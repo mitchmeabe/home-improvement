@@ -256,24 +256,37 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   questions.push("Is the project a breaker-panel replacement, a service/meter upgrade, or new subpanel? Are new circuits separately priced?");
   questions.push("Will the utility disconnect/reconnect service, and are meter, mast, grounding, permits and inspections included?");
  }
- // Shared electrical work is additive to mechanical or plumbing permits.
+ // Merge trade requirements into ONE electrical finding per project; the
+ // underlying space/HPWH resolvers already emit general electrical permits.
  const panelWork=input.project==="electrical-panel"||hasPanel(input.electricScope);
  const newCircuit=input.electricScope==="new-circuit"||input.electricScope==="both";
+ const electricalExisting=findings.find(f=>f.id==="space-electrical"||f.id==="water-electrical");
  if(cityResidential&&(panelWork||newCircuit)){
-  add("permit","electrical-trade",
-   panelWork?"Portland service / panel electrical permit":"Portland new-circuit electrical permit",
-   "required",
-   panelWork?
-    "Portland requires a permit to replace a service panel and provides service/feeder inspection guidance. Ask the electrician whether the quoted work includes the panel, utility service, meter, branch circuits and final inspection.":
-    "Portland requires an electrical permit for added or altered hard-wired circuits. Confirm how the new circuit connects to this project's equipment and who closes the permit.",
-   panelWork?DOSSIER_SOURCES.panel:DOSSIER_SOURCES.electrical);
- }else if(panelWork||newCircuit||input.project==="electrical-panel"){
-  add("permit","electrical-trade","Verify local electrical permit and inspections","verify",
-   "Panel/service work or a new circuit is reported, but this tool cannot apply Portland's permit requirements without a confirmed supported city/building route. Contact the actual authority.",
+  if(panelWork){
+   for(let i=findings.length-1;i>=0;i--)
+    if(findings[i].id==="space-electrical"||findings[i].id==="water-electrical")findings.splice(i,1);
+   add("permit","electrical-trade","Portland service / panel electrical permit","required",
+    "Portland requires a permit to replace a service panel and publishes service/feeder inspection guidance. Ask whether the quote includes meter/service coordination, grounding, branch circuits and final inspection.",
+    DOSSIER_SOURCES.panel);
+  }else if(electricalExisting){
+   electricalExisting.status="required";
+   electricalExisting.detail="A new or altered hard-wired circuit was reported; Portland requires an electrical permit. "+electricalExisting.detail;
+   electricalExisting.sourceUrl=DOSSIER_SOURCES.electrical;
+  }else{
+   add("permit","electrical-trade","Portland new-circuit electrical permit","required",
+    "A new or altered hard-wired circuit was reported; identify the electrician, permit and final inspection.",
+    DOSSIER_SOURCES.electrical);
+  }
+ }else if(panelWork||newCircuit){
+  if(electricalExisting){
+   electricalExisting.status="verify";
+   electricalExisting.detail="Actual permit jurisdiction and building class must be confirmed before applying published Portland circuit/panel requirements. "+electricalExisting.detail;
+  }else add("permit","electrical-trade","Verify local electrical permit and inspections","verify",
+   "Panel/service work or a new circuit is reported, but Portland rules cannot be applied without a confirmed city/building route.",
    DOSSIER_SOURCES.electrical,DOSSIER_REVIEWED_ON,"pending-fact");
  }else if(input.electricScope==="unknown"){
-  add("permit","electrical-trade","Identify electrical installation work","verify",
-   "Whether a circuit, panel, service or meter modification is necessary has not been determined. Request a written installer/electrician scope before selecting permit types.",
+  if(!electricalExisting)add("permit","electrical-trade","Identify electrical installation work","verify",
+   "Whether a circuit, panel, service or meter modification is necessary is unknown; request written electrical scope.",
    DOSSIER_SOURCES.electrical,DOSSIER_REVIEWED_ON,"pending-fact");
   blockers.push("Electrical circuit and panel/service work are not yet defined.");
  }
