@@ -53,9 +53,6 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
         <option value="unsure">I don't know</option><option value="before-discounts">Before discounts</option><option value="after-discounts">After discounts</option>
        </select>
       </label>
-      <details className="hp-q-advanced">
-       <summary>Review discounts, rebates, permits and warranties</summary>
-       <div className="hp-q-fields">
       <label className="hp-q-field">Broad installation scope
        <select aria-label={"Quote "+q.id.toUpperCase()+" installation scope"} value={q.scope} onChange={e=>update(q.id,"scope",e.target.value as QuoteScope)}>
         <option value="unknown">Not documented</option><option value="reuse-existing-ducts">Ducted — reuse existing ducts</option>
@@ -63,6 +60,10 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
         <option value="ductless">Ductless mini-splits</option><option value="mixed">Mixed ducted and ductless</option>
        </select>
       </label>
+      <details className="hp-q-advanced">
+       <summary>Review discounts, rebates, permits and warranties</summary>
+       <div className="hp-q-fields">
+
       {cost(q,"otherDiscount","Other written discount ($)","Only count as applied if explicitly confirmed in writing.")}
       {ynSelect(q,"otherDiscountConfirmed","Other discount confirmed?")}
       {cost(q,"hp3ProposedDiscount","HP3 amount proposed ($)","Enter only what the contractor actually quotes; no automatic $2,000 assumption.")}
