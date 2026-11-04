@@ -156,3 +156,48 @@ test("Massachusetts optional proposal text applies only reviewer-selected values
  await expect(page.locator("#ma-a-price")).toHaveValue("18500");
  await expect(page.locator("#ma-a-scope")).toHaveValue("unknown");
 });
+
+function tinyOnePagePdf(){
+ const content="BT /F1 12 Tf 50 710 Td (Total installed price: $18,500) Tj ET";
+ const objects=[
+  "<< /Type /Catalog /Pages 2 0 R >>",
+  "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+  "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+  "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  "<< /Length "+Buffer.byteLength(content)+" >>\nstream\n"+content+"\nendstream"
+ ];
+ let pdf="%PDF-1.4\n";
+ const offsets=[0];
+ for(const [i,body] of objects.entries()){
+  offsets.push(Buffer.byteLength(pdf));
+  pdf+=(i+1)+" 0 obj\n"+body+"\nendobj\n";
+ }
+ const xref=Buffer.byteLength(pdf);
+ pdf+="xref\n0 "+(objects.length+1)+"\n0000000000 65535 f \n";
+ for(const offset of offsets.slice(1))pdf+=String(offset).padStart(10,"0")+" 00000 n \n";
+ pdf+="trailer\n<< /Size "+(objects.length+1)+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF";
+ return Buffer.from(pdf);
+}
+test("Massachusetts PDF import extracts text locally but requires manual review before quote updates",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ const importer=page.locator(".ma-bid").first().locator(".proposal-import");
+ await importer.locator("summary").click();
+ await importer.locator('input[type="file"]').setInputFiles({
+  name:"sample.pdf",mimeType:"application/pdf",buffer:tinyOnePagePdf()
+ });
+ await expect(importer.getByText(/Read 1 PDF page/)).toBeVisible();
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+ await importer.getByRole("checkbox",{name:/Installed total/}).check();
+ await importer.getByRole("button",{name:/Apply 1 confirmed field/}).click();
+ await expect(page.locator("#ma-a-price")).toHaveValue("18500");
+});
+test("PDF magic validation rejects disguised text files without modifying quote",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ const importer=page.locator(".ma-bid").first().locator(".proposal-import");
+ await importer.locator("summary").click();
+ await importer.locator('input[type="file"]').setInputFiles({
+  name:"invalid.pdf",mimeType:"application/pdf",buffer:Buffer.from("not an actual PDF")
+ });
+ await expect(importer.getByText(/valid PDF header/)).toBeVisible();
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+});

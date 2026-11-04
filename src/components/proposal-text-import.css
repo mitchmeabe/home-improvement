@@ -16,3 +16,6 @@
 .proposal-import-body button{justify-self:start;padding:9px 14px;border-radius:7px;background:#185c4d;color:#fff;font-weight:700;border:0;cursor:pointer}
 .proposal-import-body button:disabled{opacity:.5;cursor:not-allowed}
 @media print{.proposal-import{display:none!important}}
+
+.proposal-import-body [role=status]{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.proposal-import input[type=file]{max-width:100%;font-size:12px}
