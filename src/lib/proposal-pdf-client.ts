@@ -22,7 +22,7 @@ export async function extractProposalPdf(file:File):Promise<ExtractedProposalPdf
    throw new Error("Choose a PDF smaller than 5 MB.");
  const bytes=new Uint8Array(await file.arrayBuffer());
  validatePdfHeader(bytes);
- const pdfjs=await import("pdfjs-dist/build/pdf.mjs");
+ const pdfjs=await import("pdfjs-dist");
  // Bundled same-origin worker; never load a CDN or send customer PDF bytes.
  pdfjs.GlobalWorkerOptions.workerSrc=new URL("pdfjs-dist/build/pdf.worker.min.mjs",import.meta.url).toString();
  const task=pdfjs.getDocument({data:bytes,isEvalSupported:false,useSystemFonts:false,stopAtErrors:true});
@@ -37,9 +37,11 @@ export async function extractProposalPdf(file:File):Promise<ExtractedProposalPdf
   for(let pageIndex=1;pageIndex<=document.numPages;pageIndex++){
    const page=await document.getPage(pageIndex);
    const content=await page.getTextContent();
-   const words=content.items.filter((x):x is Extract<typeof x,{str:string}>=>"str" in x)
-    .filter(x=>x.str.trim().length>0)
-    .map(x=>({value:x.str.trim(),x:x.transform[4],y:x.transform[5]}));
+   const words:{value:string;x:number;y:number}[]=[];
+   for(const item of content.items){
+    if(!("str" in item)||!item.str.trim())continue;
+    words.push({value:item.str.trim(),x:item.transform[4],y:item.transform[5]});
+   }
    // Keep distinct rows distinct. Many PDF generators split one line into
    // positioned fragments; joining all fragments as one paragraph can cause
    // a deposit or rebate label to be falsely associated with another amount.
