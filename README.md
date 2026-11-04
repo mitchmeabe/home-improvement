@@ -45,3 +45,7 @@ See `docs/markets/massachusetts-heat-pumps.md` and tests `tests/mass-save.test.m
 ## Massachusetts quote evidence and validation (2026-11-03)
 
 The new Massachusetts quote tool now prevents price ranking when one bid reuses ducts and another includes new ductwork or ductless scope. Public homeowner-report fixtures and limitations are documented in `docs/markets/massachusetts-heat-pumps.md` and `tests/fixtures/ma-public-quote-scenarios.json`. The official Mass Save expert consultation remains linked, because similar free quote-review services already exist. **No actual signed proposals or customer interviews have been received.**
+
+## Quote-scope audit — November 2026
+
+The Oregon and Massachusetts heat-pump bid planners now check commissioning, duct/airflow testing and existing-system removal/disposal; Oregon additionally compares permits, electrical work and final inspection explicitly. The new pure scope-evidence comparison refuses to rank quotes when one explicitly includes costly work that another explicitly excludes. Unknown work stays unresolved. Differences appear in a side-by-side matrix, warning block and locally downloadable report. See docs/markets/massachusetts-heat-pumps.md for sources and limits.

@@ -16,3 +16,8 @@
 .ma-matrix tbody th{font-weight:750;min-width:190px;background:#f9fcfa}
 .ma-matrix tbody tr:nth-child(even) td{background:#fafdfb}
 @media print{.ma-matrix-scroll{overflow:visible}.ma-matrix{min-width:0;font-size:10px;break-inside:auto}.ma-matrix tr{break-inside:avoid}}
+
+.ma-scope-warning{border:1px solid #ba9e62;background:#fff8e9;border-radius:11px;padding:17px;margin:18px 0}
+.ma-scope-warning h3{font-size:17px;margin:0 0 8px}.ma-scope-warning p,.ma-scope-warning li{font-size:12px;line-height:1.6}
+.ma-scope-warning ul{padding-left:20px}
+@media print{.ma-scope-warning{break-inside:avoid}}

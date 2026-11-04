@@ -18,3 +18,7 @@
 .hp-q-priorities ol{font-size:12px;line-height:1.5;margin:0;padding-left:18px}
 .hp-q-priorities li{margin:0 0 7px}
 @media print{.hp-q-priorities{break-inside:avoid}}
+
+.hp-q-scope-warning{border:1px solid #baa26f;background:#fff9eb;border-radius:10px;margin:20px 0;padding:18px}
+.hp-q-scope-warning h4{font-size:15px;margin:0 0 10px}.hp-q-scope-warning p,.hp-q-scope-warning li{font-size:12px;line-height:1.6}
+.hp-q-scope-warning ul{padding-left:20px}@media print{.hp-q-scope-warning{break-inside:avoid}}

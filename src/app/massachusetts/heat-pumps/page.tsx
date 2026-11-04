@@ -16,7 +16,7 @@ const answerOptions=[
 ] as const;
 type Common=Omit<MassInput,"installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"coolingCapacityBtu">;
 type CommonAnswerKey="inMassachusetts"|"residentialAccount"|"residentialSponsorConfirmed"|"winterOccupied"|"hasOldHeatPump"|"displacesPrimaryHeating"|"wholeWeatherization"|"wholeFormSigned"|"fossilHeatingRemains"|"partialIntegratedControls"|"removedFuelEvidence";
-type BidAnswerKey="installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"rebateDocumentation"|"permitsAndElectrical"|"loadCalculationProvided"|"scopeAndEquipmentIdentified"|"warrantyInWriting";
+type BidAnswerKey="installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"rebateDocumentation"|"permitsAndElectrical"|"loadCalculationProvided"|"scopeAndEquipmentIdentified"|"warrantyInWriting"|"commissioningIncluded"|"ductAirflowTestingIncluded"|"oldSystemRemovalIncluded";
 const currency=(value:number|null)=>value===null?"Not established":value.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
 const number=(str:string)=>str.trim()===""?null:Number(str);
 const scopeNames:Record<ProposalScope,string>={
@@ -138,6 +138,9 @@ export default function MassachusettsHeatPumpPage(){
      {bidChoice(q,"loadCalculationProvided","Manual J heat-load/sizing documentation provided?")}
      {bidChoice(q,"scopeAndEquipmentIdentified","Equipment model IDs and scope documented?")}
      {bidChoice(q,"warrantyInWriting","Equipment/workmanship warranties in writing?")}
+     {bidChoice(q,"commissioningIncluded","Startup commissioning and written performance check included?")}
+     {bidChoice(q,"ductAirflowTestingIncluded","Airflow or duct leakage testing included (where applicable)?")}
+     {bidChoice(q,"oldSystemRemovalIncluded","Existing heating equipment removal and disposal included?")}
      </div>
     </details>
    </article>)}</div>
@@ -148,6 +151,11 @@ export default function MassachusettsHeatPumpPage(){
   <section className="ma-card" id="ma-results" aria-live="polite">
    <div className="ma-head"><span className="ma-step">3</span><h2>Results, cost comparison and questions</h2></div>
    {comparison.error?<p role="alert" className="ma-warning">{comparison.error}</p>:comparison.result&&<>
+    {comparison.result.scopeDifferences.length>0&&<section className="ma-scope-warning" aria-label="Material contractor scope differences">
+      <h3>These bids do not cover identical documented work</h3>
+      <p>The following items are explicitly marked included in at least one bid and excluded in another. Resolve them before ranking prices:</p>
+      <ul>{comparison.result.scopeDifferences.map(label=><li key={label}>{label}</li>)}</ul>
+    </section>}
     <div className="ma-matrix-scroll"><table className="ma-matrix" aria-label="Massachusetts contractor proposal coverage comparison">
      <caption>Side-by-side scope and documentation — all information is self-reported, not certified.</caption>
      <thead><tr><th scope="col">Comparison item</th>{comparison.result.quotes.map(e=><th scope="col" key={e.quote.id}>Quote {e.quote.id.toUpperCase()}</th>)}</tr></thead>
@@ -162,6 +170,9 @@ export default function MassachusettsHeatPumpPage(){
        {label:"Qualified heat-pump system",values:comparison.result.quotes.map(e=>statusName(e.quote.equipmentOnQualifiedList))},
        {label:"Equipment & labor warranty",values:comparison.result.quotes.map(e=>statusName(e.quote.warrantyInWriting))},
        {label:"Written rebate confirmation",values:comparison.result.quotes.map(e=>statusName(e.quote.rebateDocumentation))},
+       {label:"Startup commissioning included",values:comparison.result.quotes.map(e=>statusName(e.quote.commissioningIncluded))},
+       {label:"Duct/airflow testing included",values:comparison.result.quotes.map(e=>statusName(e.quote.ductAirflowTestingIncluded))},
+       {label:"Old equipment removal included",values:comparison.result.quotes.map(e=>statusName(e.quote.oldSystemRemovalIncluded))},
        {label:"Conditional after-rebate illustration",values:comparison.result.quotes.map(e=>currency(e.conditionalPostRebate))},
      ].map(row=><tr key={row.label}><th scope="row">{row.label}</th>{row.values.map((value,i)=><td key={comparison.result!.quotes[i].quote.id}>{value}</td>)}</tr>)}</tbody>
     </table></div>
@@ -171,7 +182,7 @@ export default function MassachusettsHeatPumpPage(){
      <div className="ma-price"><small>As-quoted installation amount</small><strong>{currency(e.statedPrice)}</strong></div>
      <div className="ma-price"><small>Published schedule arithmetic (not an award)</small><strong>{currency(e.program.theoreticalScheduleAmount)}</strong></div>
      <div className="ma-price"><small>Conditional post-rebate illustration, only with written confirmation</small><strong>{currency(e.conditionalPostRebate)}</strong></div>
-     <p className="ma-muted">Project documentation: {e.itemsDocumented} of 4 items marked confirmed in writing.</p>
+     <p className="ma-muted">Project documentation: {e.itemsDocumented} of 7 items marked confirmed in writing.</p>
      <details><summary>Eligibility conditions ({e.program.conditions.length})</summary>
        <ul>{e.program.conditions.map(x=><li key={x.id}><b>{x.label}</b> — {x.status==="reported-met"?"User-reported met":x.status==="not-met"?"Not met":"Needs verification"}<p>{x.explanation}</p></li>)}</ul>
      </details>

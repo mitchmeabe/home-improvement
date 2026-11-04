@@ -4,6 +4,7 @@
  * No user details stored or transmitted.
  */
 import type { Location, Property } from "./heat-pump.ts";
+import {findExplicitScopeDifferences} from "./scope-coverage.ts";
 export const QUOTE_REVIEWED_ON="2026-11-03";
 export const HP3_MAX_DISCOUNT=2000; // Official ODOE HP3 incentive ceiling, not an available-funding claim.
 export const QUOTE_SOURCES={
@@ -30,6 +31,9 @@ export interface QuoteItem {
   electricalScopeIncluded:Answer;
   finalInspectionIncluded:Answer;
   warrantyInWriting:Answer;
+  commissioningIncluded:Answer;
+  ductAirflowTestingIncluded:Answer;
+  oldSystemRemovalIncluded:Answer;
   annualOperatingCost:number|null;
 }
 export interface QuoteCompareInput {
@@ -55,13 +59,16 @@ export interface QuoteComparison {
   priceDifference:number|null;
   comparisonReason:string;
   propertyWarning:string;
+  scopeDifferences:string[];
 }
 export function emptyQuote(id:QuoteItem["id"]):QuoteItem{
  return {
   id,installedPrice:null,priceBasis:"unsure",scope:"unknown",otherDiscount:null,otherDiscountConfirmed:"unsure",
   hp3ProposedDiscount:null,hp3ApprovedContractor:"unsure",hp3FundingConfirmed:"unsure",hp3UpfrontReduction:"unsure",
   modelAndRatingsDocumented:"unsure",mechanicalPermitIncluded:"unsure",electricalScopeIncluded:"unsure",
-  finalInspectionIncluded:"unsure",warrantyInWriting:"unsure",annualOperatingCost:null,
+  finalInspectionIncluded:"unsure",warrantyInWriting:"unsure",
+  commissioningIncluded:"unsure",ductAirflowTestingIncluded:"unsure",
+  oldSystemRemovalIncluded:"unsure",annualOperatingCost:null,
  };
 }
 function amount(v:number|null,name:string){
@@ -125,30 +132,46 @@ export function compareHeatPumpQuotes(input:QuoteCompareInput):QuoteComparison{
   if(q.finalInspectionIncluded!=="yes")warnings.push("Confirm final inspection scheduling and closeout.");
   if(q.warrantyInWriting!=="yes")warnings.push("Get equipment and labor warranty terms in writing.");
   if(q.modelAndRatingsDocumented!=="yes")warnings.push("Request exact outdoor/indoor model IDs and efficiency documentation.");
-  const checks=[q.modelAndRatingsDocumented,q.mechanicalPermitIncluded,q.electricalScopeIncluded,q.finalInspectionIncluded,q.warrantyInWriting];
+  if(q.commissioningIncluded!=="yes")warnings.push("Confirm startup commissioning, refrigerant charge checks and a written performance report.");
+  if(q.ductAirflowTestingIncluded!=="yes")warnings.push("Clarify duct sealing and measured airflow/duct leakage work, or a documented ductless exception.");
+  if(q.oldSystemRemovalIncluded!=="yes")warnings.push("Ask if old equipment removal and lawful disposal are included in the contract.");
+  const checks=[
+    q.modelAndRatingsDocumented,q.mechanicalPermitIncluded,q.electricalScopeIncluded,
+    q.finalInspectionIncluded,q.warrantyInWriting,q.commissioningIncluded,
+    q.ductAirflowTestingIncluded,q.oldSystemRemovalIncluded];
   const complete=checks.filter(x=>x==="yes").length;
   const tenYearScenario=net!==null&&q.annualOperatingCost!==null?Math.round((net+q.annualOperatingCost*10)*100)/100:null;
   return {
     id:q.id,installedPrice:q.installedPrice,scope:q.scope,priceBasis:q.priceBasis,arithmeticNet:net,
     netDescription:q.priceBasis==="after-discounts"?"Quote amount marked after discounts (not verified)":q.priceBasis==="before-discounts"?"Only explicitly confirmed user-entered discounts deducted (not an awarded rebate)":"Cannot calculate a net without knowing price basis",
-    tenYearScenario,warnings,completeFields:complete,totalFields:5,
+    tenYearScenario,warnings,completeFields:complete,totalFields:8,
     qualifiesForNoRebateGuarantee:true,
   } satisfies QuoteEvaluation;
  });
  // Compare *quoted prices* only, never conditional or unawarded discounts.
  // A hypothetical rebate must not silently alter the "lowest contractor" ranking.
+ const scopeDifferences=findExplicitScopeDifferences(input.quotes.map(q=>({id:q.id,fields:[
+   {id:"mechanical",label:"Mechanical permit and fee included",value:q.mechanicalPermitIncluded},
+   {id:"electrical",label:"Electrical work and permit included",value:q.electricalScopeIncluded},
+   {id:"final-inspection",label:"Final inspection included",value:q.finalInspectionIncluded},
+   {id:"commissioning",label:"Startup commissioning included",value:q.commissioningIncluded},
+   {id:"duct-airflow",label:"Duct and airflow testing included",value:q.ductAirflowTestingIncluded},
+   {id:"old-system",label:"Old equipment removal and disposal included",value:q.oldSystemRemovalIncluded},
+ ]})));
  const valid=evaluations.filter(x=>x.installedPrice!==null);
  const sameBasis=input.quotes.every(x=>x.priceBasis!=="unsure"&&x.priceBasis===input.quotes[0].priceBasis);
  const sameScope=input.quotes.every(x=>x.scope!=="unknown"&&x.scope===input.quotes[0].scope);
- const lowest=valid.length===input.quotes.length&&sameBasis&&sameScope?
+ const lowest=valid.length===input.quotes.length&&sameBasis&&sameScope&&scopeDifferences.length===0?
     [...valid].sort((a,b)=>a.installedPrice!-b.installedPrice!):[];
  const difference=lowest.length>=2?
     Math.round((Math.max(...lowest.map(x=>x.installedPrice!))-Math.min(...lowest.map(x=>x.installedPrice!)))*100)/100:null;
  return {
-  evaluations,lowestComparableQuote:lowest[0]?.id??null,priceDifference:difference,
+  evaluations,lowestComparableQuote:lowest[0]?.id??null,priceDifference:difference,scopeDifferences,
   comparisonReason:lowest.length>0
    ?"As-quoted totals only: scopes and before/after discount bases were reported the same. Proposed discounts and rebates do NOT alter the ranking; equipment, warranties, financing and undocumented work may still differ."
-   :"No valid lowest-price ranking: enter every installed price and establish the SAME documented ductwork/installation scope AND the SAME before/after discount price basis. Do not compare unrelated projects on price.",
+   :"No valid lowest-price ranking: enter every installed price and establish the SAME documented ductwork/installation scope AND the SAME before/after discount price basis. Do not compare unrelated projects on price."+
+      (scopeDifferences.length?" Specifically different included work: "+scopeDifferences.join("; ")+".":""),
+
   propertyWarning:hp3==="reserved"?"ODOE funding table Oct 1, 2026: existing owner-occupied HP3 funds fully reserved; do not count a new $2,000 rebate.":hp3==="blocked"?"This property type or location does not meet the described HP3 program scope.":"HP3 availability is not checked live; approved contractor, category, equipment and funding must all be verified."
  };
 }
@@ -156,6 +179,7 @@ export function quoteComparisonQuestions(report:QuoteComparison):string{
  return ["HEAT PUMP QUOTE COMPARISON — QUESTIONS FOR INSTALLERS",
  "Self-reported planning, not verification of bids, permits, incentives or annual savings.",
  "Agency funding note: "+report.propertyWarning,
+ "Explicit included-scope differences: "+(report.scopeDifferences.join("; ")||"None identified from yes/no answers; unknowns still need confirmation"),
  "COMPARE REPORTED QUOTE TOTALS: "+(report.priceDifference===null?"Not safely comparable": 
    "As-quoted price gap $"+report.priceDifference.toFixed(2)+"; lowest quote "+report.lowestComparableQuote?.toUpperCase()+". Conditional discounts were NOT used in the ranking."),
  ...report.evaluations.flatMap(e=>[

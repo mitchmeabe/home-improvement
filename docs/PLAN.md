@@ -43,3 +43,11 @@ No automatic national crawler until the original hypothesis survives real-world 
 - [x] Document free incumbent quote-review services and competitive limits
 - [ ] Validate with 8–12 genuine redacted homeowner contractor proposals and an experienced HVAC reviewer
 - [ ] Establish real public qualified-user funnel before claiming demand or conversions
+
+## Scope-comparability engineering (2026-11-03)
+- [x] Shared pure yes/no/unsure evidence discrepancy detector with no invented defaults
+- [x] Massachusetts startup, airflow/duct testing, existing-system removal included/excluded responses
+- [x] Oregon existing permit/electrical/inspection and new commissioning/duct/disposal response comparison
+- [x] Suppress lowest-price result on explicit contradictory included scope while preserving unknown warnings
+- [x] Export detailed differences to local text report and show matrix details
+- [ ] Authenticated contractor proposal review; no original signed quotes or homeowner acceptance performed
