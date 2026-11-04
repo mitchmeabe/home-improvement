@@ -201,3 +201,29 @@ test("PDF magic validation rejects disguised text files without modifying quote"
  await expect(importer.getByText(/valid PDF header/)).toBeVisible();
  await expect(page.locator("#ma-a-price")).toHaveValue("");
 });
+
+test("Oregon HPWH compares matched bids without awarding incentive or unverified permits",async({page})=>{
+ await page.goto("/oregon/heat-pump-water-heaters");
+ await expect(page.getByRole("heading",{name:/Compare the installation, not just/i})).toBeVisible();
+ const result=page.getByRole("region",{name:"Heat pump water heater project results"});
+ await expect(result).toContainText("Determine the responsible permitting authority");
+ await page.locator("#hw-place").selectOption("portland-verified");
+ await page.locator("#hw-house").selectOption("one-two-family");
+ await page.locator("#hw-replacement").selectOption("yes");
+ await expect(result).toContainText("Required for this reported scenario");
+ await page.locator("#hw-dwelling").selectOption("existing-owner");
+ await page.locator("#hw-utility").selectOption("pge");
+ await page.locator("#hw-install").selectOption("contractor");
+ await expect(result).toContainText("$1,200");
+ await page.locator("#hw-a-total").fill("4200");
+ await page.locator("#hw-b-total").fill("3600");
+ for(const id of ["a","b"]){
+  await page.locator("#hw-"+id+"-basis").selectOption("before-incentives");
+  await page.locator("#hw-"+id+"-scope").selectOption("same-location");
+  await page.locator("#hw-"+id+"-tank").fill("65");
+ }
+ await expect(result).toContainText("Lowest listed total: quote B");
+ await expect(result).toContainText("$600");
+ await page.locator("#hw-b-basis").selectOption("after-incentives");
+ await expect(result).toContainText("Quotes differ in scope");
+});
