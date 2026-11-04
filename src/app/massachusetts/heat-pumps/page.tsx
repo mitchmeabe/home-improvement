@@ -221,7 +221,26 @@ export default function MassachusettsHeatPumpPage(){
       <p>There are {comparison.result.quotes.length} reported proposals. These figures are not approved Mass Save awards; a lower entered price never certifies equipment, contractor or program eligibility.</p>
       <a href="#ma-bids">Return to proposal inputs <span aria-hidden="true">↑</span></a>
     </div>
-    {comparison.result.scopeDifferences.length>0&&<section className="ma-scope-warning" aria-label="Material contractor scope differences">
+    {comparison.audit&&<section className="ma-proposal-audit" aria-label="Massachusetts installation and equipment verification">
+ <h3>Installation date and exact equipment checks</h3>
+ <p><strong>Reported period:</strong> {comparison.audit.timeline.status==="2026"?"2026 published incentive schedule":
+ comparison.audit.timeline.status==="2027-announced"?"2027 announced whole/partial rates only":
+ comparison.audit.timeline.status==="unsupported"?"Outside supported rate periods":"Not established"}.
+ Source reviewed {MASS_AUDIT_REVIEWED}; these findings are not official product approval or funding.</p>
+ {comparison.audit.timeline.problems.map(x=><p className="ma-warning" key={x}>{x}</p>)}
+ <div className="ma-equipment-grid">{comparison.audit.quotes.map(f=><article key={f.id}>
+  <h4>Quote {f.id.toUpperCase()} — {f.readiness==="blocked"?"Reported system barrier":
+   f.readiness==="reported-ready"?"Conditions self-reported":"System verification pending"}</h4>
+  <p>AHRI: {equipment[f.id]?.ahriReference||"not entered"}; outdoor: {equipment[f.id]?.outdoorModel||"not entered"}; indoor: {equipment[f.id]?.indoorModel||"not entered"}.</p>
+  <ul>{f.risks.map(x=><li key={x}>{x}</li>)}</ul>
+ </article>)}</div>
+ <h4>Required documents and next questions</h4>
+ <ul>{comparison.audit.timeline.documents.map(x=><li key={x}>{x}</li>)}</ul>
+ <details><summary>Priority contractor follow-ups</summary>
+  <ol>{comparison.audit.priorityQuestions.map((x,i)=><li key={i}>{x}</li>)}</ol></details>
+ <p><a href={MA_AUDIT_SOURCES.equipment} target="_blank" rel="noreferrer">Check the paired system in Mass Save's qualified-products list ↗</a></p>
+</section>}
+{comparison.result.scopeDifferences.length>0&&<section className="ma-scope-warning" aria-label="Material contractor scope differences">
       <h3>These bids do not cover identical documented work</h3>
       <p>The following items are explicitly marked included in at least one bid and excluded in another. Resolve them before ranking prices:</p>
       <ul>{comparison.result.scopeDifferences.map(label=><li key={label}>{label}</li>)}</ul>
@@ -231,6 +250,14 @@ export default function MassachusettsHeatPumpPage(){
      <thead><tr><th scope="col">Comparison item</th>{comparison.result.quotes.map(e=><th scope="col" key={e.quote.id}>Quote {e.quote.id.toUpperCase()}</th>)}</tr></thead>
      <tbody>{[
        {label:"Proposed installation scope",values:comparison.result.quotes.map(e=>scopeNames[e.quote.scope])},
+       {label:"AHRI reference (self-reported)",values:comparison.result.quotes.map(e=>equipment[e.quote.id]?.ahriReference||"Not entered")},
+       {label:"Indoor/outdoor model IDs",values:comparison.result.quotes.map(e=>
+        (equipment[e.quote.id]?.indoorModel||"Not entered")+" / "+(equipment[e.quote.id]?.outdoorModel||"Not entered"))},
+       {label:"Equipment evidence status",values:comparison.result.quotes.map(e=>{
+        const f=comparison.audit?.quotes.find(x=>x.id===e.quote.id);
+        return f?.readiness==="blocked"?"Reported equipment barrier":f?.readiness==="reported-ready"?
+          "Reported only — official check needed":"Identity/list verification needed";
+       })},
        {label:"As-quoted total",values:comparison.result.quotes.map(e=>currency(e.statedPrice))},
        {label:"Rebate already in quoted total?",values:comparison.result.quotes.map(e=>e.quote.priceBasis==="before-rebate"?"No — before rebate":e.quote.priceBasis==="after-rebate"?"Yes — after rebate":"Unknown")},
        {label:"Equipment models and scope",values:comparison.result.quotes.map(e=>statusName(e.quote.scopeAndEquipmentIdentified))},
