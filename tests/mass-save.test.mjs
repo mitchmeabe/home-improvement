@@ -111,3 +111,12 @@ test("unknown installation scope prohibits misleading lowest-bid winner",()=>{
  assert.equal(r.comparativeWinner,null);
  assert.ok(r.quotes[0].risks.some(x=>/Identify whether/.test(x)));
 });
+
+test("downloaded text explains differences in bid scope and evidence without claiming approval",()=>{
+ const r=compareMassQuotes(shared,[make("a",26000),{...make("b",45000),scope:"replace-or-build-ducts"}]);
+ const report=massCopyPlan(r);
+ assert.match(report,/Broad installation scope: reuse-existing-ducts/);
+ assert.match(report,/Broad installation scope: replace-or-build-ducts/);
+ assert.match(report,/Permits & electrical documented/);
+ assert.match(report,/NOT Mass Save preapproval/);
+});

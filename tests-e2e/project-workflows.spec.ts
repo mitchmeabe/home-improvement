@@ -32,6 +32,7 @@ test("comparable Massachusetts bids show a reported total price difference",asyn
  await page.locator("#ma-a-basis").selectOption("before-rebate");
  await page.locator("#ma-b-basis").selectOption("before-rebate");
  await expect(page.getByText(/Difference between comparable reported price totals/i)).toBeVisible();
+ await expect(page.getByRole("table",{name:/Massachusetts contractor proposal coverage comparison/})).toBeVisible();
  const pending=page.waitForEvent("download");
  await page.getByRole("button",{name:/Download report/i}).click();
  expect((await pending).suggestedFilename()).toBe("massachusetts-quote-review-plan.txt");
@@ -67,4 +68,16 @@ test("key routes are mobile-width compatible",async({page})=>{
   const {scrollWidth,viewport}=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,viewport:window.innerWidth}));
   expect(scrollWidth,route+" horizontal overflow").toBeLessThanOrEqual(viewport+4);
  }
+});
+
+test("Oregon quote engine withholds ranking across materially different ductwork scopes",async({page})=>{
+ await page.goto("/");
+ await page.getByLabel("Total installed quote ($)").nth(0).fill("15000");
+ await page.getByLabel("Total installed quote ($)").nth(1).fill("23000");
+ await page.getByLabel("Is this total before or after incentives?").nth(0).selectOption("before-discounts");
+ await page.getByLabel("Is this total before or after incentives?").nth(1).selectOption("before-discounts");
+ await page.getByLabel("Quote A installation scope").selectOption("reuse-existing-ducts");
+ await page.getByLabel("Quote B installation scope").selectOption("new-ductwork");
+ await expect(page.locator(".hp-q-summary")).toContainText("No valid lowest-price ranking");
+ await expect(page.getByRole("table",{name:/Oregon heat pump quote completeness comparison/})).toBeVisible();
 });

@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {emptyQuote,compareHeatPumpQuotes,quoteComparisonQuestions} from "../src/lib/heat-pump-quotes.ts";
-const a={...emptyQuote("a"),installedPrice:15000,priceBasis:"before-discounts"};
-const b={...emptyQuote("b"),installedPrice:17000,priceBasis:"before-discounts"};
+const a={...emptyQuote("a"),installedPrice:15000,priceBasis:"before-discounts",scope:"reuse-existing-ducts"};
+const b={...emptyQuote("b"),installedPrice:17000,priceBasis:"before-discounts",scope:"reuse-existing-ducts"};
 const base={location:"portland",property:"existing-owner-occupied",hspf2:8.5,seer2:17,quotes:[a,b]};
 const screen=(x={})=>compareHeatPumpQuotes({...base,...x});
 test("owner occupied fully reserved never assumes HP3 discount",()=>{
@@ -61,4 +61,23 @@ test("missing permit and warranty flags and copyable source plan",()=>{
  const r=screen();assert.ok(r.evaluations[0].warnings.some(x=>/mechanical permit/.test(x)));
  const x=quoteComparisonQuestions(r);assert.match(x,/oregon.gov\/energy/);
  assert.match(x,/fully reserved/);
+});
+
+test("unknown or unequal installation scopes suppress a lowest-price ranking",()=>{
+ const unknown=screen({quotes:[{...a,scope:"unknown"},b]});
+ assert.equal(unknown.lowestComparableQuote,null);
+ const different=screen({quotes:[{...a,scope:"new-ductwork"},b]});
+ assert.equal(different.lowestComparableQuote,null);
+ assert.match(different.comparisonReason,/SAME documented ductwork/);
+});
+test("before and after discount totals are not comparable as a lowest-price ranking",()=>{
+ const mixed=screen({quotes:[{...a,priceBasis:"after-discounts"},b]});
+ assert.equal(mixed.lowestComparableQuote,null);
+ assert.equal(mixed.priceDifference,null);
+});
+test("text report documents each quote's scope and price basis",()=>{
+ const r=screen();
+ const report=quoteComparisonQuestions(r);
+ assert.match(report,/scope: reuse-existing-ducts/);
+ assert.match(report,/basis: before-discounts/);
 });

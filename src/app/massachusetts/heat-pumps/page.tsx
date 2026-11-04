@@ -19,6 +19,14 @@ type CommonAnswerKey="inMassachusetts"|"residentialAccount"|"residentialSponsorC
 type BidAnswerKey="installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"rebateDocumentation"|"permitsAndElectrical"|"loadCalculationProvided"|"scopeAndEquipmentIdentified"|"warrantyInWriting";
 const currency=(value:number|null)=>value===null?"Not established":value.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
 const number=(str:string)=>str.trim()===""?null:Number(str);
+const scopeNames:Record<ProposalScope,string>={
+ "unknown":"Not documented",
+ "reuse-existing-ducts":"Existing ducts reused",
+ "replace-or-build-ducts":"New / substantially replaced ductwork",
+ "ductless":"Ductless mini-split",
+ "mixed":"Mixed ducted and ductless",
+};
+const statusName=(s:Answer)=>s==="yes"?"Reported yes":s==="no"?"Reported no":"Not documented";
 
 function Choice({id,label,hint,value,options,onChange}:{
  id:string;label:string;hint?:string;value:string;options:ReadonlyArray<{value:string;label:string}>;onChange:(v:string)=>void;
@@ -140,6 +148,23 @@ export default function MassachusettsHeatPumpPage(){
   <section className="ma-card" id="ma-results" aria-live="polite">
    <div className="ma-head"><span className="ma-step">3</span><h2>Results, cost comparison and questions</h2></div>
    {comparison.error?<p role="alert" className="ma-warning">{comparison.error}</p>:comparison.result&&<>
+    <div className="ma-matrix-scroll"><table className="ma-matrix" aria-label="Massachusetts contractor proposal coverage comparison">
+     <caption>Side-by-side scope and documentation — all information is self-reported, not certified.</caption>
+     <thead><tr><th scope="col">Comparison item</th>{comparison.result.quotes.map(e=><th scope="col" key={e.quote.id}>Quote {e.quote.id.toUpperCase()}</th>)}</tr></thead>
+     <tbody>{[
+       {label:"Proposed installation scope",values:comparison.result.quotes.map(e=>scopeNames[e.quote.scope])},
+       {label:"As-quoted total",values:comparison.result.quotes.map(e=>currency(e.statedPrice))},
+       {label:"Rebate already in quoted total?",values:comparison.result.quotes.map(e=>e.quote.priceBasis==="before-rebate"?"No — before rebate":e.quote.priceBasis==="after-rebate"?"Yes — after rebate":"Unknown")},
+       {label:"Equipment models and scope",values:comparison.result.quotes.map(e=>statusName(e.quote.scopeAndEquipmentIdentified))},
+       {label:"Heat-load sizing / Manual J",values:comparison.result.quotes.map(e=>statusName(e.quote.loadCalculationProvided))},
+       {label:"Permits and electrical scope",values:comparison.result.quotes.map(e=>statusName(e.quote.permitsAndElectrical))},
+       {label:"Installer network",values:comparison.result.quotes.map(e=>statusName(e.quote.installerInNetwork))},
+       {label:"Qualified heat-pump system",values:comparison.result.quotes.map(e=>statusName(e.quote.equipmentOnQualifiedList))},
+       {label:"Equipment & labor warranty",values:comparison.result.quotes.map(e=>statusName(e.quote.warrantyInWriting))},
+       {label:"Written rebate confirmation",values:comparison.result.quotes.map(e=>statusName(e.quote.rebateDocumentation))},
+       {label:"Conditional after-rebate illustration",values:comparison.result.quotes.map(e=>currency(e.conditionalPostRebate))},
+     ].map(row=><tr key={row.label}><th scope="row">{row.label}</th>{row.values.map((value,i)=><td key={comparison.result!.quotes[i].quote.id}>{value}</td>)}</tr>)}</tbody>
+    </table></div>
     <div className="ma-results">{comparison.result.quotes.map(e=><article className="ma-result" key={e.quote.id}>
      <p className="ma-eyebrow">QUOTE {e.quote.id.toUpperCase()}</p>
      <span className={"ma-status "+e.program.status}>{e.program.status==="requirements-reported"?"Prerequisites self-reported":e.program.status==="schedule-only"?"2027 amounts only":e.program.status==="not-supported"?"Reported eligibility barrier":"Verification needed"}</span>

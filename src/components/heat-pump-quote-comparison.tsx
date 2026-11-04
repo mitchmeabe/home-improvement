@@ -5,7 +5,7 @@ import {downloadTextReport} from "../lib/download-report";
 import type {Location,Property} from "../lib/heat-pump";
 import {
  emptyQuote,compareHeatPumpQuotes,quoteComparisonQuestions,QUOTE_REVIEWED_ON,QUOTE_SOURCES,
- type QuoteItem,type Answer,type PriceBasis,
+ type QuoteItem,type Answer,type PriceBasis,type QuoteScope,
 } from "../lib/heat-pump-quotes";
 import "./heat-pump-quote-comparison.css";
 const yn=[{value:"unsure",label:"Not documented"},{value:"yes",label:"Confirmed in writing"},{value:"no",label:"No"}] as const;
@@ -56,6 +56,13 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
       <details className="hp-q-advanced">
        <summary>Review discounts, rebates, permits and warranties</summary>
        <div className="hp-q-fields">
+      <label className="hp-q-field">Broad installation scope
+       <select aria-label={"Quote "+q.id.toUpperCase()+" installation scope"} value={q.scope} onChange={e=>update(q.id,"scope",e.target.value as QuoteScope)}>
+        <option value="unknown">Not documented</option><option value="reuse-existing-ducts">Ducted — reuse existing ducts</option>
+        <option value="new-ductwork">Ducted — new or substantially rebuilt ducts</option>
+        <option value="ductless">Ductless mini-splits</option><option value="mixed">Mixed ducted and ductless</option>
+       </select>
+      </label>
       {cost(q,"otherDiscount","Other written discount ($)","Only count as applied if explicitly confirmed in writing.")}
       {ynSelect(q,"otherDiscountConfirmed","Other discount confirmed?")}
       {cost(q,"hp3ProposedDiscount","HP3 amount proposed ($)","Enter only what the contractor actually quotes; no automatic $2,000 assumption.")}
@@ -76,6 +83,21 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
   {compared.error&&<p role="alert" className="warning">{compared.error}</p>}
   {compared.data&&<div className="hp-q-analysis" aria-live="polite">
     <h3>Side-by-side quote analysis</h3>
+    <div className="hp-q-table-scroll"><table className="hp-q-table" aria-label="Oregon heat pump quote completeness comparison">
+      <caption>Side-by-side coverage. All answers are self-reported; a checked item is not verified by this website.</caption>
+      <thead><tr><th scope="col">Comparison</th>{quotes.map(q=><th scope="col" key={q.id}>Quote {q.id.toUpperCase()}</th>)}</tr></thead>
+      <tbody>{[
+        {label:"Installation scope",values:quotes.map(q=>q.scope==="reuse-existing-ducts"?"Reusing ducts":q.scope==="new-ductwork"?"New ductwork":q.scope==="ductless"?"Ductless":q.scope==="mixed"?"Mixed":"Unknown")},
+        {label:"As-quoted price",values:quotes.map(q=>m(q.installedPrice))},
+        {label:"Price basis",values:quotes.map(q=>q.priceBasis)},
+        {label:"Conditional arithmetic",values:compared.data.evaluations.map(e=>m(e.arithmeticNet))},
+        {label:"Equipment models documented",values:quotes.map(q=>q.modelAndRatingsDocumented)},
+        {label:"Mechanical permit included",values:quotes.map(q=>q.mechanicalPermitIncluded)},
+        {label:"Electrical scope included",values:quotes.map(q=>q.electricalScopeIncluded)},
+        {label:"Final inspection included",values:quotes.map(q=>q.finalInspectionIncluded)},
+        {label:"Written warranty",values:quotes.map(q=>q.warrantyInWriting)},
+       ].map(row=><tr key={row.label}><th scope="row">{row.label}</th>{row.values.map((value,i)=><td key={quotes[i].id}>{value}</td>)}</tr>)}</tbody>
+     </table></div>
     <div className="hp-q-results">{compared.data.evaluations.map(e=><article key={e.id}>
       <p className="eyebrow">QUOTE {e.id.toUpperCase()}</p>
       <div><small>Stated installed quote</small><strong>{m(e.installedPrice)}</strong></div>

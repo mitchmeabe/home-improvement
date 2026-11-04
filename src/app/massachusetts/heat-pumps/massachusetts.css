@@ -7,3 +7,12 @@
 .ma-bid-details .ma-bid-fields{grid-template-columns:1fr 1fr}
 @media(max-width:550px){.ma-bid-details .ma-bid-fields{grid-template-columns:1fr}}
 @media print{.ma-top,.ma-form-grid,.ma-bids,.ma-buttons,.ma-feedback,.ma-sources,.ma-advanced{display:none!important}.ma-result,.ma-results{display:block}.ma-result{break-inside:avoid;margin-bottom:20px}.ma-card{border:0;box-shadow:none;padding:0}.ma-wrap{max-width:none;padding:0}}
+
+.ma-matrix-scroll{overflow-x:auto;border-radius:12px;border:1px solid var(--ma-line);margin:20px 0 25px;background:white}
+.ma-matrix{width:100%;min-width:620px;border-collapse:collapse;font-size:12px;line-height:1.5}
+.ma-matrix caption{text-align:left;color:var(--ma-muted);padding:12px 16px;font-size:12px}
+.ma-matrix th,.ma-matrix td{padding:12px 14px;border-top:1px solid var(--ma-line);vertical-align:top;text-align:left}
+.ma-matrix thead th{background:#ebf5f0;color:#1c5842;font-size:12px;white-space:nowrap}
+.ma-matrix tbody th{font-weight:750;min-width:190px;background:#f9fcfa}
+.ma-matrix tbody tr:nth-child(even) td{background:#fafdfb}
+@media print{.ma-matrix-scroll{overflow:visible}.ma-matrix{min-width:0;font-size:10px;break-inside:auto}.ma-matrix tr{break-inside:avoid}}
