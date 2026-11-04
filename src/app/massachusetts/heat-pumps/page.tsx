@@ -47,6 +47,7 @@ export default function MassachusettsHeatPumpPage(){
  const [quotes,setQuotes]=useState<MassQuote[]>([newMassQuote("a"),newMassQuote("b")]);
  const [copyMessage,setCopyMessage]=useState("");
  const [feedback,setFeedback]=useState<null|boolean>(null);
+ const [hasQuotes,setHasQuotes]=useState<null|boolean>(null);
  const set=<K extends keyof Common>(k:K,value:Common[K])=>setCommon(old=>({...old,[k]:value}));
  const updateBid=<K extends keyof MassQuote>(id:MassQuote["id"],key:K,value:MassQuote[K])=>
   setQuotes(old=>old.map(q=>q.id===id?{...q,[key]:value}:q));
@@ -145,7 +146,17 @@ export default function MassachusettsHeatPumpPage(){
     {copyMessage&&<p role="status" className="ma-muted">{copyMessage}</p>}
    </>}
   </section>
-  <section className="ma-card ma-feedback"><h2>Did this help you compare proposals?</h2><p className="ma-muted">We count only yes/no feedback, not your quote amounts or personal information.</p>
+  <section className="ma-card ma-feedback"><h2>Do you already have multiple contractor quotes?</h2>
+   <p className="ma-muted">This is an anonymous buyer-intent question, not a quote upload or sales lead. It records only your answer.</p>
+   <div className="ma-buttons">
+    <button type="button" aria-pressed={hasQuotes===true} onClick={()=>{setHasQuotes(true);track("mass_multiple_quotes_yes")}}>Yes, two or more</button>
+    <button type="button" aria-pressed={hasQuotes===false} onClick={()=>{setHasQuotes(false);track("mass_multiple_quotes_no")}}>Not yet</button>
+    {hasQuotes!==null&&<span role="status">Thanks for answering.</span>}
+   </div>
+   <h3>Independent review is also available</h3>
+   <p className="ma-muted">Mass Save says residential customers can book a decarbonization consultation to review multiple heat-pump bids. Certain municipal-light-plant programs also offer free human quote comparisons. Our self-service calculations are not a substitute for an expert evaluation.</p>
+   <div className="ma-buttons"><a href="https://www.masssave.com/frequently-asked-questions" target="_blank" rel="noreferrer" onClick={()=>track("mass_official_quote_help_click")}>Official Mass Save quote-review guidance ↗</a></div>
+   <h2>Did this help you compare proposals?</h2><p className="ma-muted">We count only yes/no feedback, not your quote amounts or personal information.</p>
     <div className="ma-buttons"><button type="button" aria-pressed={feedback===true} onClick={()=>{setFeedback(true);track("mass_quote_helpful_yes")}}>Yes</button><button type="button" aria-pressed={feedback===false} onClick={()=>{setFeedback(false);track("mass_quote_helpful_no")}}>No</button>{feedback!==null&&<span role="status">Thank you.</span>}</div>
   </section>
   <section className="ma-sources"><h2>Official source references</h2><p>Reviewed {MASS_REVIEWED_ON}. Rules and program funding can change; compare source publication dates before relying on money.</p>
