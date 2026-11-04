@@ -51,7 +51,7 @@ test("invalid tonnage is rejected",()=>{
  assert.throws(()=>evaluateMassSave({...good,coolingCapacityBtu:v}),RangeError);
 });
 const {installerInNetwork,equipmentOnQualifiedList,newEquipment,coolingCapacityBtu,...shared}=good;
-const make=(id,price)=>({...newMassQuote(id),price,priceBasis:"before-rebate",proposedRebate:5000,rebateDocumentation:"yes",installerInNetwork:"yes",equipmentOnQualifiedList:"yes",newEquipment:"yes",coolingCapacityBtu:36000});
+const make=(id,price)=>({...newMassQuote(id),scope:"reuse-existing-ducts",price,priceBasis:"before-rebate",proposedRebate:5000,rebateDocumentation:"yes",installerInNetwork:"yes",equipmentOnQualifiedList:"yes",newEquipment:"yes",coolingCapacityBtu:36000});
 test("bid comparison shows conditional scenario with written confirmation, no awarded rebate",()=>{
  const r=compareMassQuotes(shared,[make("a",16000),make("b",18000)]);
  assert.equal(r.quotes[0].conditionalPostRebate,11000);
@@ -95,4 +95,19 @@ test("multifamily 5+ requires case review for special conditions",()=>{
  const r=evaluateMassSave({...good,propertyUnits:"five-plus"});
  assert.equal(r.status,"needs-verification");
  assert.equal(r.conditions.find(x=>x.id==="property-units").status,"verify");
+});
+
+test("different installation scopes cannot be ranked by nominal price",()=>{
+ const a=make("a",22000);
+ const b={...make("b",45000),scope:"replace-or-build-ducts"};
+ const r=compareMassQuotes(shared,[a,b]);
+ assert.equal(r.comparablePriceGap,null);
+ assert.equal(r.comparativeWinner,null);
+ assert.match(r.comparisonExplanation,/new ductwork/);
+});
+test("unknown installation scope prohibits misleading lowest-bid winner",()=>{
+ const a={...make("a",24000),scope:"unknown"};
+ const r=compareMassQuotes(shared,[a,make("b",26000)]);
+ assert.equal(r.comparativeWinner,null);
+ assert.ok(r.quotes[0].risks.some(x=>/Identify whether/.test(x)));
 });

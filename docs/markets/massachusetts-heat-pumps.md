@@ -25,3 +25,17 @@ A conditional post-rebate *illustration* requires 2026 self-reported prerequisit
 - Independent review of sponsor/fuel compatibility, winter occupation, weatherization, system qualification, partial controls, rebate forms and 2027 changes.
 - Real installer proposals tested with permission and personal details removed.
 - Live published rate/terms refresh before public launch. No real referral partner or user conversion data established.
+
+## Real-world quote evaluation and competitor evidence — November 2026
+
+**Traceable homeowner quote reports, not authenticated contractor proposals:**
+
+1. [July 17, 2026 Massachusetts oil-heated ranch quote thread](https://www.reddit.com/r/massachusetts/comments/1uz992i/heat_pump_upgrade_good_dealidea/): approximately $26,000 pre-rebate Bryant 3-ton **reuse/insulate ducts**, $45,000 Mitsubishi 3-ton **build new ducts**, and $22,000 ducted / $32,000 ductless alternatives from a third firm. The differences in scope make a lowest-price recommendation misleading. A three-bid scenario using the cited $26k/$45k/$32k values is in `tests/fixtures/ma-public-quote-scenarios.json` and asserts **no comparable winner**.
+2. [January 30, 2026 Massachusetts 6-head/2-condensor quote report](https://www.reddit.com/r/massachusetts/comments/1qrmhn4/ma_heat_pump_quotes/): homeowner reported approximately $45k before rebate with insufficient verified AHRI/permit data. **Only one quoted offer**, so not enough for a two-bid comparison. Fixture verifies refusal to rank a single quote.
+3. [September 23, 2026 Massachusetts Bryant replacement quote report](https://www.reddit.com/r/hvacadvice/comments/1woa8zm/ma_is_24k_reasonable_for_a_bryant_multizone/): reported $24,300 before $750 potential rebate, but also $24,500 final. The report contains inconsistent arithmetic and a distinct replacement scenario. The software flags unknown rebate documentation and excludes it until verified.
+
+No original PDFs, contractor identities, signed payment records, homeowner permission or completed rebate approvals were obtained. These are anonymized public posts, not a professional technical review or validation with a representative sample of Massachusetts homeowners. Do not claim we 'tested against actual signed contractor proposals.'
+
+**Incumbent alternatives:** [Mass Save FAQ](https://www.masssave.com/frequently-asked-questions) explicitly offers consultation for reviewing multiple residential heat-pump quotes. Certain municipal-light-plant programs have a [free Abode comparison service](https://abodeenergy.com/homeowners/select-your-mlp/tmlp/heat-pumps/) (up to five quotes). That removes any assumption that this is a new or unserved service. Our possible product advantage is self-service speed and predictable source-backed checks, NOT exclusive access or a promise to beat free experts.
+
+**Release validation still missing:** At least 8–12 consented local homeowners sharing redacted original proposals with an HVAC specialist, line-item scope/price mapping, permitting confirmation, equipment AHRI checks and waiver review. The prototype does not store or accept documents. A real-document harness would need explicit permission and proper handling.

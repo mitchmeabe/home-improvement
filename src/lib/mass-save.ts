@@ -167,9 +167,11 @@ export function evaluateMassSave(input:MassInput):MassResult {
 }
 
 export type PriceBasis="before-rebate"|"after-rebate"|"unsure";
+export type ProposalScope="reuse-existing-ducts"|"replace-or-build-ducts"|"ductless"|"mixed"|"unknown";
 export interface MassQuote {
   id:"a"|"b"|"c";
   price:number|null;priceBasis:PriceBasis;
+  scope:ProposalScope;
   proposedRebate:number|null;
   rebateDocumentation:Answer;
   installerInNetwork:Answer;
@@ -182,7 +184,7 @@ export interface MassQuote {
   warrantyInWriting:Answer;
 }
 export function newMassQuote(id:MassQuote["id"]):MassQuote{
- return {id,price:null,priceBasis:"unsure",proposedRebate:null,rebateDocumentation:"unsure",
+ return {id,price:null,priceBasis:"unsure",scope:"unknown",proposedRebate:null,rebateDocumentation:"unsure",
   installerInNetwork:"unsure",equipmentOnQualifiedList:"unsure",newEquipment:"unsure",
   coolingCapacityBtu:null,permitsAndElectrical:"unsure",loadCalculationProvided:"unsure",
   scopeAndEquipmentIdentified:"unsure",warrantyInWriting:"unsure"};
@@ -215,6 +217,7 @@ export function compareMassQuotes(common:Omit<MassInput,"installerInNetwork"|"eq
   const risks:string[]=[];
   if(quote.price===null)risks.push("Quote's installed price not supplied.");
   if(quote.priceBasis==="unsure")risks.push("Confirm whether quote already includes a rebate. Do not subtract it twice.");
+  if(quote.scope==="unknown")risks.push("Identify whether the bid reuses ducts, creates new ductwork, is ductless, or mixes scopes before a meaningful price comparison.");
   if(quote.permitsAndElectrical!=="yes")risks.push("Ask which permits and electrical upgrades are included; municipality-specific rules are not evaluated here.");
   if(quote.loadCalculationProvided!=="yes")risks.push("Request Manual J load calculation and AHRI cooling capacity.");
   if(quote.scopeAndEquipmentIdentified!=="yes")risks.push("Ask for matching indoor/outdoor model numbers, installation scope and refrigerant details.");
@@ -232,13 +235,17 @@ export function compareMassQuotes(common:Omit<MassInput,"installerInNetwork"|"eq
   return {quote,program,statedPrice:quote.price,conditionalPostRebate:postRebate,
     risks,itemsDocumented:[quote.permitsAndElectrical,quote.loadCalculationProvided,quote.scopeAndEquipmentIdentified,quote.warrantyInWriting].filter(x=>x==="yes").length};
  });
- const comparable=evaluated.every(x=>x.statedPrice!==null)&&quotes.every(q=>q.priceBasis!=="unsure")&&quotes.every(q=>q.priceBasis===quotes[0].priceBasis);
+ const comparable=evaluated.every(x=>x.statedPrice!==null)&&
+   quotes.every(q=>q.priceBasis!=="unsure")&&quotes.every(q=>q.priceBasis===quotes[0].priceBasis)&&
+   quotes.every(q=>q.scope!=="unknown")&&quotes.every(q=>q.scope===quotes[0].scope);
  const ordered=comparable?[...evaluated].sort((a,b)=>a.statedPrice!-b.statedPrice!):[];
  const min=ordered.length?ordered[0].statedPrice!:null;
  const max=ordered.length?ordered[ordered.length-1].statedPrice!:null;
  return {quotes:evaluated,comparablePriceGap:min!==null&&max!==null?Math.round((max-min)*100)/100:null,
   comparativeWinner:ordered[0]?.quote.id??null,
-  comparisonExplanation:comparable?"Ranked only by self-reported quoted totals on the same before/after rebate basis, not by true total project quality, net savings or awarded rebate.":"Enter prices and the same before/after rebate basis for every quote to compare reported totals fairly."};
+  comparisonExplanation:comparable?
+    "Ranked only by self-reported quoted totals on the same before/after rebate basis and broad project scope. Different loads, equipment sizes, duct condition, labor and unlisted work can still make comparison misleading; this is not a best-contractor recommendation.":
+    "Enter prices, the same before/after rebate basis, and the same broad installation scope for every bid. Comparing new ductwork to duct reuse or ductless systems on price alone is misleading."};
 }
 export function massCopyPlan(r:MassBidComparison):string{
  return ["MASSACHUSETTS HEAT-PUMP QUOTE REVIEW — "+MASS_REVIEWED_ON,

@@ -1,0 +1,68 @@
+{
+  "reviewed": "2026-11-03",
+  "warning": "These are public homeowner self-reports, NOT the original signed contractor proposals, verified prices, or equivalent 2026 Mass Save eligible bids. No names/addresses retained.",
+  "scenarios": [
+    {
+      "id": "ma-2026-oil-ranch",
+      "published": "2026-07-17",
+      "source": "https://www.reddit.com/r/massachusetts/comments/1uz992i/heat_pump_upgrade_good_dealidea/",
+      "description": "Public 2026 homeowner report: 1965 oil-heat ranch; differing new-vs-old ducts and ductless scope; do NOT compare on price alone.",
+      "quotes": [
+        {
+          "id": "a",
+          "reportedPrice": 26000,
+          "scope": "reuse-existing-ducts",
+          "basis": "before-rebate",
+          "equipment": "Bryant 3-ton, old duct insulation"
+        },
+        {
+          "id": "b",
+          "reportedPrice": 45000,
+          "scope": "replace-or-build-ducts",
+          "basis": "unsure",
+          "equipment": "Mitsubishi 3-ton, new ductwork"
+        },
+        {
+          "id": "c",
+          "reportedPrice": 32000,
+          "scope": "ductless",
+          "basis": "unsure",
+          "equipment": "Five-zone ductless alternative"
+        }
+      ],
+      "actualSignedDocuments": false
+    },
+    {
+      "id": "ma-2026-six-heads",
+      "published": "2026-01-30",
+      "source": "https://www.reddit.com/r/massachusetts/comments/1qrmhn4/ma_heat_pump_quotes/",
+      "description": "Public homeowner asking about an approximately $45k ductless six-head/two-condenser quote; no second comparable actual bid, incomplete AHRI and permit records.",
+      "quotes": [
+        {
+          "id": "a",
+          "reportedPrice": 45000,
+          "scope": "ductless",
+          "basis": "before-rebate",
+          "equipment": "Mitsubishi 2 outdoor units/6 heads"
+        }
+      ],
+      "actualSignedDocuments": false
+    },
+    {
+      "id": "ma-2026-bryant-replacement",
+      "published": "2026-09-23",
+      "source": "https://www.reddit.com/r/hvacadvice/comments/1woa8zm/ma_is_24k_reasonable_for_a_bryant_multizone/",
+      "description": "Public report of $24,300 pre-$750 rebate yet $24,500 claimed final price, an internal inconsistency illustrating why quotation arithmetic needs review.",
+      "quotes": [
+        {
+          "id": "a",
+          "reportedPrice": 24300,
+          "scope": "mixed",
+          "basis": "before-rebate",
+          "equipment": "Bryant replacement 3-ton/ducted+ductless"
+        }
+      ],
+      "actualSignedDocuments": false
+    }
+  ]
+}

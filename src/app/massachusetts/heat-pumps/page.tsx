@@ -5,7 +5,7 @@ import Link from "next/link";
 import {track} from "@vercel/analytics";
 import {
  MASS_REVIEWED_ON,MASS_SOURCES,EMPTY_MASS_INPUT,newMassQuote,compareMassQuotes,massCopyPlan,
- type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,
+ type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,type ProposalScope,
 } from "../../../lib/mass-save";
 import "./massachusetts.css";
 const answerOptions=[
@@ -103,6 +103,11 @@ export default function MassachusettsHeatPumpPage(){
     <div className="ma-bid-top"><h3>Quote {q.id.toUpperCase()}</h3><span>Independent proposal</span></div>
     <div className="ma-bid-fields">
      <Money id={"ma-"+q.id+"-price"} label="Installed quoted price ($)" value={q.price} onChange={v=>updateBid(q.id,"price",v)}/>
+     <Choice id={"ma-"+q.id+"-scope"} label="Scope of this proposal" value={q.scope} options={[
+       {value:"unknown",label:"Not documented"},{value:"reuse-existing-ducts",label:"Ducted, reuse existing ducts"},
+       {value:"replace-or-build-ducts",label:"Ducted, new or substantially rebuilt ducts"},
+       {value:"ductless",label:"Ductless mini-splits"},{value:"mixed",label:"Mixed ducted + ductless"}]}
+       onChange={v=>updateBid(q.id,"scope",v as ProposalScope)}/>
      <Choice id={"ma-"+q.id+"-basis"} label="Does this price already include a rebate?" value={q.priceBasis} options={[{value:"unsure",label:"Don't know"},{value:"before-rebate",label:"Before rebate"},{value:"after-rebate",label:"After rebate"}]} onChange={v=>updateBid(q.id,"priceBasis",v as PriceBasis)}/>
      <Money id={"ma-"+q.id+"-rebate"} label="Rebate amount claimed by contractor ($)" value={q.proposedRebate} onChange={v=>updateBid(q.id,"proposedRebate",v)}/>
      <Money id={"ma-"+q.id+"-capacity"} label="AHRI cooling capacity (BTU/h)" hint="E.g., 36,000 BTU/h = 3 tons. Not the heating capacity or marketing model size." value={q.coolingCapacityBtu} onChange={v=>updateBid(q.id,"coolingCapacityBtu",v)}/>
