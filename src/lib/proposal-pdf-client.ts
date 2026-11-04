@@ -25,7 +25,7 @@ export async function extractProposalPdf(file:File):Promise<ExtractedProposalPdf
  const pdfjs=await import("pdfjs-dist");
  // Bundled same-origin worker; never load a CDN or send customer PDF bytes.
  pdfjs.GlobalWorkerOptions.workerSrc=new URL("pdfjs-dist/build/pdf.worker.min.mjs",import.meta.url).toString();
- const task=pdfjs.getDocument({data:bytes,isEvalSupported:false,useSystemFonts:false,stopAtErrors:true});
+ const task=pdfjs.getDocument({data:bytes,useSystemFonts:false,stopAtErrors:true});
  let document:Awaited<typeof task.promise>|null=null;
  try{
   document=await task.promise;
@@ -67,7 +67,6 @@ export async function extractProposalPdf(file:File):Promise<ExtractedProposalPdf
   if(text.length<15)throw new Error("No readable text layer. Scanned PDFs require manual transcription.");
   return {text,pages:document.numPages,characters:text.length,truncated};
  }finally{
-  if(document)await document.destroy();
-  else await task.destroy();
+  await task.destroy();
  }
 }
