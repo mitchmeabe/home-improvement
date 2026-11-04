@@ -48,16 +48,26 @@
       "claimedUse": "Scope of local mechanical/electrical permits"
     },
     {
-      "id": "portland-parcel-jurisdiction",
+      "id": "portland-hpwh-plumbing",
+      "owner": "Portland PPD",
+      "url": "https://www.portland.gov/ppd/residential-permitting/residential-plumbing-permits",
+      "lastReviewed": "2026-11-04",
+      "maxAgeDays": 60,
+      "expectedText": [
+        "Replace a water heater"
+      ],
+      "claimedUse": "One/two-family water heater replacement and plumbing permit responsibility"
+    },
+    {
+      "id": "portland-hpwh-jurisdiction",
       "owner": "Portland PPD",
       "url": "https://www.portland.gov/ppd/property-addressing",
       "lastReviewed": "2026-11-04",
       "maxAgeDays": 60,
       "expectedText": [
-        "jurisdiction",
-        "Portland Maps"
+        "jurisdiction"
       ],
-      "claimedUse": "Property-ID/PortlandMaps verification that postal Portland address does not establish Portland permit jurisdiction"
+      "claimedUse": "Address/jurisdiction checks for applying Portland-specific permit rules"
     }
   ]
 }

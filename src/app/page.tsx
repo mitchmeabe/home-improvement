@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { QuoteReview } from "../components/quote-review";
 import { HeatPumpQuoteComparison } from "../components/heat-pump-quote-comparison";
 import { evaluateHeatPump, RULE_REVIEWED_ON, FUNDING_SNAPSHOT_AS_OF, SOURCES, type Location, type Property, type Wiring, type Equipment, type Status } from "../lib/heat-pump";
-import {resolveOregonProject,LOCAL_REVIEWED_ON,LOCAL_SOURCES,type JurisdictionEvidence,type BuildingKind,type ElectricUtility} from "../lib/oregon-location-matcher";
 
 function formatStatus(status: Status) {
   return status === "required" ? "Required" : status === "check" ? "Verify" : "Not applicable";
@@ -14,59 +13,35 @@ function numberOrUndefined(value: string): number | undefined {
 }
 export default function Home() {
   const [location, setLocation] = useState<Location>("portland");
-  const [jurisdiction, setJurisdiction] = useState<JurisdictionEvidence>("unverified");
-  const [building, setBuilding] = useState<BuildingKind>("unknown");
-  const [electricUtility, setElectricUtility] = useState<ElectricUtility>("unknown");
   const [property, setProperty] = useState<Property>("existing-owner-occupied");
   const [equipment, setEquipment] = useState<Equipment>("heat-pump");
   const [wiring, setWiring] = useState<Wiring>("unsure");
   const [hspf2, setHspf2] = useState("");
   const [seer2, setSeer2] = useState("");
-  const locationMatch = useMemo(()=>resolveOregonProject({
-    location,jurisdiction,building,electricUtility,property,equipment,wiring
-  }),[location,jurisdiction,building,electricUtility,property,equipment,wiring]);
   const { result, error } = useMemo(() => {
     try {
-      return { result: evaluateHeatPump({ location:locationMatch.effectiveLocation, property, equipment, wiring, hspf2: numberOrUndefined(hspf2), seer2: numberOrUndefined(seer2) }), error: "" };
+      return { result: evaluateHeatPump({ location, property, equipment, wiring, hspf2: numberOrUndefined(hspf2), seer2: numberOrUndefined(seer2) }), error: "" };
     } catch (err) {
       return { result: null, error: err instanceof Error ? err.message : "Invalid input" };
     }
-  }, [locationMatch.effectiveLocation, property, equipment, wiring, hspf2, seer2]);
+  }, [location, property, equipment, wiring, hspf2, seer2]);
 
   return <main className="container">
-    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><nav className="market-nav" aria-label="Project tools"><a href="#project-tools">Choose market</a><a href="/massachusetts/heat-pumps">Massachusetts</a><a href="#oregon-project">Oregon</a></nav></header>
-    <section className="improvement-directory-intro"><p className="eyebrow">Independent heat-pump project guidance</p><h1>Compare the real project before accepting a contractor quote.</h1><p>Understand your program questions, spot differences in installation scope, and prepare informed contractor follow-ups. Incentives and permits require official confirmation; no personal account or proposal upload.</p></section>
+    
+    <section className="improvement-directory-intro"><p className="eyebrow">Independent heat-pump project guidance</p><h1>Compare the real project before accepting a contractor quote.</h1><p>Understand your program questions, spot differences in installation scope, and prepare informed contractor follow-ups. Incentives and permits require official confirmation; no personal account or proposal upload.</p>
+      <p className="project-finder-prompt"><a href="/projects"><strong>Need help choosing the right tool?</strong> Select your project and location <span aria-hidden="true">→</span></a></p></section>
     <section className="improvement-directory" id="project-tools" aria-label="Available project planners">
       <a href="/massachusetts/heat-pumps"><b>Massachusetts heat-pump quote review</b><span>Compare contractor bids, equipment and 2026 or announced 2027 Mass Save program conditions.</span><em>Open Massachusetts planner ↗</em></a>
+      <a href="/oregon/heat-pump-water-heaters"><b>Oregon heat-pump water heaters</b><span>Check Portland plumbing and electrical permit questions, 2026 incentive pathways, and compare installation quotes.</span><em>Open water-heater planner ↗</em></a>
       <a href="#oregon-project"><b>Oregon installation and incentive questions</b><span>Review Portland permit considerations, Oregon HP3 funding limits and contractor quote completeness.</span><em>Open Oregon planner ↓</em></a>
     </section>
-    <section className="hero oregon-project-section" id="oregon-project"><p className="eyebrow">Residential heat pump project planner</p><h1>Plan the work before you pay for it.</h1><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
+    <section className="hero oregon-project-section" id="oregon-project"><p className="eyebrow">Residential heat pump project planner</p><h2 className="homepage-secondary-heading">Plan the work before you pay for it.</h2><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
     <div className="grid">
       <section className="panel"><h2>Tell us about the project</h2><p className="muted">Enter basic information. This prototype does not collect your address or income.</p>
         <label htmlFor="location">Property location</label>
         <select id="location" value={location} onChange={(e) => setLocation(e.target.value as Location)}>
           <option value="portland">Within Portland city limits, Oregon</option><option value="other-oregon">Elsewhere in Oregon</option><option value="outside-oregon">Outside Oregon</option><option value="unknown">Not sure</option>
         </select>
-        {location!=="outside-oregon"&&<div className="local-project-conditions">
-          <h3>Verify jurisdiction and utility service</h3>
-          <p className="small">Use <a href={LOCAL_SOURCES.portlandMaps} target="_blank" rel="noreferrer">PortlandMaps</a> to check the property's actual Jurisdiction field. A Portland mailing address or ZIP code is not confirmation; do not enter an address here.</p>
-          {location==="portland"&&<><label htmlFor="portland-jurisdiction">What does the official property jurisdiction show?</label>
-            <select id="portland-jurisdiction" value={jurisdiction} onChange={e=>setJurisdiction(e.target.value as JurisdictionEvidence)}>
-             <option value="unverified">Not checked / mailing address only</option>
-             <option value="portland-confirmed">Portland city jurisdiction verified in PortlandMaps</option>
-             <option value="not-portland">Not Portland city jurisdiction</option>
-            </select></>}
-          <label htmlFor="building-structure">Building type for permit/program screening</label>
-          <select id="building-structure" value={building} onChange={e=>setBuilding(e.target.value as BuildingKind)}>
-           <option value="unknown">Not sure</option><option value="one-two-family">One- or two-family dwelling</option>
-           <option value="townhouse-adu">Townhouse or ADU</option><option value="multifamily-other">Larger multifamily / commercial / other</option>
-          </select>
-          <label htmlFor="electric-utility">Electricity provider shown on your bill</label>
-          <select id="electric-utility" value={electricUtility} onChange={e=>setElectricUtility(e.target.value as ElectricUtility)}>
-           <option value="unknown">Not checked</option><option value="pge">Portland General Electric</option>
-           <option value="pacific-power">Pacific Power</option><option value="other">Another utility</option>
-          </select>
-        </div>}
         <label htmlFor="property">Property category</label>
         <select id="property" value={property} onChange={(e) => setProperty(e.target.value as Property)}>
           <option value="existing-owner-occupied">Existing home I own and live in</option><option value="existing-rental">Existing long-term residential rental</option><option value="new-construction">New residential construction</option><option value="vacation-or-commercial">Vacation rental or commercial property</option><option value="other">Other / not sure</option>
@@ -87,23 +62,7 @@ export default function Home() {
       </section>
       <section className="panel results" aria-live="polite"><p className="eyebrow">Your project checklist</p>
         {error ? <p className="warning" role="alert">{error}</p> : result ? <>
-          <section className="local-project-results" aria-label="Jurisdiction and utility program matches">
-           <h3>Jurisdiction and program matching</h3>
-           <p className="small">Source review {LOCAL_REVIEWED_ON}. We do not geocode addresses, confirm utility accounts, reserve funds or determine incentives automatically.</p>
-           <p><strong>{locationMatch.permitAuthority==="portland-confirmed"?"Portland permit authority confirmed by your report":
-              locationMatch.permitAuthority==="outside-portland"?"Portland permits do not establish your authority":"Permit authority not yet established"}</strong></p>
-           {locationMatch.locationFindings.map(x=><div className="finding" key={x.id}>
-             <span className={"flag "+(x.status==="required"?"required":x.status==="not-applicable"?"not-applicable":"check")}>{x.status==="required"?"Required":x.status==="not-applicable"?"N/A":"Verify"}</span>
-             <div><strong>{x.title}</strong><p>{x.detail} <a href={x.sourceUrl} target="_blank" rel="noreferrer">Official source ↗</a></p></div>
-           </div>)}
-           <h3>Potential program routes — not awarded rebates</h3>
-           {locationMatch.programs.map(x=><div className="finding" key={x.id}>
-             <span className={"flag "+(x.status==="not-applicable"?"not-applicable":"check")}>{x.status==="not-applicable"?"N/A":"Verify"}</span>
-             <div><strong>{x.title}</strong><p>{x.detail} <a href={x.sourceUrl} target="_blank" rel="noreferrer">Program instructions ↗</a></p></div>
-           </div>)}
-           <details><summary><strong>Project-specific contractor questions</strong></summary><ul>{locationMatch.questions.map(q=><li key={q}>{q}</li>)}</ul></details>
-          </section>
-          <h3>Existing Oregon planner permit checks</h3>
+          <h3>Permits</h3>
           {result.permits.map((finding) => <div className="finding" key={finding.title}><span className={"flag " + finding.status}>{formatStatus(finding.status)}</span><div><strong>{finding.title}</strong><p>{finding.detail} <a href={finding.sourceUrl} target="_blank" rel="noreferrer">Official guidance ↗</a></p></div></div>)}
           <h3>Oregon HP3 incentive funding</h3><p className="small"><strong>Agency funding table dated {FUNDING_SNAPSHOT_AS_OF}.</strong> This is not a real-time inventory or reservation.</p>
           <div className="notice"><b>{result.funding === "fully-reserved" ? "Fully reserved — existing owner-occupied" : result.funding === "not-applicable" ? "Outside current program scope" : "Current funding & eligibility: verify"}</b><p>{result.fundingExplanation}</p></div>
