@@ -103,15 +103,19 @@ export function auditMassachusettsProposals(
   if(q.equipmentOnQualifiedList!=="yes")risks.push("Exact qualified-list status remains unverified (or marked not listed).");
   if(q.coolingCapacityBtu===null)risks.push("AHRI cooling capacity missing; the per-ton schedule example cannot be checked against a system certificate.");
   const listed=hpqplMatches?.[q.id];
+  const original=quotes.find(v=>v.id===q.id);
+  const capacityConflict=!!listed&&listed.status==="listed-residential"&&listed.coolingBtu!==null&&
+    original?.coolingCapacityBtu!==null&&original?.coolingCapacityBtu!==undefined&&
+    original.coolingCapacityBtu!==listed.coolingBtu;
+  const sourceRefrigerantHigh=!!listed&&listed.rows.some(r=>/R[- ]?410A/i.test(r.refrigerant));
+  const refrigerantConflict=sourceRefrigerantHigh&&e.refrigerant==="at-most-700";
   if(listed){
    risks.push("Imported HPQPL workbook (not authenticated live): "+listed.reason);
-   if(listed.status==="listed-residential"&&listed.coolingBtu!==null&&
-      quotes.find(v=>v.id===q.id)?.coolingCapacityBtu!==null&&
-      quotes.find(v=>v.id===q.id)?.coolingCapacityBtu!==listed.coolingBtu)
-    risks.push("Quoted capacity conflicts with the matched product-list capacity; ask for the correct AHRI certificate.");
+   if(capacityConflict)risks.push("Quoted capacity conflicts with the matched product-list capacity; ask for the correct AHRI certificate.");
+   if(refrigerantConflict)risks.push("The matching HPQPL row reports R-410A, conflicting with your low-GWP selection. Resolve the exact refrigerant before relying on incentives.");
   }
   let refrigerantFinding:EquipmentFinding["refrigerantFinding"]="not-established";
-  const highGwp=e.refrigerant==="r410a"||e.refrigerant==="other-over-700";
+  const highGwp=e.refrigerant==="r410a"||e.refrigerant==="other-over-700"||sourceRefrigerantHigh;
   if(e.refrigerant==="at-most-700")refrigerantFinding="no-known-high-gwp-barrier";
   if(highGwp&&year==="2026"){
    if(e.systemClass==="split"){refrigerantFinding="unsupported-standard";risks.push("A split system with refrigerant GWP above 700, including R-410A, was removed from the 2026 Mass Save HPQPL.");}
@@ -126,7 +130,7 @@ export function auditMassachusettsProposals(
    risks.push("High-GWP system reported for 2027. Do not rely on the temporary 2026 VRF exception; verify exact 2027 product eligibility.");
   }else if(e.refrigerant==="unsure")risks.push("Confirm the proposed refrigerant and GWP class against the model plate and manufacturer specification.");
   if(!timeline.installationDate)risks.push("No installation date supplied, so the 2026/2027 rate selection is unverified.");
-  const blocked=refrigerantFinding==="unsupported-standard"||
+  const blocked=refrigerantFinding==="unsupported-standard"||capacityConflict||refrigerantConflict||
     q.equipmentOnQualifiedList==="no"||status==="unsupported";
   const verify=!complete||q.equipmentOnQualifiedList!=="yes"||
     refrigerantFinding==="exception-needs-review"||e.refrigerant==="unsure"||
