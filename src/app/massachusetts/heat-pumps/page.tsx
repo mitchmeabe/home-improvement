@@ -14,7 +14,7 @@ const answerOptions=[
  {value:"no",label:"No"},
 ] as const;
 type Common=Omit<MassInput,"installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"coolingCapacityBtu">;
-type CommonAnswerKey="residentialSponsorConfirmed"|"winterOccupied"|"hasOldHeatPump"|"displacesPrimaryHeating"|"wholeWeatherization"|"wholeFormSigned"|"fossilHeatingRemains"|"partialIntegratedControls"|"removedFuelEvidence";
+type CommonAnswerKey="inMassachusetts"|"residentialAccount"|"residentialSponsorConfirmed"|"winterOccupied"|"hasOldHeatPump"|"displacesPrimaryHeating"|"wholeWeatherization"|"wholeFormSigned"|"fossilHeatingRemains"|"partialIntegratedControls"|"removedFuelEvidence";
 type BidAnswerKey="installerInNetwork"|"equipmentOnQualifiedList"|"newEquipment"|"rebateDocumentation"|"permitsAndElectrical"|"loadCalculationProvided"|"scopeAndEquipmentIdentified"|"warrantyInWriting";
 const currency=(value:number|null)=>value===null?"Not established":value.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
 const number=(str:string)=>str.trim()===""?null:Number(str);
@@ -37,6 +37,7 @@ export default function MassachusettsHeatPumpPage(){
  const initial=EMPTY_MASS_INPUT;
  const [common,setCommon]=useState<Common>({
   year:initial.year,route:initial.route,heatingFuel:initial.heatingFuel,
+  inMassachusetts:initial.inMassachusetts,residentialAccount:initial.residentialAccount,propertyUnits:initial.propertyUnits,
   residentialSponsorConfirmed:initial.residentialSponsorConfirmed,winterOccupied:initial.winterOccupied,
   hasOldHeatPump:initial.hasOldHeatPump,displacesPrimaryHeating:initial.displacesPrimaryHeating,
   wholeWeatherization:initial.wholeWeatherization,wholeFormSigned:initial.wholeFormSigned,
@@ -74,6 +75,9 @@ export default function MassachusettsHeatPumpPage(){
   <section className="ma-card" id="ma-situation">
    <div className="ma-head"><span className="ma-step">1</span><h2>Property, heating system and proposed installation</h2></div>
    <div className="ma-form-grid">
+    {commonChoice("inMassachusetts","ma-in-state","Is this property in Massachusetts?")}
+    {commonChoice("residentialAccount","ma-residential","Is this a residential utility account?")}
+    <Choice id="ma-units" label="Building size" value={common.propertyUnits} options={[{value:"unsure",label:"Not sure"},{value:"one-four",label:"1–4 residential units"},{value:"five-plus",label:"5+ units — special program review needed"}]} onChange={v=>set("propertyUnits",v as Common["propertyUnits"])}/>
     <Choice id="ma-year" label="Expected installation year" value={common.year} options={[{value:"unknown",label:"Not yet known"},{value:"2026",label:"2026 — published program"},{value:"2027",label:"2027 — announced changes only"}]} onChange={v=>set("year",v as MassYear)}/>
     <Choice id="ma-route" label="How will the heat pump be used?" value={common.route} options={[{value:"unsure",label:"Not yet decided"},{value:"whole",label:"Whole-home — sole heating and cooling"},{value:"partial",label:"Partial-home — supplemental heating"},{value:"basic",label:"Basic — replacement heat pump / new cooling / addition"}]} onChange={v=>set("route",v as MassRoute)}/>
     <Choice id="ma-fuel" label="What heats the home today?" value={common.heatingFuel} options={[{value:"unsure",label:"Need to confirm"},{value:"oil",label:"Heating oil"},{value:"propane",label:"Propane"},{value:"electric-resistance",label:"Electric resistance / baseboards"},{value:"natural-gas",label:"Natural gas"},{value:"existing-heat-pump",label:"Existing heat pump"},{value:"other",label:"Another fuel / other"}]} onChange={v=>set("heatingFuel",v as HeatingFuel)}/>
