@@ -17,3 +17,8 @@
 The existing project form now feeds a two-to-three bid quote comparison. Buyer-reported price bases, proposed discounts, financing/scope notes and annual operating-cost figures are NOT independently verified. It does not infer utility-specific rebates, tax incentives, official HP3 availability, bill savings or whether a contractor is actually approved. Conditional math can be shown when the customer confirms ALL HP3 conditions, but never states incentive approval. The Portland-specific permit limits remain in place outside Portland.
 
 A source ledger (`docs/SOURCE_REGISTRY.json`) and opt-in network probe (`npm run sources:probe`) flag stale/changed sources without automatically altering government rule logic. The site stays private/noindex until an independent accuracy review.
+
+
+## Massachusetts heat-pump program-specific workflow
+
+A new isolated route models Mass Save air-source published 2026 rates and announced 2027 reductions without extending Oregon HP3 assumptions. Each contractor bid has unique equipment/installer claims and quote price basis. The 2026 formula is informational; only with user-reported written rebate proof and matching conditions is a conditional post-rebate *illustration* shown, never a guaranteed amount. A 2027 illustration of a settled rebate is withheld even with reported documents because full terms and funding must be verified. No automated utility lookup, municipal permits or modeled heating savings.
