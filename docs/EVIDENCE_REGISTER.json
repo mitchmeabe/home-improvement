@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "updated": "2026-11-04",
+  "policy": "Source-published incentive claims are never approvals; manual checks and current effective dates remain required.",
+  "claims": [
+    {
+      "id": "masssave-2026-schedule",
+      "market": "Massachusetts heat pumps",
+      "kind": "incentive",
+      "title": "2026 whole and partial air-source published rate schedule",
+      "status": "program-published",
+      "sourceUrl": "https://www.masssave.com/en/residential/rebates-offers-services/heating-and-cooling/heat-pumps/air-source-heat-pumps",
+      "lastChecked": "2026-11-04",
+      "reviewAfterDays": 14,
+      "effectiveFrom": "2026-01-01",
+      "effectiveThrough": "2026-12-31",
+      "reviewNote": "Existing published program schedule, not award; installer, utility, equipment and weatherization remain unverified."
+    },
+    {
+      "id": "masssave-2027-terms",
+      "market": "Massachusetts heat pumps",
+      "kind": "incentive",
+      "title": "Announced 2027 whole/partial program reductions",
+      "status": "needs-review",
+      "sourceUrl": "https://www.masssave.com/en/residential/rebates-offers-services/heating-and-cooling/heat-pumps/air-source-heat-pumps",
+      "lastChecked": "2026-11-04",
+      "reviewAfterDays": 14,
+      "effectiveFrom": "2027-01-01",
+      "reviewNote": "Future-dated program information, not a final qualification or 2027 awarded amount."
+    },
+    {
+      "id": "masssave-equipment-list",
+      "market": "Massachusetts heat pumps",
+      "kind": "incentive",
+      "title": "Current qualified equipment and AHRI list",
+      "status": "needs-review",
+      "sourceUrl": "https://www.masssave.com/heat-pump-qualified-list",
+      "lastChecked": "2026-11-04",
+      "reviewAfterDays": 14,
+      "reviewNote": "Exact equipment and AHRI matching requires independent current listing and proposal verification."
+    },
+    {
+      "id": "energytrust-water-heater",
+      "market": "Oregon heat-pump water heaters",
+      "kind": "incentive",
+      "title": "Energy Trust 2026 midstream published pricing",
+      "status": "program-published",
+      "sourceUrl": "https://insider.energytrust.org/home-retrofit-incentive-updates/",
+      "lastChecked": "2026-11-04",
+      "reviewAfterDays": 14,
+      "reviewNote": "Published seller/installer offer, not an active customer rebate or guaranteed purchase discount."
+    },
+    {
+      "id": "oregon-hp3-funding",
+      "market": "Oregon heat pumps",
+      "kind": "incentive",
+      "title": "HP3 funding categories, state snapshot",
+      "status": "needs-review",
+      "sourceId": "oregon-hp3",
+      "sourceUrl": "https://www.oregon.gov/energy/incentives/Pages/HP3.aspx",
+      "lastChecked": "2026-11-04",
+      "reviewAfterDays": 7,
+      "reviewNote": "October 1 table is not live availability; cannot be used as reserved or awarded funding."
+    }
+  ]
+}

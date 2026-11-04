@@ -202,6 +202,82 @@ test("PDF magic validation rejects disguised text files without modifying quote"
  await expect(page.locator("#ma-a-price")).toHaveValue("");
 });
 
+test("Oregon HPWH compares matched bids without awarding incentive or unverified permits",async({page})=>{
+ await page.goto("/oregon/heat-pump-water-heaters");
+ await expect(page.getByRole("heading",{name:/Compare the installation, not just/i})).toBeVisible();
+ const result=page.getByRole("region",{name:"Heat pump water heater project results"});
+ await expect(result).toContainText("Determine the responsible permitting authority");
+ await page.locator("#hw-place").selectOption("portland-verified");
+ await page.locator("#hw-house").selectOption("one-two-family");
+ await page.locator(".hpwh-advanced > summary").click();
+ await page.locator("#hw-replacement").selectOption("yes");
+ await expect(result).toContainText("Required for this reported scenario");
+ await page.locator("#hw-dwelling").selectOption("existing-owner");
+ await page.locator("#hw-utility").selectOption("pge");
+ await page.locator("#hw-install").selectOption("contractor");
+ await expect(result).toContainText("$1,200");
+ await page.locator(".hpwh-quote-step > summary").click();
+ await page.locator("#hw-a-total").fill("4200");
+ await page.locator("#hw-b-total").fill("3600");
+ for(const id of ["a","b"]){
+  await page.locator("#hw-"+id+"-basis").selectOption("before-incentives");
+  await page.locator("#hw-"+id+"-scope").selectOption("same-location");
+  await page.locator("#hw-"+id+"-tank").fill("65");
+  const details=page.locator(".hpwh-quote").filter({has:page.getByRole("heading",{name:"Quote "+id.toUpperCase()})});
+  await details.locator("summary").click();
+  for(const key of ["plumbingIncluded","electricalIncluded","condensateIncluded"]){
+   await page.locator("#hw-"+id+"-"+key).selectOption("yes");
+  }
+ }
+ await expect(result).toContainText("Lowest listed total: quote B");
+ await expect(result).toContainText("$600");
+ await page.locator("#hw-b-basis").selectOption("after-incentives");
+ await expect(result).toContainText("Quotes differ in scope");
+});
+
+test("project finder narrows by project and location and explains unsupported combinations",async({page})=>{
+ await page.goto("/projects");
+ await expect(page.getByRole("heading",{name:/Find the right planning tool/i})).toBeVisible();
+ await page.locator("#pf-project").selectOption("water-heater");
+ await page.locator("#pf-region").selectOption("or");
+ await expect(page.getByRole("status")).toContainText("1 matching project planner");
+ await expect(page.getByRole("link",{name:/Open project planner/})).toHaveAttribute("href","/oregon/heat-pump-water-heaters");
+ await page.locator("#pf-region").selectOption("ma");
+ await expect(page.getByText(/This combination is not supported/)).toBeVisible();
+ await page.getByRole("button",{name:"Show all project planners"}).click();
+ await expect(page.getByRole("status")).toContainText("3 matching project planners");
+});
+test("project finder supports keyboard skip and 390px screen without horizontal scroll",async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ await page.goto("/projects");
+ await page.keyboard.press("Tab");
+ await expect(page.getByRole("link",{name:"Skip to main content"})).toBeFocused();
+ await page.keyboard.press("Enter");
+ await expect(page.locator("#primary-content")).toBeFocused();
+ await expect(page.getByRole("navigation",{name:"Main site navigation"}).getByRole("link",{name:"Choose a project"})).toBeVisible();
+ const width=await page.evaluate(()=>document.documentElement.scrollWidth);
+ expect(width).toBeLessThanOrEqual(390);
+});
+
+test("water-heater first-action summary works without entering any contractor quotes",async({page})=>{
+ await page.goto("/oregon/heat-pump-water-heaters");
+ const result=page.getByRole("region",{name:"Heat pump water heater project results"});
+ await expect(result.getByRole("heading",{name:"Your first next action"})).toBeVisible();
+ await expect(result).toContainText("No contractor quotes entered yet");
+ await expect(page.locator(".hpwh-quote-step")).not.toHaveAttribute("open","");
+ await page.locator(".hpwh-quote-step > summary").click();
+ await expect(page.locator("#hw-a-total")).toBeVisible();
+ await page.locator(".hpwh-advanced > summary").click();
+ await expect(page.locator("#hw-replacement")).toBeVisible();
+});
+test("Massachusetts results show immediate action without claiming an awarded rebate",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ const result=page.locator("#ma-results");
+ await expect(result.getByRole("heading",{name:"Your priority next action"})).toBeVisible();
+ await expect(result).toContainText("not approved Mass Save awards");
+ await expect(result.getByRole("link",{name:/Return to proposal inputs/})).toHaveAttribute("href","#ma-bids");
+});
+
 test("Oregon location and utility matching keeps Portland postal addresses unverified",async({page})=>{
  await page.goto("/");
  await expect(page.getByText("Permit authority not yet established")).toBeVisible();
