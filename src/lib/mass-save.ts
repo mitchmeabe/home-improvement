@@ -18,6 +18,9 @@ export type HeatingFuel = "oil"|"propane"|"electric-resistance"|"natural-gas"|"e
 export interface MassInput {
   year:MassYear;
   route:MassRoute;
+  inMassachusetts:Answer;
+  residentialAccount:Answer;
+  propertyUnits:"one-four"|"five-plus"|"unsure";
   heatingFuel:HeatingFuel;
   residentialSponsorConfirmed:Answer;
   winterOccupied:Answer;
@@ -35,7 +38,9 @@ export interface MassInput {
   coolingCapacityBtu:number|null;
 }
 export const EMPTY_MASS_INPUT:MassInput={
-  year:"unknown",route:"unsure",heatingFuel:"unsure",residentialSponsorConfirmed:"unsure",
+  year:"unknown",route:"unsure",heatingFuel:"unsure",
+  inMassachusetts:"unsure",residentialAccount:"unsure",propertyUnits:"unsure",
+  residentialSponsorConfirmed:"unsure",
   winterOccupied:"unsure",hasOldHeatPump:"unsure",displacesPrimaryHeating:"unsure",
   wholeWeatherization:"unsure",wholeFormSigned:"unsure",fossilHeatingRemains:"unsure",
   partialIntegratedControls:"unsure",removedFuelEvidence:"unsure",
@@ -86,6 +91,17 @@ export function evaluateMassSave(input:MassInput):MassResult {
   };
   const warnings:string[]=[];
   const s=readMassSchedule(input.year,input.route);
+  add("ma-location","Property is in Massachusetts",input.inMassachusetts,
+    "This screen covers Massachusetts residences only; other state programs have different rules.");
+  add("residential","Account is residential",input.residentialAccount,
+    "Mass Save standard residential rebates require a qualifying residential utility account.");
+  if(input.propertyUnits!=="one-four"){
+    conditions.push({id:"property-units",label:"Building size confirmed in supported pilot",
+      status:"verify",
+      explanation:input.propertyUnits==="five-plus"
+        ?"Some 5+ unit buildings have special weatherization/program rules; get Mass Save review rather than applying this single-home screen as an approval."
+        :"Confirm the unit count and applicable building program before relying on the rules."});
+  }
   const theoreticalScheduleAmount=s&&input.coolingCapacityBtu!==null?
     Math.min(s.cap,Math.round(input.coolingCapacityBtu/12000*s.rate*100)/100):null;
 
