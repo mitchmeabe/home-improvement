@@ -16,8 +16,8 @@ export const PORTLAND_GIS_QUERY=PORTLAND_GIS_LAYER+"/query";
 export const PORTLAND_GIS_GUIDE="https://www.portland.gov/phb/rental-services/helpdesk/portland-maps";
 export const PORTLAND_MAPS="https://www.portlandmaps.com/";
 export const PORTLAND_GIS_FIELDS=[
- "ADDRESS_FULL","ADDRESS_NUMBER","STREET_NAME","STREET_PREFIX_DIRECTION",
- "STREET_TYPE_CODE","UNIT","ZIP_CODE","JURISDICTION_NAME",
+ "ADDRESS_FULL","ADDRESS_NUMBER","ADDRESS_NUMBER_CHAR","STREET_NAME","STREET_PREFIX_DIRECTION",
+ "STREET_POST_DIRECTION","STREET_TYPE_CODE","UNIT","ZIP_CODE","JURISDICTION_NAME",
  "STATE_ABBREVIATION","STATUS","PROPERTY_ID"
 ] as const;
 export interface StreetAddress{
@@ -107,8 +107,8 @@ const unresolved=(status:GISStatus,reason:string,checkedOn:string,records=0):GIS
  evidence:null,propertyUrl:null,sourceUrl:PORTLAND_GIS_LAYER
 });
 type GISAttributes={
- ADDRESS_FULL?:unknown;ADDRESS_NUMBER?:unknown;STREET_NAME?:unknown;
- STREET_TYPE_CODE?:unknown;STREET_PREFIX_DIRECTION?:unknown;UNIT?:unknown;
+ ADDRESS_FULL?:unknown;ADDRESS_NUMBER?:unknown;ADDRESS_NUMBER_CHAR?:unknown;STREET_NAME?:unknown;
+ STREET_TYPE_CODE?:unknown;STREET_PREFIX_DIRECTION?:unknown;STREET_POST_DIRECTION?:unknown;UNIT?:unknown;
  ZIP_CODE?:unknown;JURISDICTION_NAME?:unknown;STATE_ABBREVIATION?:unknown;
  STATUS?:unknown;PROPERTY_ID?:unknown;
 };
@@ -132,6 +132,8 @@ export function interpretPortlandGISResponse(
   if(item.ADDRESS_NUMBER!==address.houseNumber||
     upper(item.STREET_NAME)!==address.streetName||
     upper(item.STREET_TYPE_CODE)!==address.streetType||
+    upper(item.ADDRESS_NUMBER_CHAR)!==""||
+    upper(item.STREET_POST_DIRECTION)!==""||
     upper(item.STREET_PREFIX_DIRECTION)!==address.direction||
     upper(item.STATUS)!=="ACTIVE"||
     (address.zip&&upper(item.ZIP_CODE)!==address.zip)||
@@ -143,6 +145,7 @@ export function interpretPortlandGISResponse(
  const states=[...new Set(valid.map(a=>upper(a.STATE_ABBREVIATION)))];
  const propertyIds=[...new Set(valid.map(a=>upper(a.PROPERTY_ID)).filter(Boolean))];
  if(jurisdictions.some(j=>!j)||jurisdictions.length!==1||states.length!==1||
+  !["OR","WA"].includes(states[0])||
   (propertyIds.length>1)|| (valid.length>1&&propertyIds.length===0))
   return unresolved("ambiguous","The official address-point records disagree or represent multiple unresolved properties. Verify the parcel directly on PortlandMaps.",checkedOn,valid.length);
  const jurisdiction=jurisdictions[0],state=states[0];

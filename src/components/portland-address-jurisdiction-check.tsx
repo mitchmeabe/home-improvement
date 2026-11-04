@@ -2,13 +2,14 @@
 import {useEffect,useRef,useState} from "react";
 import {
  lookupPortlandJurisdiction,PORTLAND_GIS_LAYER,PORTLAND_GIS_GUIDE,PORTLAND_MAPS,
- type GISResult
+ type GISResult,type OfficialJurisdictionEvidence
 } from "../lib/portland-jurisdiction-gis";
 import "./portland-address-jurisdiction-check.css";
 export function PortlandAddressJurisdictionCheck({
- onAccepted,onInvalidated
+ onAccepted,onInvalidated,activeEvidence
 }:{
- onAccepted:(result:GISResult)=>void;onInvalidated:()=>void
+ onAccepted:(result:GISResult)=>void;onInvalidated:()=>void;
+ activeEvidence:OfficialJurisdictionEvidence|null;
 }){
  const [street,setStreet]=useState("");
  const [unit,setUnit]=useState("");
@@ -16,6 +17,7 @@ export function PortlandAddressJurisdictionCheck({
  const [result,setResult]=useState<GISResult|null>(null);
  const [busy,setBusy]=useState(false);
  const [message,setMessage]=useState("");
+ const visibleResult=result?.evidence&&result.evidence!==activeEvidence?null:result;
  const controller=useRef<AbortController|null>(null);
  const generation=useRef(0);
  useEffect(()=>()=>{controller.current?.abort();generation.current++;},[]);
@@ -85,15 +87,15 @@ export function PortlandAddressJurisdictionCheck({
    <button type="button" className="city-jurisdiction-secondary" onClick={clear}>Clear address and result</button>
    <a href={PORTLAND_MAPS} target="_blank" rel="noreferrer">Check the parcel manually</a>
   </div>
-  {message&&<p className="city-jurisdiction-message" role={result?.status==="portland"||result?.status==="other-oregon"?"status":"alert"}>{message}</p>}
-  {result?.evidence&&<div className="city-jurisdiction-success" role="status">
-   <strong>Official address-point result: {result.jurisdiction}</strong>
-   <p>{result.matchedRecords} active matching address record{result.matchedRecords===1?"":"s"}, lookup dated {result.checkedOn}. The dossier now uses this GIS-supported jurisdiction rather than a manually selected mailing city. Confirm the exact parcel on PortlandMaps before filing permits.</p>
+  {message&&(!result?.evidence||visibleResult)&&<p className="city-jurisdiction-message" role={visibleResult?.evidence?"status":"alert"}>{message}</p>}
+  {visibleResult?.evidence&&<div className="city-jurisdiction-success" role="status">
+   <strong>Official address-point result: {visibleResult.jurisdiction}</strong>
+   <p>{visibleResult.matchedRecords} active matching address record{visibleResult.matchedRecords===1?"":"s"}, lookup dated {visibleResult.checkedOn}. The dossier now uses this GIS-supported jurisdiction rather than a manually selected mailing city. Confirm the exact parcel on PortlandMaps before filing permits.</p>
    <p><a href={PORTLAND_GIS_LAYER} target="_blank" rel="noreferrer">Open City source layer</a>
-    {result.propertyUrl&&<> · <a href={result.propertyUrl} target="_blank" rel="noreferrer">Inspect matching property record</a></>}</p>
+    {visibleResult.propertyUrl&&<> · <a href={visibleResult.propertyUrl} target="_blank" rel="noreferrer">Inspect matching property record</a></>}</p>
   </div>}
-  {(result&&!result.evidence)&&<div className="city-jurisdiction-unresolved">
-   <strong>{result.status==="outside-oregon"?"Address outside Oregon":result.status==="ambiguous"?"Multiple or conflicting records":result.status==="not-found"?"No exact address-point match":"GIS lookup not available"}</strong>
+  {(visibleResult&&!visibleResult.evidence)&&<div className="city-jurisdiction-unresolved">
+   <strong>{visibleResult.status==="outside-oregon"?"Address outside Oregon":visibleResult.status==="ambiguous"?"Multiple or conflicting records":visibleResult.status==="not-found"?"No exact address-point match":"GIS lookup not available"}</strong>
    <p>This result does not independently confirm Portland jurisdiction. Review the address and official property page rather than selecting a nearby match.</p>
   </div>}
   <p className="city-jurisdiction-foot"><a href={PORTLAND_GIS_GUIDE} target="_blank" rel="noreferrer">City instructions for interpreting Jurisdiction</a>. We do not use an unverified geocoder, census ZIP mapping, location permission, or utility-account inference.</p>

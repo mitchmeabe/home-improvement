@@ -62,7 +62,7 @@ export default function OregonProjectDossier(){
      ["heat-pump-water-heater","Heat-pump water heater"],
      ["electrical-panel","Electrical panel or service work"]
     ])}
-    <PortlandAddressJurisdictionCheck onAccepted={acceptGIS} onInvalidated={invalidateGIS}/>
+    <PortlandAddressJurisdictionCheck onAccepted={acceptGIS} onInvalidated={invalidateGIS} activeEvidence={input.officialJurisdiction}/>
     <p className="or-dossier-hint">You can also confirm the parcel's Jurisdiction field manually in <a target="_blank" rel="noreferrer" href={DOSSIER_SOURCES.property}>PortlandMaps</a>. A Portland mailing address is not proof of city jurisdiction. A city GIS match does not establish the property's building class or permit approval.</p>
     {C("place","od-place","Reported jurisdiction",[
      ["portland-unverified","Portland address, city jurisdiction not checked"],
