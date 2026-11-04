@@ -185,3 +185,13 @@ test("dossier refuses stale or mismatched official evidence rather than acceptin
  assert.throws(()=>resolveProjectDossier({...base,place:"other-oregon",
   officialJurisdiction:r.evidence}),RangeError);
 });
+
+test("records with extra house-number letters or trailing street directions are not an exact match",()=>{
+ assert.equal(decide(json(city({ADDRESS_NUMBER_CHAR:"A"}))).status,"not-found");
+ assert.equal(decide(json(city({STREET_POST_DIRECTION:"E"}))).status,"not-found");
+});
+test("missing Oregon/Washington state data cannot be interpreted as outside Oregon",()=>{
+ const r=decide(json(city({STATE_ABBREVIATION:null})));
+ assert.equal(r.status,"ambiguous");
+ assert.equal(r.evidence,null);
+});
