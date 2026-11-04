@@ -64,9 +64,13 @@ export function auditMassachusettsProposals(
  if(year==="2027")problems.push("Only announced 2027 whole/partial rate changes are known; other 2027 eligibility and submission rules are not independently verified.");
  if(year==="2026"){
   documents.push("For 2026 installations, submit the complete rebate form and supporting documents by February 28, 2027.");
-  if(installation>="2026-10-01")documents.push("Applications from October 1, 2026 require serial numbers and legible outdoor-unit nameplate photographs; do not enter serial numbers in this tool.");
+
   if(timeline.submissionDate&&timeline.submissionDate>"2027-02-28")problems.push("Planned 2026 rebate submission is after the published February 28, 2027 receipt deadline.");
  }
+ // The Oct 1 change applies to APPLICATIONS, not just systems installed
+ // after Oct 1. An earlier installation submitted later still needs photos.
+ if(!timeline.submissionDate||timeline.submissionDate>="2026-10-01")
+  documents.push("Applications submitted on or after October 1, 2026 require serial numbers and legible outdoor-unit nameplate photographs; do not enter serial numbers in this tool.");
  if(timeline.submissionDate&&installation&&timeline.submissionDate<installation)
   problems.push("Submission is reported before installation. Check the actual application and installation chronology.");
  const scheduleMatches=year!=="unknown"&&common.year===year&&
