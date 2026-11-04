@@ -1,6 +1,7 @@
 "use client";
 import {useMemo,useState} from "react";
 import {track} from "@vercel/analytics";
+import {downloadTextReport} from "../lib/download-report";
 import type {Location,Property} from "../lib/heat-pump";
 import {
  emptyQuote,compareHeatPumpQuotes,quoteComparisonQuestions,QUOTE_REVIEWED_ON,QUOTE_SOURCES,
@@ -52,6 +53,9 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
         <option value="unsure">I don't know</option><option value="before-discounts">Before discounts</option><option value="after-discounts">After discounts</option>
        </select>
       </label>
+      <details className="hp-q-advanced">
+       <summary>Review discounts, rebates, permits and warranties</summary>
+       <div className="hp-q-fields">
       {cost(q,"otherDiscount","Other written discount ($)","Only count as applied if explicitly confirmed in writing.")}
       {ynSelect(q,"otherDiscountConfirmed","Other discount confirmed?")}
       {cost(q,"hp3ProposedDiscount","HP3 amount proposed ($)","Enter only what the contractor actually quotes; no automatic $2,000 assumption.")}
@@ -64,6 +68,8 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
       {ynSelect(q,"finalInspectionIncluded","Final inspection responsibility documented?")}
       {ynSelect(q,"warrantyInWriting","Equipment and labor warranties in writing?")}
       {cost(q,"annualOperatingCost","Optional estimated annual operating cost ($)","Only your own estimate; used for a simple ten-year arithmetic scenario.")}
+       </div>
+      </details>
     </div>
   </div>)}</div>
   <div className="action-row">{quotes.length<3?<button type="button" className="action-secondary" onClick={()=>setQuotes(old=>[...old,emptyQuote("c")])}>Add third quote</button>:<button type="button" className="action-secondary" onClick={()=>setQuotes(old=>old.slice(0,2))}>Remove third quote</button>}</div>
@@ -84,6 +90,7 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
     <p className="small">These are examples of arithmetic, not savings guarantees. HP3 has a published $2,000 program ceiling, strict funding/contractor/efficiency conditions, and restrictions on stacking with some federal incentives; an approved reservation is not required for all eligible applications, but funding is never guaranteed. Verify the specific program application and final invoice.</p>
   </div>}
   <div className="action-row"><button type="button" className="action-primary" disabled={!compared.data} onClick={copy}>Copy comparison questions</button>
+   <button type="button" className="action-secondary" disabled={!compared.data} onClick={()=>{if(compared.data){downloadTextReport("oregon-heat-pump-quotes",quoteComparisonQuestions(compared.data));track("heat_pump_quote_report_downloaded")}}}>Download report (.txt)</button>
    <a href={QUOTE_SOURCES.mechanical} className="action-secondary" target="_blank" rel="noreferrer" onClick={()=>track("heat_pump_mechanical_permit_click")}>Portland mechanical permits ↗</a>
    <a href={QUOTE_SOURCES.electrical} className="action-secondary" target="_blank" rel="noreferrer" onClick={()=>track("heat_pump_electrical_permit_click")}>Portland electrical permits ↗</a>
   </div>

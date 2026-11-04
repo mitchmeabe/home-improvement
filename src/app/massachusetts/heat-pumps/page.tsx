@@ -3,6 +3,7 @@
 import {useMemo,useState} from "react";
 import Link from "next/link";
 import {track} from "@vercel/analytics";
+import {downloadTextReport} from "../../../lib/download-report";
 import {
  MASS_REVIEWED_ON,MASS_SOURCES,EMPTY_MASS_INPUT,newMassQuote,compareMassQuotes,massCopyPlan,
  type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,type ProposalScope,
@@ -82,6 +83,11 @@ export default function MassachusettsHeatPumpPage(){
     <Choice id="ma-year" label="Expected installation year" value={common.year} options={[{value:"unknown",label:"Not yet known"},{value:"2026",label:"2026 — published program"},{value:"2027",label:"2027 — announced changes only"}]} onChange={v=>set("year",v as MassYear)}/>
     <Choice id="ma-route" label="How will the heat pump be used?" value={common.route} options={[{value:"unsure",label:"Not yet decided"},{value:"whole",label:"Whole-home — sole heating and cooling"},{value:"partial",label:"Partial-home — supplemental heating"},{value:"basic",label:"Basic — replacement heat pump / new cooling / addition"}]} onChange={v=>set("route",v as MassRoute)}/>
     <Choice id="ma-fuel" label="What heats the home today?" value={common.heatingFuel} options={[{value:"unsure",label:"Need to confirm"},{value:"oil",label:"Heating oil"},{value:"propane",label:"Propane"},{value:"electric-resistance",label:"Electric resistance / baseboards"},{value:"natural-gas",label:"Natural gas"},{value:"existing-heat-pump",label:"Existing heat pump"},{value:"other",label:"Another fuel / other"}]} onChange={v=>set("heatingFuel",v as HeatingFuel)}/>
+   </div>
+   <details className="ma-progressive">
+    <summary>Check additional Mass Save eligibility conditions (when you have documents)</summary>
+    <p className="ma-muted">Unanswered questions remain unverified, not automatically eligible.</p>
+    <div className="ma-form-grid">
     {commonChoice("residentialSponsorConfirmed","ma-sponsor","Eligible Mass Save utility account confirmed?","Check the Mass Save electric sponsor for oil/propane/electric and gas sponsor for natural gas; Basic requires participating electric sponsor.")}
     {commonChoice("displacesPrimaryHeating","ma-displaces","Will the heat pump replace/displace the existing primary heating?","Whole-home requires replacement; Basic applies to non-displacing installations.")}
     {commonChoice("hasOldHeatPump","ma-existing","Replacing an existing heat-pump system?","Replacing an existing heat pump is generally a Basic rebate scenario.")}
@@ -93,7 +99,8 @@ export default function MassachusettsHeatPumpPage(){
       {common.fossilHeatingRemains==="yes"&&commonChoice("partialIntegratedControls","ma-integrated","Qualified integrated controls and settings documented?")}
       {common.fossilHeatingRemains==="no"&&commonChoice("removedFuelEvidence","ma-removed","Removed/disconnected fossil heat documented on invoice?")}
     </>}
-   </div>
+    </div>
+   </details>
    <p className="ma-note">Income-qualified and turnkey programs can offer larger support but require separate income verification, weatherization and program review. This calculator intentionally does not estimate household income eligibility. <a href={MASS_SOURCES.enhanced.url} target="_blank" rel="noreferrer">Check enhanced incentives ↗</a></p>
   </section>
   <section className="ma-card" id="ma-bids">
@@ -111,6 +118,10 @@ export default function MassachusettsHeatPumpPage(){
      <Choice id={"ma-"+q.id+"-basis"} label="Does this price already include a rebate?" value={q.priceBasis} options={[{value:"unsure",label:"Don't know"},{value:"before-rebate",label:"Before rebate"},{value:"after-rebate",label:"After rebate"}]} onChange={v=>updateBid(q.id,"priceBasis",v as PriceBasis)}/>
      <Money id={"ma-"+q.id+"-rebate"} label="Rebate amount claimed by contractor ($)" value={q.proposedRebate} onChange={v=>updateBid(q.id,"proposedRebate",v)}/>
      <Money id={"ma-"+q.id+"-capacity"} label="AHRI cooling capacity (BTU/h)" hint="E.g., 36,000 BTU/h = 3 tons. Not the heating capacity or marketing model size." value={q.coolingCapacityBtu} onChange={v=>updateBid(q.id,"coolingCapacityBtu",v)}/>
+    </div>
+    <details className="ma-progressive ma-bid-details">
+     <summary>Review rebate evidence, permits, equipment and warranties</summary>
+     <div className="ma-bid-fields">
      {bidChoice(q,"rebateDocumentation","Written rebate confirmation exists?")}
      {bidChoice(q,"installerInNetwork","Installer appears in Mass Save Heat Pump Installer Network?")}
      {bidChoice(q,"equipmentOnQualifiedList","Exact paired system appears on Mass Save qualified list?")}
@@ -119,7 +130,8 @@ export default function MassachusettsHeatPumpPage(){
      {bidChoice(q,"loadCalculationProvided","Manual J heat-load/sizing documentation provided?")}
      {bidChoice(q,"scopeAndEquipmentIdentified","Equipment model IDs and scope documented?")}
      {bidChoice(q,"warrantyInWriting","Equipment/workmanship warranties in writing?")}
-    </div>
+     </div>
+    </details>
    </article>)}</div>
    <div className="ma-buttons">{quotes.length<3?<button type="button" onClick={()=>setQuotes(x=>[...x,newMassQuote("c")])}>Add third quote</button>:
     <button type="button" onClick={()=>setQuotes(x=>x.slice(0,2))}>Remove third quote</button>}
@@ -146,6 +158,7 @@ export default function MassachusettsHeatPumpPage(){
     <p className="ma-summary">{comparison.result.comparisonExplanation}</p>}
     <p className="ma-warning">For 2026, complete equipment installations must occur by December 31, 2026, with forms and supporting documents received by February 28, 2027. As of October 1, 2026, serial-number/nameplate photos are required. For 2027, only the announced whole-home and partial-home **rate and cap changes** are encoded. Obtain current 2027 terms and confirmation from the program before relying on any amount.</p>
     <div className="ma-buttons"><button type="button" className="ma-main-button" onClick={copy}>Copy my contractor questions</button>
+     <button type="button" onClick={()=>{if(comparison.result){downloadTextReport("massachusetts-quote-review",massCopyPlan(comparison.result));track("mass_quote_report_downloaded")}}}>Download report (.txt)</button>
      <a href={MASS_SOURCES.air.url} target="_blank" rel="noreferrer" onClick={()=>track("mass_save_program_click")}>Official Mass Save rebate rules ↗</a>
     </div>
     {copyMessage&&<p role="status" className="ma-muted">{copyMessage}</p>}
