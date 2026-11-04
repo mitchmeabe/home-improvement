@@ -3,3 +3,15 @@
 
 .site-nav{display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:12px;font-weight:700}.site-nav a{white-space:nowrap}@media(max-width:760px){.site-nav{gap:8px}}
 .pilot-footer-links{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;padding:18px;margin:20px auto;max-width:1100px;font-size:12px;color:#53675d}.pilot-footer-links a{color:#17654f}.pilot-privacy{max-width:800px;margin:20px auto;padding:20px 28px 60px;line-height:1.75;color:#22312c}.pilot-privacy h1{font-size:38px;line-height:1.15;margin:30px 0 18px}.pilot-privacy h2{font-size:21px;margin:30px 0 8px}.pilot-privacy p{font-size:15px;color:#42584e}.pilot-privacy a{color:#17654f}@media(max-width:600px){.pilot-privacy{padding:18px}}
+
+
+.market-nav{display:flex;gap:15px;align-items:center;flex-wrap:wrap;font-weight:750;font-size:12px}.market-feature{background:#eef6f3;border:1px solid #cfe4d7;border-radius:15px;padding:26px;margin:24px 0}.market-feature h2{font-size:25px;margin:9px 0}.market-feature p{font-size:14px;line-height:1.65;color:var(--muted)}.market-feature a{font-size:14px;font-weight:750}@media(max-width:750px){.market-feature{padding:19px}}
+
+/* Market directory and customer-path navigation. */
+.improvement-directory-intro{padding:50px 0 20px}.improvement-directory-intro h1{font-size:clamp(34px,5vw,52px);line-height:1.14;letter-spacing:-1.3px;margin:12px 0}.improvement-directory-intro p{color:var(--muted);font-size:16px;line-height:1.7}
+.improvement-directory{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px}
+.improvement-directory a{background:white;padding:24px;border-radius:13px;display:flex;flex-direction:column;border:1px solid var(--line);min-height:158px;gap:12px;text-decoration:none}
+.improvement-directory a:hover,.improvement-directory a:focus-visible{box-shadow:0 9px 25px #234e421a;outline-offset:3px}
+.improvement-directory a b{font-size:18px}.improvement-directory a span{font-size:13px;line-height:1.6;color:var(--muted)}.improvement-directory a em{font-size:12px;font-weight:750;font-style:normal;color:var(--green);margin-top:auto}
+.oregon-project-section{padding-top:22px;border-top:1px solid var(--line)}
+@media(max-width:630px){.improvement-directory{grid-template-columns:1fr}.improvement-directory a{min-height:130px}}
