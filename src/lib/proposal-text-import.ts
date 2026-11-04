@@ -15,11 +15,13 @@ export interface ProposalTextReview {
  warnings:string[];
  mentions:{label:string;evidence:string}[];
 }
-const pricePattern=/\$\s*([\d,]+(?:\.\d{1,2})?)/;
 const toMoney=(line:string):number|null=>{
- const m=line.match(pricePattern);
- if(!m)return null;
- const value=Number(m[1].replaceAll(",",""));
+ // An amount cannot be associated reliably with the quoted total when a
+ // line also carries a deposit, allowance, discount or alternate amount.
+ // Withhold the candidate rather than silently selecting the first dollar.
+ const amounts=[...line.matchAll(/\$\s*([\d,]+(?:\.\d{1,2})?)/g)];
+ if(amounts.length!==1)return null;
+ const value=Number(amounts[0][1].replaceAll(",",""));
  return Number.isFinite(value)&&value>=0&&value<=1000000?value:null;
 };
 function fromLines<T extends number|string>(
