@@ -144,3 +144,15 @@ test("Oregon quote comparison exposes excluded work independently of broad scope
  await expect(page.getByRole("region",{name:"Material Oregon bid scope differences"})).toContainText("Startup commissioning included");
  await expect(page.getByText(/Difference between comparable as-quoted totals/i)).toHaveCount(0);
 });
+
+test("Massachusetts optional proposal text applies only reviewer-selected values",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ const importer=page.locator(".ma-bid").first().locator(".proposal-import");
+ await importer.locator("summary").click();
+ await importer.locator("textarea").fill("Total installed price: $18,500\\nReuse existing ducts\\nPermit not included");
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+ await importer.getByRole("checkbox",{name:/Installed total/}).check();
+ await importer.getByRole("button",{name:/Apply 1 confirmed field/}).click();
+ await expect(page.locator("#ma-a-price")).toHaveValue("18500");
+ await expect(page.locator("#ma-a-scope")).toHaveValue("unknown");
+});

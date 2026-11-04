@@ -7,6 +7,7 @@ import {
  emptyQuote,compareHeatPumpQuotes,quoteComparisonQuestions,QUOTE_REVIEWED_ON,QUOTE_SOURCES,
  type QuoteItem,type Answer,type PriceBasis,type QuoteScope,
 } from "../lib/heat-pump-quotes";
+import {ProposalTextImporter,type ProposalPatch} from "./proposal-text-import";
 import "./heat-pump-quote-comparison.css";
 const yn=[{value:"unsure",label:"Not documented"},{value:"yes",label:"Confirmed in writing"},{value:"no",label:"No"}] as const;
 const m=(n:number|null)=>n===null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
@@ -24,6 +25,13 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
  const [message,setMessage]=useState("");
  const update=<K extends keyof QuoteItem>(id:QuoteItem["id"],key:K,value:QuoteItem[K])=>
    setQuotes(old=>old.map(q=>q.id===id?{...q,[key]:value}:q));
+ const applyImported=(id:QuoteItem["id"],patch:ProposalPatch)=>{
+   setQuotes(old=>old.map(q=>q.id!==id?q:{
+     ...q,
+     ...(typeof patch.price==="number"?{installedPrice:patch.price}:{}),
+     ...(patch.scope?{scope:patch.scope as QuoteScope}:{})
+   }));
+ };
  const compared=useMemo(()=>{
    try{return {data:compareHeatPumpQuotes({location,property,hspf2,seer2,quotes}),error:null}}
    catch(e){return {data:null,error:e instanceof Error?e.message:"Invalid amount"}}

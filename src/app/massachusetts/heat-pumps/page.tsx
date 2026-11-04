@@ -8,6 +8,7 @@ import {
  MASS_REVIEWED_ON,MASS_SOURCES,EMPTY_MASS_INPUT,newMassQuote,compareMassQuotes,massCopyPlan,
  type MassInput,type MassQuote,type Answer,type HeatingFuel,type MassYear,type MassRoute,type PriceBasis,type ProposalScope,
 } from "../../../lib/mass-save";
+import {ProposalTextImporter,type ProposalPatch} from "../../../components/proposal-text-import";
 import "./massachusetts.css";
 const answerOptions=[
  {value:"unsure",label:"I need to verify"},
