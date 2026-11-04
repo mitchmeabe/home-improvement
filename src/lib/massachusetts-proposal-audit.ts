@@ -109,7 +109,7 @@ export function auditMassachusettsProposals(
     q.equipmentOnQualifiedList==="no"||status==="unsupported";
   const verify=!complete||q.equipmentOnQualifiedList!=="yes"||
     refrigerantFinding==="exception-needs-review"||e.refrigerant==="unsure"||
-    !scheduleMatches||year==="2027";
+    e.systemClass==="unsure"||!scheduleMatches||year==="2027";
   return {
    id:q.id,
    identity:complete?"complete-reported":q.equipmentOnQualifiedList==="yes"?"requires-official-check":"incomplete",
