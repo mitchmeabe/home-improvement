@@ -21,3 +21,6 @@
 .ma-scope-warning h3{font-size:17px;margin:0 0 8px}.ma-scope-warning p,.ma-scope-warning li{font-size:12px;line-height:1.6}
 .ma-scope-warning ul{padding-left:20px}
 @media print{.ma-scope-warning{break-inside:avoid}}
+
+.ma-quick-next{background:#eaf5ed;border-left:4px solid #25794c;padding:16px;border-radius:9px;margin:18px 0}
+.ma-quick-next h3{font-size:16px;margin:0 0 9px}.ma-quick-next p{margin:7px 0;font-size:13px;line-height:1.55}.ma-quick-next a{font-size:13px;font-weight:750}

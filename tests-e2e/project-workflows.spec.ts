@@ -209,12 +209,14 @@ test("Oregon HPWH compares matched bids without awarding incentive or unverified
  await expect(result).toContainText("Determine the responsible permitting authority");
  await page.locator("#hw-place").selectOption("portland-verified");
  await page.locator("#hw-house").selectOption("one-two-family");
+ await page.locator(".hpwh-advanced > summary").click();
  await page.locator("#hw-replacement").selectOption("yes");
  await expect(result).toContainText("Required for this reported scenario");
  await page.locator("#hw-dwelling").selectOption("existing-owner");
  await page.locator("#hw-utility").selectOption("pge");
  await page.locator("#hw-install").selectOption("contractor");
  await expect(result).toContainText("$1,200");
+ await page.locator(".hpwh-quote-step > summary").click();
  await page.locator("#hw-a-total").fill("4200");
  await page.locator("#hw-b-total").fill("3600");
  for(const id of ["a","b"]){
@@ -255,4 +257,23 @@ test("project finder supports keyboard skip and 390px screen without horizontal 
  await expect(page.getByRole("navigation",{name:"Main site navigation"}).getByRole("link",{name:"Choose a project"})).toBeVisible();
  const width=await page.evaluate(()=>document.documentElement.scrollWidth);
  expect(width).toBeLessThanOrEqual(390);
+});
+
+test("water-heater first-action summary works without entering any contractor quotes",async({page})=>{
+ await page.goto("/oregon/heat-pump-water-heaters");
+ const result=page.getByRole("region",{name:"Heat pump water heater project results"});
+ await expect(result.getByRole("heading",{name:"Your first next action"})).toBeVisible();
+ await expect(result).toContainText("No contractor quotes entered yet");
+ await expect(page.locator(".hpwh-quote-step")).not.toHaveAttribute("open","");
+ await page.locator(".hpwh-quote-step > summary").click();
+ await expect(page.locator("#hw-a-total")).toBeVisible();
+ await page.locator(".hpwh-advanced > summary").click();
+ await expect(page.locator("#hw-replacement")).toBeVisible();
+});
+test("Massachusetts results show immediate action without claiming an awarded rebate",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ const result=page.locator("#ma-results");
+ await expect(result.getByRole("heading",{name:"Your priority next action"})).toBeVisible();
+ await expect(result).toContainText("not approved Mass Save awards");
+ await expect(result.getByRole("link",{name:/Return to proposal inputs/})).toHaveAttribute("href","#ma-bids");
 });

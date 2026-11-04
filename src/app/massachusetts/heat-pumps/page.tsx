@@ -164,6 +164,16 @@ export default function MassachusettsHeatPumpPage(){
   <section className="ma-card" id="ma-results" aria-live="polite">
    <div className="ma-head"><span className="ma-step">3</span><h2>Results, cost comparison and questions</h2></div>
    {comparison.error?<p role="alert" className="ma-warning">{comparison.error}</p>:comparison.result&&<>
+    <div className="ma-quick-next" aria-label="Massachusetts immediate decision summary">
+      <h3>Your priority next action</h3>
+      <p><strong>{comparison.result.scopeDifferences.length>0?
+        "Ask the contractors to resolve material scope differences.":
+        comparison.result.comparablePriceGap===null?
+        "Confirm the bids use the same scope and before/after-rebate basis.":
+        "Verify written program conditions and the complete contract before choosing."}</strong></p>
+      <p>There are {comparison.result.quotes.length} reported proposals. These figures are not approved Mass Save awards; a lower entered price never certifies equipment, contractor or program eligibility.</p>
+      <a href="#ma-bids">Return to proposal inputs <span aria-hidden="true">↑</span></a>
+    </div>
     {comparison.result.scopeDifferences.length>0&&<section className="ma-scope-warning" aria-label="Material contractor scope differences">
       <h3>These bids do not cover identical documented work</h3>
       <p>The following items are explicitly marked included in at least one bid and excluded in another. Resolve them before ranking prices:</p>

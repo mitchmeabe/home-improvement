@@ -35,6 +35,7 @@ export default function WaterHeaterPlanner(){
    <p>Identify relevant Portland permits, check the applicable 2026 Energy Trust purchasing route, and compare two or three itemized heat-pump water heater quotes.</p>
    <p className="hpwh-muted">Reviewed {HPWH_REVIEWED}. Not a space-heating heat pump, HP3 calculation, approved rebate, permit issuance or contractor endorsement. Inputs stay in browser memory.</p>
   </header>
+  <p className="hpwh-jump"><a href="#hpwh-results">See permit and incentive results <span aria-hidden="true">↓</span></a></p>
   <section className="hpwh-card hpwh-static">
    <h2>Before choosing a heat-pump water heater</h2>
    <p>Replacing a water heater can involve a plumbing permit, changes to electrical circuits, condensate disposal, and air-clearance or ventilation constraints. A lower appliance price can exclude significant installation work. Portland's permit rules require actual city jurisdiction—not merely a Portland mailing address. <a href={HPWH_SOURCES.jurisdiction} target="_blank" rel="noreferrer">Check city jurisdiction ↗</a></p>
@@ -65,6 +66,9 @@ export default function WaterHeaterPlanner(){
       <option value="unknown">Not checked</option><option value="pge">Portland General Electric</option>
       <option value="pacific-power">Pacific Power</option><option value="other">Other utility</option>
      </select></label>
+    <details className="hpwh-advanced">
+      <summary><strong>Add installation details</strong> · optional questions for more precise guidance</summary>
+      <div className="hpwh-advanced-fields">
     <label htmlFor="hw-install">How is the water heater purchased/installed?
      <select id="hw-install" value={input.installation} onChange={e=>set("installation",e.target.value as InstallRoute)}>
       <option value="unknown">Not decided</option><option value="contractor">Contractor / professional installation</option>
@@ -78,9 +82,12 @@ export default function WaterHeaterPlanner(){
     {field("hw-replacement","Replacing an existing water heater?","replacement")}
     {field("hw-wiring","New or altered hard-wired electrical work?","newWiring")}
     {field("hw-ventilation","New or changed ventilation or ducting?","newVentilation")}
+      </div>
+    </details>
    </div>
   </section>
   <section className="hpwh-card"><h2>2. Compare contractor or installation quotes</h2>
+   <details className="hpwh-quote-step"><summary><strong>Have contractor proposals?</strong> Open the optional two- or three-quote comparison</summary>
    <p className="hpwh-muted">Enter comparable installed totals, not appliance-only prices. Mark whether any incentive is already deducted. No automatic published rebate subtraction.</p>
    <div className="hpwh-quote-grid">{input.quotes.map(q=><article className="hpwh-quote" key={q.id}>
     <h3>Quote {q.id.toUpperCase()}</h3>
@@ -114,10 +121,20 @@ export default function WaterHeaterPlanner(){
    <div className="hpwh-buttons">{input.quotes.length<3?
     <button type="button" onClick={()=>setInput(old=>({...old,quotes:[...old.quotes,newQuote("c")]}))}>Add third quote</button>:
     <button type="button" onClick={()=>setInput(old=>({...old,quotes:old.quotes.slice(0,2)}))}>Remove third quote</button>}</div>
+   </details>
   </section>
-  <section className="hpwh-card hpwh-results" aria-label="Heat pump water heater project results" aria-live="polite">
+  <section className="hpwh-card hpwh-results" id="hpwh-results" aria-label="Heat pump water heater project results">
    <h2>3. Permit, incentive and bid findings</h2>
    {out.error?<p role="alert" className="hpwh-warning">{out.error}</p>:out.result&&<>
+    <aside className="hpwh-next-action" aria-labelledby="hpwh-start-heading">
+      <h3 id="hpwh-start-heading">Your first next action</h3>
+      <p><strong>{out.result.permits[0]?.title||"Confirm project jurisdiction"}</strong> — {out.result.permits[0]?.detail||"Identify the local permitting authority."}</p>
+      <p><strong>Program check:</strong> {out.result.programs[0]?.title||"Confirm the applicable incentive route"}.
+      Published discounts are not automatically awarded or deducted from contractor quotes.</p>
+      <p><strong>Quote status:</strong> {out.result.comparison.comparable?
+        "The entered totals share a broad comparison basis; inspect the detailed omissions before deciding.":
+        "No reliable price comparison yet. Confirm matching scopes, inclusions, tank size and discount basis."}</p>
+    </aside>
     <h3>Permit responsibilities</h3>
     {out.result.permits.map(x=><article className="hpwh-finding" key={x.id}>
       <strong>{x.title} — {x.status==="required"?"Required for this reported scenario":x.status==="check"?"Verify":"Not applicable"}</strong>
@@ -126,6 +143,7 @@ export default function WaterHeaterPlanner(){
     {out.result.programs.map(x=><article className="hpwh-finding" key={x.id}>
       <strong>{x.title} — {x.status==="not-applicable"?"Excluded by stated program scope":"Check current terms"}</strong>
       <p>{x.detail} <a href={HPWH_SOURCES[x.source]} target="_blank" rel="noreferrer">Program source ↗</a></p></article>)}
+    {input.quotes.some(q=>q.installedTotal!==null)?<>
     <h3>Installed-price comparison</h3>
     <p className={out.result.comparison.comparable?"hpwh-good":"hpwh-warning"}>{out.result.comparison.reason}</p>
     {out.result.comparison.comparable&&<p><strong>Lowest listed total: quote {out.result.comparison.lowerTotalQuote?.toUpperCase()}</strong>; spread across quoted totals: {price(out.result.comparison.difference)}. This is not an endorsement of the cheaper quote.</p>}
@@ -133,6 +151,7 @@ export default function WaterHeaterPlanner(){
       <summary>Quote {x.quote.id.toUpperCase()} — {price(x.quote.installedTotal)} · {x.warnings.length} items to verify</summary>
       <ul>{x.warnings.map(w=><li key={w}>{w}</li>)}</ul>
     </details>)}
+    </>:<p className="hpwh-muted hpwh-no-quotes">No contractor quotes entered yet. You can use the permit and program questions without entering any prices.</p>}
     {out.result.notes.map(n=><p className="hpwh-muted" key={n}>{n}</p>)}
     <h3>Questions to ask before signing</h3><ol>{out.result.questions.map(q=><li key={q}>{q}</li>)}</ol>
     <div className="hpwh-buttons"><button type="button" onClick={copy}>Copy questions and findings</button>
