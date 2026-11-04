@@ -84,7 +84,7 @@ export function resolveOregonProject(input:LocalProjectInput):LocalProjectResult
  if(isOregon){
    const statewide=evaluateHeatPump({
      location:effectiveLocation,property:input.property,equipment:input.equipment,
-     wiring:input.wiring,hspf2:input.hspf2,seer2:input.seer2
+     wiring:input.wiring
    });
    const hp3State:LocalStatus=statewide.funding==="not-applicable"?"not-applicable":"check";
    add(programs,"hp3","Oregon Heat Pump Purchase Program (HP3)",hp3State,
