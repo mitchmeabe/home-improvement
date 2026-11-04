@@ -197,3 +197,9 @@ test("missing Oregon/Washington state data cannot be interpreted as outside Oreg
  assert.equal(r.status,"ambiguous");
  assert.equal(r.evidence,null);
 });
+
+test("mixed known and missing property IDs cannot certify one Portland parcel",()=>{
+ const r=decide(json(city(),city({PROPERTY_ID:null,UNIT:"200"})));
+ assert.equal(r.status,"ambiguous");
+ assert.equal(r.evidence,null);
+});

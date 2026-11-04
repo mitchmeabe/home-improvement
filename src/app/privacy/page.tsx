@@ -5,7 +5,7 @@ export const metadata:Metadata={title:"Privacy & Data Use | Home Improvement",ro
 export default function PrivacyPage(){
  return <main className="pilot-privacy"><p><Link href="/">← Back to Home Improvement</Link></p>
  <h1>Privacy and data use</h1>
- <p><strong>Effective November 3, 2026.</strong> This is a private research pilot, not a government website or verified application/eligibility service.</p>
+ <p><strong>Updated November 4, 2026.</strong> This is a private research pilot, not a government website or verified application/eligibility service.</p>
  <h2>Information you enter</h2>
  <p>The calculators run in your browser session. We do not request full names, Social Security numbers, financial account details, license numbers or payment credentials; do not enter them. Questionnaire answers, cost figures and other fields are not saved in an application database.</p>
  <p><strong>Optional City of Portland jurisdiction check:</strong> Only if you click “Check City GIS jurisdiction” on the Oregon dossier page, the street number, street name and optional unit/ZIP are sent directly from your browser to the City of Portland's public ArcGIS address-point service. This is an external City service that may log the lookup and associated technical information. Our site does not proxy, log, save, persist or add the address to exported reports; the address input is cleared after a successful match. You can use PortlandMaps manually instead. An official address-point match is not a permit or parcel-title verification.</p>

@@ -147,7 +147,9 @@ export function interpretPortlandGISResponse(
  const propertyIds=[...new Set(valid.map(a=>upper(a.PROPERTY_ID)).filter(Boolean))];
  if(jurisdictions.some(j=>!j)||jurisdictions.length!==1||states.length!==1||
   !["OR","WA"].includes(states[0])||
-  (propertyIds.length>1)|| (valid.length>1&&propertyIds.length===0))
+  (propertyIds.length>1)||
+  (propertyIds.length>0&&valid.some(a=>!upper(a.PROPERTY_ID)))||
+  (valid.length>1&&propertyIds.length===0))
   return unresolved("ambiguous","The official address-point records disagree or represent multiple unresolved properties. Verify the parcel directly on PortlandMaps.",checkedOn,valid.length);
  const jurisdiction=jurisdictions[0],state=states[0];
  let status:GISStatus;
