@@ -85,3 +85,10 @@ test("unknown equipment configuration keeps high-GWP claims out of conditional p
  const y=run({evidence:{a:{...full,systemClass:"unsure"},b:full}});
  assert.equal(y.quotes[0].readiness,"verify");
 });
+
+test("October 2026 nameplate-photo requirement follows submission date, not installation date",()=>{
+ const earlyInstall=run({timeline:{installationDate:"2026-07-10",submissionDate:"2026-11-12"}});
+ assert.ok(earlyInstall.timeline.documents.some(x=>/nameplate photographs/.test(x)));
+ const earlySubmit=run({timeline:{installationDate:"2026-07-10",submissionDate:"2026-09-01"}});
+ assert.ok(earlySubmit.timeline.documents.every(x=>!/nameplate photographs/.test(x)));
+});
