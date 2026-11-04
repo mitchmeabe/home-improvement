@@ -246,8 +246,11 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   add("equipment","electrical-load","Panel/service sizing and utility coordination","verify",
    "Request an electrician's written load calculation and existing/new panel ampacity; clarify panel-versus-service upgrade, utility coordination, meter and outage scope. This site does not size a service.",
    DOSSIER_SOURCES.panel,DOSSIER_REVIEWED_ON,"pending-fact");
-  add("incentive","panel-incentive","Panel upgrade incentive screening","verify",
-   "No general Oregon rebate is calculated for panel-only work in this pilot. If a contractor proposes incentives, obtain the exact sponsoring program, eligibility rules and preapproval; do not assume heat-pump rebates apply.",
+  add("incentive","panel-incentive","Panel upgrade incentive screening",
+   input.place==="outside-oregon"?"not-applicable":"verify",
+   input.place==="outside-oregon"?
+    "Oregon utility/energy programs do not establish rebates for this out-of-state property; identify a specific local program independently.":
+    "No general Oregon rebate is calculated for panel-only work in this pilot. If a contractor proposes incentives, obtain the exact sponsoring program, eligibility rules and preapproval; do not assume heat-pump rebates apply.",
    DOSSIER_SOURCES.energyTrust,DOSSIER_REVIEWED_ON,"pending-fact");
   doc("load","Electrical load study, panel schedule and scope of work","contractor",
    "Before choosing panel amperage or signing a contract.",DOSSIER_SOURCES.panel);
@@ -307,6 +310,8 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
  if(input.plannedInstallationDate){
   if(input.plannedInstallationDate>DOSSIER_REVIEWED_ON)
    blockers.push("The planned installation date is later than the last source review; recheck applicable permit rules and incentive terms at that date.");
+  else if(input.plannedInstallationDate<DOSSIER_REVIEWED_ON)
+   blockers.push("The planned installation predates this source review. These later published rules and funding snapshots cannot establish eligibility or requirements in force on that earlier date.");
   doc("timeline","Installation date, permit inspections and program deadlines","both",
    "Confirm requirements effective for the actual installation/submission dates.",DOSSIER_SOURCES.hp3);
  }
