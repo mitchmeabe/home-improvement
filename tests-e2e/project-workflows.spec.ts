@@ -99,3 +99,16 @@ test("keyboard can reach the Massachusetts project details and quote entry",asyn
  await page.keyboard.press("Tab");
  await expect(page.locator("#ma-route")).toBeFocused();
 });
+
+test("Oregon does not credit a reported above-cap HP3 incentive",async({page})=>{
+ await page.goto("/");
+ await page.getByLabel("Total installed quote ($)").first().fill("15000");
+ await page.getByLabel("Quote A installation scope").selectOption("reuse-existing-ducts");
+ await page.getByLabel("Quote B installation scope").selectOption("reuse-existing-ducts");
+ await page.getByLabel("Is this total before or after incentives?").first().selectOption("before-discounts");
+ const details=page.locator(".hp-q-advanced").first();
+ await details.locator("summary").click();
+ await page.getByLabel("HP3 amount proposed ($)").first().fill("3000");
+ await expect(page.getByText(/proposed HP3 discount exceeds the official/i).first()).toBeVisible();
+ await expect(page.getByRole("region",{name:/Quote A priority contractor questions/i})).toBeVisible();
+});

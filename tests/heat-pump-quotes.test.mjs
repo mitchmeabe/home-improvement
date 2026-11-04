@@ -81,3 +81,47 @@ test("text report documents each quote's scope and price basis",()=>{
  assert.match(report,/scope: reuse-existing-ducts/);
  assert.match(report,/basis: before-discounts/);
 });
+
+test("ODOE $2,000 HP3 ceiling is enforced even with every checkbox reported confirmed",()=>{
+ const funded={...a,hp3ApprovedContractor:"yes",hp3FundingConfirmed:"yes",
+   hp3UpfrontReduction:"yes",modelAndRatingsDocumented:"yes"};
+ const below=screen({property:"existing-rental",quotes:[{...funded,hp3ProposedDiscount:2000},b]});
+ assert.equal(below.evaluations[0].arithmeticNet,13000);
+ const over=screen({property:"existing-rental",quotes:[{...funded,hp3ProposedDiscount:2500},b]});
+ assert.equal(over.evaluations[0].arithmeticNet,15000);
+ assert.ok(over.evaluations[0].warnings.some(x=>/exceeds the official \$2,000/.test(x)));
+});
+test("conditional rebate scenarios cannot reorder as-quoted contractor prices",()=>{
+ const funded={...b,hp3ProposedDiscount:2000,hp3ApprovedContractor:"yes",hp3FundingConfirmed:"yes",
+   hp3UpfrontReduction:"yes",modelAndRatingsDocumented:"yes"};
+ const r=screen({property:"existing-rental",quotes:[a,funded]});
+ assert.equal(r.evaluations[1].arithmeticNet,15000);
+ assert.equal(r.lowestComparableQuote,"a");
+ assert.equal(r.priceDifference,2000);
+ assert.match(r.comparisonReason,/Proposed discounts and rebates do NOT alter/);
+ assert.match(quoteComparisonQuestions(r),/As-quoted price gap/);
+});
+test("proposed HP3 above its ceiling cannot be counted in combined discount scenarios",()=>{
+ const q={...a,otherDiscount:750,otherDiscountConfirmed:"yes",hp3ProposedDiscount:2750,
+   hp3ApprovedContractor:"yes",hp3FundingConfirmed:"yes",hp3UpfrontReduction:"yes",
+   modelAndRatingsDocumented:"yes"};
+ const r=screen({property:"existing-rental",quotes:[q,b]});
+ assert.equal(r.evaluations[0].arithmeticNet,14250);
+});
+
+test("HP3 is not counted when Oregon location or residential category remains unknown",()=>{
+ const quote={...a,hp3ProposedDiscount:2000,hp3ApprovedContractor:"yes",
+   hp3FundingConfirmed:"yes",hp3UpfrontReduction:"yes",modelAndRatingsDocumented:"yes"};
+ const cases=[
+   {location:"unknown",property:"existing-rental"},
+   {location:"portland",property:"other"},
+   {location:"unknown",property:"other"}
+ ];
+ for(const override of cases){
+   const r=screen({...override,quotes:[quote,b]});
+   assert.equal(r.evaluations[0].arithmeticNet,15000);
+   assert.ok(r.evaluations[0].warnings.some(w=>/location or eligible residential project category is not established/.test(w)));
+ }
+ const known=screen({location:"other-oregon",property:"new-construction",quotes:[quote,b]});
+ assert.equal(known.evaluations[0].arithmeticNet,13000);
+});
