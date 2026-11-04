@@ -80,6 +80,11 @@ export function compareHeatPumpQuotes(input:QuoteCompareInput):QuoteComparison{
  if(new Set(input.quotes.map(x=>x.id)).size!==input.quotes.length)throw new RangeError("Duplicate quote ID.");
  rating(input.hspf2,"HSPF2");rating(input.seer2,"SEER2");
  const hp3=hp3Category(input.location,input.property);
+ // The "verify" status includes UNKNOWN location/property as well as
+ // Oregon rentals/new construction. Do not treat those as the same thing.
+ const knownEligibleResidentialCategory=
+   (input.location==="portland"||input.location==="other-oregon")&&
+   (input.property==="existing-rental"||input.property==="new-construction");
  const numericRatingsOk=input.hspf2!==null&&input.seer2!==null&&input.hspf2>=8.1&&input.seer2>=16;
  const evaluations=input.quotes.map(q=>{
   for(const k of ["installedPrice","otherDiscount","hp3ProposedDiscount","annualOperatingCost"] as const)amount(q[k],k);
@@ -94,6 +99,8 @@ export function compareHeatPumpQuotes(input:QuoteCompareInput):QuoteComparison{
   }
   if(q.hp3ProposedDiscount!==null&&q.hp3ProposedDiscount>HP3_MAX_DISCOUNT)
     warnings.push("The proposed HP3 discount exceeds the official $2,000 per-heat-pump ceiling. Do not subtract it; request a corrected itemization or evidence of a separate incentive.");
+  if(q.hp3ProposedDiscount!==null&&q.hp3ProposedDiscount>0&&hp3==="verify"&&!knownEligibleResidentialCategory)
+    warnings.push("The home's Oregon location or eligible residential project category is not established. Do not count the proposed HP3 incentive until these are confirmed.");
   if(q.installedPrice!==null&&q.priceBasis==="before-discounts"){
     net=q.installedPrice;
     if(q.otherDiscount!==null&&q.otherDiscount>0){
@@ -102,7 +109,7 @@ export function compareHeatPumpQuotes(input:QuoteCompareInput):QuoteComparison{
     }
     if(q.hp3ProposedDiscount!==null&&q.hp3ProposedDiscount>0){
       const canCount=q.hp3ProposedDiscount<=HP3_MAX_DISCOUNT&&
-        hp3==="verify"&&numericRatingsOk&&q.hp3ApprovedContractor==="yes"&&
+        knownEligibleResidentialCategory&&hp3==="verify"&&numericRatingsOk&&q.hp3ApprovedContractor==="yes"&&
         q.hp3FundingConfirmed==="yes"&&q.hp3UpfrontReduction==="yes"&&
         q.modelAndRatingsDocumented==="yes";
       if(canCount)net-=q.hp3ProposedDiscount;

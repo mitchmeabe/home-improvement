@@ -108,3 +108,20 @@ test("proposed HP3 above its ceiling cannot be counted in combined discount scen
  const r=screen({property:"existing-rental",quotes:[q,b]});
  assert.equal(r.evaluations[0].arithmeticNet,14250);
 });
+
+test("HP3 is not counted when Oregon location or residential category remains unknown",()=>{
+ const quote={...a,hp3ProposedDiscount:2000,hp3ApprovedContractor:"yes",
+   hp3FundingConfirmed:"yes",hp3UpfrontReduction:"yes",modelAndRatingsDocumented:"yes"};
+ const cases=[
+   {location:"unknown",property:"existing-rental"},
+   {location:"portland",property:"other"},
+   {location:"unknown",property:"other"}
+ ];
+ for(const override of cases){
+   const r=screen({...override,quotes:[quote,b]});
+   assert.equal(r.evaluations[0].arithmeticNet,15000);
+   assert.ok(r.evaluations[0].warnings.some(w=>/location or eligible residential project category is not established/.test(w)));
+ }
+ const known=screen({location:"other-oregon",property:"new-construction",quotes:[quote,b]});
+ assert.equal(known.evaluations[0].arithmeticNet,13000);
+});
