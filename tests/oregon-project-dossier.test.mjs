@@ -126,7 +126,7 @@ test("standalone panel work elsewhere requires local permit confirmation, not Po
 test("DIY reported rental never inherits owner-occupant electrical exception",()=>{
  const r=run({project:"electrical-panel",place:"portland-reported",
   house:"one-two-family",property:"existing-rental",installRoute:"do-it-yourself"});
- assert.ok(r.blockers.some(x=>/DIY rights/i.test(x)));
+ assert.ok(r.blockers.some(x=>/DIY .*rights/i.test(x)));
  assert.equal(find(r,"licensed-work")?.status,"verify");
 });
 test("planned installation after evidence review triggers source recency warning",()=>{
@@ -163,4 +163,19 @@ test("invalid dates, ratings, project type or utility inputs are rejected",()=>{
  assert.throws(()=>run({seer2:-1}),RangeError);
  assert.throws(()=>run({electricUtility:"generic-power"}),RangeError);
  assert.throws(()=>run({project:"solar-array"}),RangeError);
+});
+
+test("HP3 cannot be presented as a DIY installation incentive",()=>{
+ const r=run({place:"portland-reported",house:"one-two-family",
+  installRoute:"do-it-yourself",property:"existing-owner-occupied"});
+ assert.equal(find(r,"space-hp3")?.status,"not-applicable");
+ assert.match(find(r,"space-hp3")?.detail,/ODOE-approved contractor/);
+ assert.ok(r.blockers.some(x=>/DIY installation/i.test(x)));
+ assert.equal(r.canClaimRebate,false);
+});
+test("ADU DIY electrical project is not automatically allowed under owner-occupant exception",()=>{
+ const r=run({project:"electrical-panel",place:"portland-reported",
+  house:"townhouse-adu",installRoute:"do-it-yourself",property:"existing-owner-occupied"});
+ assert.equal(find(r,"licensed-work")?.status,"verify");
+ assert.ok(r.blockers.some(x=>/ADU/i.test(x)));
 });
