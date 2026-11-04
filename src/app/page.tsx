@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { QuoteReview } from "../components/quote-review";
+import { HeatPumpQuoteComparison } from "../components/heat-pump-quote-comparison";
 import { evaluateHeatPump, RULE_REVIEWED_ON, FUNDING_SNAPSHOT_AS_OF, SOURCES, type Location, type Property, type Wiring, type Equipment, type Status } from "../lib/heat-pump";
 
 function formatStatus(status: Status) {
@@ -26,8 +27,8 @@ export default function Home() {
   }, [location, property, equipment, wiring, hspf2, seer2]);
 
   return <main className="container">
-    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><span className="edition">Early research prototype · Oregon</span></header>
-    <section className="hero"><p className="eyebrow">Residential heat pump project planner</p><h1>Plan the work before you pay for it.</h1><p className="lead">An initial checklist of permits and Oregon heat-pump incentive questions, backed by government sources. Not an official eligibility determination.</p></section>
+    <header className="topbar"><span className="brand">HOME IMPROVEMENT</span><nav className="site-nav" aria-label="Project tools"><a href="#project">Permits &amp; incentives</a><a href="#compare-quotes">Compare quotes</a><a href="#review-quote">Review quote details</a></nav></header>
+    <section className="hero" id="project"><p className="eyebrow">Residential heat pump project planner</p><h1>Compare the full project, not just the installation price.</h1><p className="lead">Plan Portland permits, investigate Oregon incentive eligibility, compare contractor quotes and spot missing scope before signing. Government-sourced guidance, not an official approval.</p></section>
     <div className="grid">
       <section className="panel"><h2>Tell us about the project</h2><p className="muted">Enter basic information. This prototype does not collect your address or income.</p>
         <label htmlFor="location">Property location</label>
@@ -64,7 +65,8 @@ export default function Home() {
         <div className="next"><h3>Before signing an installation contract</h3><ol><li>Verify the applicable permitting authority and contractor responsibilities.</li><li>Get multiple quotes from ODOE-approved contractors; ask whether a permit and final inspection are included.</li><li>Verify live incentive funding, program restrictions and any limitations on stacking before relying on savings.</li><li>Check that any HP3 discount is applied upfront on your quote and retain the signed final invoice.</li></ol></div>
       </section>
     </div>
-    <QuoteReview funding={result?.funding} />
+    <HeatPumpQuoteComparison location={location} property={property} hspf2={hspf2.trim()===""?null:Number(hspf2)} seer2={seer2.trim()===""?null:Number(seer2)} />
+    <div id="review-quote"><QuoteReview funding={result?.funding} /></div>
     <section className="sources"><h2>Official government sources</h2><p className="muted">Reviewed {RULE_REVIEWED_ON}. ODOE funding numbers last updated {FUNDING_SNAPSHOT_AS_OF}. Confirm live before relying on any incentive.</p><ul>{SOURCES.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></li>)}</ul></section>
     <footer>Independent planning prototype. Not affiliated with Portland or the Oregon Department of Energy; does not issue permits, verify active incentive reservations or approve eligibility.</footer>
   </main>;
