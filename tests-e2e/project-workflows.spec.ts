@@ -232,3 +232,27 @@ test("Oregon HPWH compares matched bids without awarding incentive or unverified
  await page.locator("#hw-b-basis").selectOption("after-incentives");
  await expect(result).toContainText("Quotes differ in scope");
 });
+
+test("project finder narrows by project and location and explains unsupported combinations",async({page})=>{
+ await page.goto("/projects");
+ await expect(page.getByRole("heading",{name:/Find the right planning tool/i})).toBeVisible();
+ await page.locator("#pf-project").selectOption("water-heater");
+ await page.locator("#pf-region").selectOption("or");
+ await expect(page.getByRole("status")).toContainText("1 matching project planner");
+ await expect(page.getByRole("link",{name:/Open project planner/})).toHaveAttribute("href","/oregon/heat-pump-water-heaters");
+ await page.locator("#pf-region").selectOption("ma");
+ await expect(page.getByText(/This combination is not supported/)).toBeVisible();
+ await page.getByRole("button",{name:"Show all project planners"}).click();
+ await expect(page.getByRole("status")).toContainText("3 matching project planners");
+});
+test("project finder supports keyboard skip and 390px screen without horizontal scroll",async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ await page.goto("/projects");
+ await page.keyboard.press("Tab");
+ await expect(page.getByRole("link",{name:"Skip to main content"})).toBeFocused();
+ await page.keyboard.press("Enter");
+ await expect(page.locator("#primary-content")).toBeFocused();
+ await expect(page.getByRole("navigation",{name:"Main site navigation"}).getByRole("link",{name:"Choose a project"})).toBeVisible();
+ const width=await page.evaluate(()=>document.documentElement.scrollWidth);
+ expect(width).toBeLessThanOrEqual(390);
+});

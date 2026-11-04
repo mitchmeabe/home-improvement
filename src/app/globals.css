@@ -15,3 +15,22 @@
 .improvement-directory a b{font-size:18px}.improvement-directory a span{font-size:13px;line-height:1.6;color:var(--muted)}.improvement-directory a em{font-size:12px;font-weight:750;font-style:normal;color:var(--green);margin-top:auto}
 .oregon-project-section{padding-top:22px;border-top:1px solid var(--line)}
 @media(max-width:630px){.improvement-directory{grid-template-columns:1fr}.improvement-directory a{min-height:130px}}
+
+/* Milestone 4: consistent sitewide wayfinding and keyboard/mobile usability. */
+.site-skip{position:absolute;top:0;left:16px;transform:translateY(-150%);z-index:1000;background:#163d30;color:#fff;border-radius:0 0 8px 8px;padding:12px 18px;font-size:14px;font-weight:800}
+.site-skip:focus{transform:translateY(0);color:#fff}
+.site-wayfinding{max-width:1240px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #d3e0d8}
+.site-wayfinding-brand{font-size:15px;font-weight:850;text-decoration:none;color:#194532}
+.site-wayfinding nav{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;font-weight:750}
+.site-wayfinding nav a{padding:8px 11px;border-radius:8px}
+.site-wayfinding nav a:hover{background:#e9f3ec}
+:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #157d5d!important;outline-offset:3px!important}
+:where(a,button,input,select,textarea){max-width:100%}
+#primary-content:focus{outline:none}
+html{scroll-behavior:smooth}
+.project-finder-prompt{margin:18px 0!important}
+.project-finder-prompt a{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;padding:14px 17px;border:1px solid #c4dbc8;background:#e8f4ec;border-radius:10px;text-decoration:none;color:#14553c;font-size:14px}
+.homepage-secondary-heading{font-size:clamp(30px,4.5vw,47px);line-height:1.14;letter-spacing:-1px;margin:12px 0}
+@media(max-width:700px){.site-wayfinding{padding:13px 16px;flex-direction:column;align-items:flex-start;gap:8px}.site-wayfinding nav{gap:5px}.site-wayfinding nav a{padding:8px 9px}.project-finder-prompt a{display:block}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+@media print{.site-wayfinding,.site-skip,.pilot-footer-links,.project-finder-prompt{display:none!important}}
