@@ -97,6 +97,10 @@ test("keyboard can reach the Massachusetts project details and quote entry",asyn
  await page.locator("#ma-year").focus();
  await expect(page.locator("#ma-year")).toBeFocused();
  await page.keyboard.press("Tab");
+ await expect(page.locator("#ma-install-date")).toBeFocused();
+ await page.keyboard.press("Tab");
+ await expect(page.locator("#ma-submit-date")).toBeFocused();
+ await page.keyboard.press("Tab");
  await expect(page.locator("#ma-route")).toBeFocused();
 });
 
