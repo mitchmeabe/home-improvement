@@ -7,7 +7,8 @@ import "./proposal-text-import.css";
 export type ProposalPatch=Partial<Record<ProposalKey,ProposalCandidate["value"]>>;
 const labels:Record<ProposalKey,string>={
  price:"Installed total",rebate:"Stated rebate",coolingCapacityBtu:"AHRI cooling capacity",
- scope:"Installation scope",priceBasis:"Before/after rebate status"
+ scope:"Installation scope",priceBasis:"Before/after rebate status",
+ ahriReference:"AHRI reference (not approval)",outdoorModel:"Outdoor unit model",indoorModel:"Indoor unit model"
 };
 
 /** The pasted or selected .txt file never leaves the current browser session. */

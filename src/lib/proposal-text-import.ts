@@ -6,7 +6,7 @@
  */
 export type ProposalScope="reuse-existing-ducts"|"new-ductwork"|"ductless"|"mixed";
 export type ProposalBasis="before-rebate"|"after-rebate";
-export type ProposalKey="price"|"rebate"|"coolingCapacityBtu"|"scope"|"priceBasis";
+export type ProposalKey="price"|"rebate"|"coolingCapacityBtu"|"scope"|"priceBasis"|"ahriReference"|"outdoorModel"|"indoorModel";
 export interface ProposalCandidate {
  key:ProposalKey;label:string;value:number|ProposalScope|ProposalBasis;evidence:string;
 }
@@ -74,6 +74,20 @@ export function parseProposalText(text:string):ProposalTextReview {
    return null;
  });
  if(basis)candidates.push({key:"priceBasis",label:"Stated total price basis",value:basis.value,evidence:basis.evidence});
+ // Only explicit labels supply candidate identifiers, never qualified-list approval.
+ const identities=[
+  {key:"ahriReference",label:"AHRI reference",re:/^\s*AHRI\s*(?:certified reference(?: number)?|reference(?: number)?|certificate(?: number)?|ID|#)\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{4,39})\s*$/i},
+  {key:"outdoorModel",label:"outdoor model",re:/^\s*(?:outdoor\s*(?:unit\s*)?|ODU\s*)model(?:\s*(?:number|no\.?|#))?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{4,39})\s*$/i},
+  {key:"indoorModel",label:"indoor model",re:/^\s*(?:indoor\s*(?:unit\s*)?|IDU\s*)model(?:\s*(?:number|no\.?|#))?\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{4,39})\s*$/i}
+ ] as const;
+ for(const item of identities){
+  const matches=lines.filter(line=>!/\b(?:example|excluded|not included|not supplied|optional|pending)\b/i.test(line))
+   .map(line=>({value:line.match(item.re)?.[1].toUpperCase()??null,evidence:line.slice(0,180)}))
+   .filter((x):x is {value:string;evidence:string}=>x.value!==null);
+  if(new Set(matches.map(x=>x.value)).size>1)
+   warnings.push("Conflicting "+item.label+" identifiers found. Enter manually.");
+  else if(matches.length)candidates.push({key:item.key,label:item.label+" (unverified)",value:matches[0].value,evidence:matches[0].evidence});
+ }
  const prompts=[
   {label:"Permits / inspections",re:/\b(?:permit|inspection)\b/i},
   {label:"Warranty",re:/\b(?:warrant(?:y|ies)|labor coverage)\b/i},
