@@ -102,13 +102,17 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
     <div className="hp-q-results">{compared.data.evaluations.map(e=><article key={e.id}>
       <p className="eyebrow">QUOTE {e.id.toUpperCase()}</p>
       <div><small>Stated installed quote</small><strong>{m(e.installedPrice)}</strong></div>
-      <div><small>Conditional price arithmetic</small><strong>{m(e.arithmeticNet)}</strong></div>
+      <div><small>Conditional price arithmetic (not used for bid ranking)</small><strong>{m(e.arithmeticNet)}</strong></div>
       <p className="small">{e.netDescription}</p>
       <p className="small"><strong>{e.completeFields} of {e.totalFields}</strong> basic scope items confirmed in writing (self-reported).</p>
       <p className="small">10-year installation + operating-cost scenario: <strong>{m(e.tenYearScenario)}</strong> {e.tenYearScenario===null?"(requires your annual-cost estimate)":""}</p>
-      <details><summary>Questions and risks ({e.warnings.length})</summary><ul>{e.warnings.map((x,i)=><li key={i}>{x}</li>)}</ul></details>
+      {e.warnings.length>0&&<section className="hp-q-priorities" aria-label={"Quote "+e.id.toUpperCase()+" priority contractor questions"}>
+        <h4>Ask the contractor first</h4>
+        <ol>{e.warnings.slice(0,3).map((w,i)=><li key={i}>{w}</li>)}</ol>
+      </section>}
+      <details><summary>All questions and risks ({e.warnings.length})</summary><ul>{e.warnings.map((x,i)=><li key={i}>{x}</li>)}</ul></details>
     </article>)}</div>
-    {compared.data.priceDifference!==null&&<div className="hp-q-summary"><b>Difference between comparable entered amounts: {m(compared.data.priceDifference)}</b><p>{compared.data.comparisonReason} Quote {compared.data.lowestComparableQuote?.toUpperCase()} has the lowest entered comparable amount, not necessarily the best or cheapest complete project.</p></div>}
+    {compared.data.priceDifference!==null&&<div className="hp-q-summary"><b>Difference between comparable as-quoted totals: {m(compared.data.priceDifference)}</b><p>{compared.data.comparisonReason} Quote {compared.data.lowestComparableQuote?.toUpperCase()} has the lowest reported as-quoted total, not necessarily the best or cheapest complete project. Conditional rebate estimates are excluded from this comparison.</p></div>}
     {compared.data.priceDifference===null&&<p className="hp-q-summary">{compared.data.comparisonReason}</p>}
     <p className="small">These are examples of arithmetic, not savings guarantees. HP3 has a published $2,000 program ceiling, strict funding/contractor/efficiency conditions, and restrictions on stacking with some federal incentives; an approved reservation is not required for all eligible applications, but funding is never guaranteed. Verify the specific program application and final invoice.</p>
   </div>}
