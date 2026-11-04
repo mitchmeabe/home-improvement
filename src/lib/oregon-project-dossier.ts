@@ -124,7 +124,7 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
  if(!portland){
   add("jurisdiction","parcel-jurisdiction","Identify the actual property permit authority","verify",
    input.place==="portland-unverified"?
-    "A Portland postal address or ZIP code is not proof of city jurisdiction. Find the parcel in PortlandMaps and check its Jurisdiction field before applying city rules.":
+    "A Portland mailing address or ZIP code is not proof of city jurisdiction. Find the parcel in PortlandMaps and check its Jurisdiction field before applying city rules.":
     input.place==="other-oregon"?"The property is outside Portland according to the entered location. Ask its own city or county for applicable trade permits.":
     input.place==="outside-oregon"?"Oregon and Portland permits cannot establish this out-of-state property's requirements.":
     "State and actual permit jurisdiction are unknown. Verify the property in official mapping or local permitting records.",
