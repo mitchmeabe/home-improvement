@@ -15,4 +15,15 @@ jobs:
       - run: npm test
       - run: npm run sources:check
       - run: npm run typecheck
+      - run: npm run markets:check
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failure-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore

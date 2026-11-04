@@ -5,3 +5,7 @@ out
 !.env.example
 *.tsbuildinfo
 .DS_Store
+
+# Local browser acceptance output
+test-results/
+playwright-report/
