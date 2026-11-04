@@ -68,6 +68,18 @@
         "jurisdiction"
       ],
       "claimedUse": "Address/jurisdiction checks for applying Portland-specific permit rules"
+    },
+    {
+      "id": "portland-parcel-jurisdiction",
+      "owner": "Portland PPD",
+      "url": "https://www.portland.gov/ppd/property-addressing",
+      "lastReviewed": "2026-11-04",
+      "maxAgeDays": 60,
+      "expectedText": [
+        "jurisdiction",
+        "Portland Maps"
+      ],
+      "claimedUse": "Property-ID/PortlandMaps verification that postal Portland address does not establish Portland permit jurisdiction"
     }
   ]
 }

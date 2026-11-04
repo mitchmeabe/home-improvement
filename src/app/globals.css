@@ -34,3 +34,11 @@ html{scroll-behavior:smooth}
 @media(max-width:700px){.site-wayfinding{padding:13px 16px;flex-direction:column;align-items:flex-start;gap:8px}.site-wayfinding nav{gap:5px}.site-wayfinding nav a{padding:8px 9px}.project-finder-prompt a{display:block}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 @media print{.site-wayfinding,.site-skip,.pilot-footer-links,.project-finder-prompt{display:none!important}}
+
+.local-project-conditions{margin:20px 0;border:1px solid #d4e1d8;border-radius:11px;padding:14px;background:#f8fbf9}
+.local-project-conditions h3{margin:5px 0}.local-project-conditions label{margin-top:15px}
+.local-project-results{border-bottom:1px solid #d4e1d8;padding-bottom:15px;margin-bottom:20px}
+.local-project-results summary{cursor:pointer;padding:12px 2px;color:#206849}
+.local-project-results summary:focus-visible{outline:3px solid #277f55}
+.local-project-results ul{padding-left:22px;font-size:13px;line-height:1.55}
+.local-project-results .finding{grid-template-columns:86px 1fr}
