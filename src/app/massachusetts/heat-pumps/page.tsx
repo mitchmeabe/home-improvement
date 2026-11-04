@@ -117,6 +117,14 @@ export default function MassachusettsHeatPumpPage(){
     {commonChoice("residentialAccount","ma-residential","Is this a residential utility account?")}
     <Choice id="ma-units" label="Building size" value={common.propertyUnits} options={[{value:"unsure",label:"Not sure"},{value:"one-four",label:"1–4 residential units"},{value:"five-plus",label:"5+ units — special program review needed"}]} onChange={v=>set("propertyUnits",v as Common["propertyUnits"])}/>
     <Choice id="ma-year" label="Expected installation year" value={common.year} options={[{value:"unknown",label:"Not yet known"},{value:"2026",label:"2026 — published program"},{value:"2027",label:"2027 — announced changes only"}]} onChange={v=>set("year",v as MassYear)}/>
+     <div className="ma-field"><label htmlFor="ma-install-date">Planned or actual equipment installation date</label>
+      <p>Use the installation schedule, not the date the proposal was signed.</p>
+      <input id="ma-install-date" type="date" value={timeline.installationDate}
+       onChange={e=>setTimeline(old=>({...old,installationDate:e.target.value}))}/></div>
+     <div className="ma-field"><label htmlFor="ma-submit-date">Planned rebate submission date (optional)</label>
+      <p>2026 installations have a published February 28, 2027 document receipt deadline.</p>
+      <input id="ma-submit-date" type="date" value={timeline.submissionDate}
+       onChange={e=>setTimeline(old=>({...old,submissionDate:e.target.value}))}/></div>
     <Choice id="ma-route" label="How will the heat pump be used?" value={common.route} options={[{value:"unsure",label:"Not yet decided"},{value:"whole",label:"Whole-home — sole heating and cooling"},{value:"partial",label:"Partial-home — supplemental heating"},{value:"basic",label:"Basic — replacement heat pump / new cooling / addition"}]} onChange={v=>set("route",v as MassRoute)}/>
     <Choice id="ma-fuel" label="What heats the home today?" value={common.heatingFuel} options={[{value:"unsure",label:"Need to confirm"},{value:"oil",label:"Heating oil"},{value:"propane",label:"Propane"},{value:"electric-resistance",label:"Electric resistance / baseboards"},{value:"natural-gas",label:"Natural gas"},{value:"existing-heat-pump",label:"Existing heat pump"},{value:"other",label:"Another fuel / other"}]} onChange={v=>set("heatingFuel",v as HeatingFuel)}/>
    </div>
@@ -159,7 +167,29 @@ export default function MassachusettsHeatPumpPage(){
        onApply={patch=>applyImported(q.id,patch)}/>
     <details className="ma-progressive ma-bid-details">
      <summary>Review rebate evidence, permits, equipment and warranties</summary>
+     <p className="ma-muted">Enter exact paired equipment identifiers from the contractor proposal or AHRI certificate. This does not independently verify product approval; serial numbers are not collected.</p>
      <div className="ma-bid-fields">
+      {([
+       ["ahriReference","AHRI certificate / reference number"],
+       ["outdoorModel","Outdoor unit model number"],
+       ["indoorModel","Indoor unit model number"]
+      ] as const).map(([key,label])=><div className="ma-field" key={key}>
+       <label htmlFor={"ma-"+q.id+"-"+key}>{label}</label>
+       <input type="text" id={"ma-"+q.id+"-"+key} maxLength={80}
+        value={evidenceFor(q.id)[key]} placeholder="Exact model or certificate ID"
+        onChange={e=>updateEquipment(q.id,key,e.target.value)}/>
+      </div>)}
+      <Choice id={"ma-"+q.id+"-refrigerant"} label="Proposed refrigerant GWP category"
+       value={evidenceFor(q.id).refrigerant} options={[
+        {value:"unsure",label:"Not verified"},{value:"at-most-700",label:"GWP at most 700 (self-reported)"},
+        {value:"r410a",label:"R-410A / high GWP"},{value:"other-over-700",label:"Other GWP above 700"}]}
+       onChange={v=>updateEquipment(q.id,"refrigerant",v as RefrigerantClass)}/>
+      <Choice id={"ma-"+q.id+"-system"} label="Equipment configuration"
+       value={evidenceFor(q.id).systemClass} options={[
+        {value:"unsure",label:"Not verified"},{value:"split",label:"Indoor/outdoor split system"},
+        {value:"vrf",label:"Variable refrigerant flow (VRF)"},
+        {value:"self-contained",label:"Factory-charged packaged product"}]}
+       onChange={v=>updateEquipment(q.id,"systemClass",v as SystemClass)}/>
      {bidChoice(q,"rebateDocumentation","Written rebate confirmation exists?")}
      {bidChoice(q,"installerInNetwork","Installer appears in Mass Save Heat Pump Installer Network?")}
      {bidChoice(q,"equipmentOnQualifiedList","Exact paired system appears on Mass Save qualified list?")}
