@@ -12,6 +12,7 @@ import {evaluateHeatPump,FUNDING_SNAPSHOT_AS_OF,type Property,
  type Equipment} from "./heat-pump.ts";
 import {evaluate as evaluateWaterHeater,newQuote,HPWH_SOURCES,HPWH_OFFER_PUBLISHED,
  type HouseType} from "./oregon-heat-pump-water-heater.ts";
+import {PORTLAND_GIS_LAYER,type OfficialJurisdictionEvidence} from "./portland-jurisdiction-gis.ts";
 
 export const DOSSIER_REVIEWED_ON="2026-11-04";
 export const DOSSIER_SOURCES={
@@ -26,13 +27,14 @@ export const DOSSIER_SOURCES={
  energyTrust:"https://form.energytrust.org/"
 } as const;
 export type ProjectKind="space-heat-pump"|"heat-pump-water-heater"|"electrical-panel";
-export type ProjectPlace="portland-reported"|"portland-unverified"|"other-oregon"|"outside-oregon"|"unknown";
+export type ProjectPlace="portland-reported"|"portland-unverified"|"other-oregon"|"outside-oregon"|"unknown"|"portland-gis-record"|"other-oregon-gis-record";
 export type ProjectHouse="one-two-family"|"townhouse-adu"|"other"|"unknown";
 export type ElectricScope="panel-replacement"|"new-circuit"|"both"|"none-reported"|"unknown";
 export type YesNoUnknown="yes"|"no"|"unknown";
 export interface DossierInput{
  project:ProjectKind;
  place:ProjectPlace;
+ officialJurisdiction:OfficialJurisdictionEvidence|null;
  house:ProjectHouse;
  property:Property;
  electricUtility:ElectricUtility;
@@ -47,7 +49,7 @@ export interface DossierInput{
  plannedInstallationDate:string;
 }
 export const initialDossierInput=():DossierInput=>({
- project:"space-heat-pump",place:"portland-unverified",house:"unknown",
+ project:"space-heat-pump",place:"portland-unverified",officialJurisdiction:null,house:"unknown",
  property:"existing-owner-occupied",electricUtility:"unknown",installRoute:"unknown",
  electricScope:"unknown",existingWaterHeaterFuel:"unknown",
  waterHeaterReplacement:"unknown",ventilationChange:"unknown",
@@ -57,7 +59,7 @@ export type FindingGroup="jurisdiction"|"permit"|"incentive"|"equipment";
 export type FindingStatus="required"|"verify"|"not-applicable"|"historical-limit";
 export interface DossierFinding {
  id:string;group:FindingGroup;status:FindingStatus;title:string;detail:string;
- sourceUrl:string;sourceDate:string;basis:"official-conditional-rule"|"dated-program-snapshot"|"pending-fact";
+ sourceUrl:string;sourceDate:string;basis:"official-conditional-rule"|"dated-program-snapshot"|"pending-fact"|"official-address-record";
 }
 export interface DocumentRequest{
  id:string;title:string;owner:"property owner"|"contractor"|"both";
@@ -66,7 +68,7 @@ export interface DocumentRequest{
 export interface DossierResult{
  project:ProjectKind;
  reviewedOn:string;plannedDate:string|null;
- jurisdiction:"user-reported-portland"|"not-established"|"outside-portland";
+ jurisdiction:"user-reported-portland"|"not-established"|"outside-portland"|"official-portland-address"|"official-non-portland-address";
  findings:DossierFinding[];documents:DocumentRequest[];
  blockers:string[];nextActions:string[];questions:string[];
  counts:{required:number;verify:number;historicalLimit:number};
@@ -79,7 +81,7 @@ const validDate=(v:string)=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.pa
 const hasElectricalWork=(v:ElectricScope)=>v==="both"||v==="new-circuit"||v==="panel-replacement";
 const hasPanel=(v:ElectricScope)=>v==="both"||v==="panel-replacement";
 const status=(x:LocalFinding["status"]):FindingStatus=>x==="required"?"required":x==="not-applicable"?"not-applicable":"verify";
-const belongsToOregon=(p:ProjectPlace)=>p==="portland-reported"||p==="portland-unverified"||p==="other-oregon";
+const belongsToOregon=(p:ProjectPlace)=>p==="portland-reported"||p==="portland-unverified"||p==="other-oregon"||p==="portland-gis-record"||p==="other-oregon-gis-record";
 const unique=(items:string[])=>[...new Set(items)];
 const names:Record<ProjectKind,string>={
  "space-heat-pump":"Space-heating heat pump",
@@ -88,7 +90,7 @@ const names:Record<ProjectKind,string>={
 };
 export function resolveProjectDossier(input:DossierInput):DossierResult{
  if(!choice(input.project,["space-heat-pump","heat-pump-water-heater","electrical-panel"])||
-  !choice(input.place,["portland-reported","portland-unverified","other-oregon","outside-oregon","unknown"])||
+  !choice(input.place,["portland-reported","portland-unverified","other-oregon","outside-oregon","unknown","portland-gis-record","other-oregon-gis-record"])||
   !choice(input.house,["one-two-family","townhouse-adu","other","unknown"])||
   !choice(input.property,["existing-owner-occupied","existing-rental","new-construction","vacation-or-commercial","other"])||
   !choice(input.electricUtility,["pge","pacific-power","other","unknown"])||
@@ -100,6 +102,16 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   [input.hspf2,input.seer2].some(v=>v!==null&&(!Number.isFinite(v)||v<=0||v>100))||
   (input.plannedInstallationDate!==""&&!validDate(input.plannedInstallationDate)))
    throw new RangeError("Unsupported Oregon project dossier input.");
+ const officialPortland=input.place==="portland-gis-record";
+ const officialOther=input.place==="other-oregon-gis-record";
+ if(officialPortland||officialOther){
+  const e=input.officialJurisdiction;
+  if(!e||e.source!=="portlandmaps-active-address-points"||e.match!=="exact-active-address"||
+   e.scope!==(officialPortland?"portland":"other-oregon")||!validDate(e.checkedOn))
+   throw new RangeError("Official GIS address-point evidence must match the selected jurisdiction.");
+ }else if(input.officialJurisdiction!==null){
+  throw new RangeError("Official GIS evidence cannot be combined with a manual jurisdiction selection.");
+ }
  const findings:DossierFinding[]=[];
  const docs:DocumentRequest[]=[];
  const blockers:string[]=[];
@@ -115,30 +127,46 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
  const doc=(id:string,title:string,owner:DocumentRequest["owner"],when:string,sourceUrl:string)=>{
   if(!docs.some(x=>x.id===id))docs.push({id,title,owner,when,sourceUrl});
  };
- const portland=input.place==="portland-reported";
+ const portland=input.place==="portland-reported"||officialPortland;
  const housing=input.house==="one-two-family"||input.house==="townhouse-adu";
  const cityResidential=portland&&housing;
  const oregon=belongsToOregon(input.place);
- const authority:DossierResult["jurisdiction"]=portland?"user-reported-portland":
+ const authority:DossierResult["jurisdiction"]=officialPortland?"official-portland-address":
+  officialOther?"official-non-portland-address":portland?"user-reported-portland":
   input.place==="other-oregon"||input.place==="outside-oregon"?"outside-portland":"not-established";
  if(!portland){
   add("jurisdiction","parcel-jurisdiction","Identify the actual property permit authority","verify",
+   officialOther?
+    "The official active address-point record reports a non-Portland city jurisdiction, looked up "+
+    input.officialJurisdiction!.checkedOn+". Confirm the parcel and local permit authority.":
    input.place==="portland-unverified"?
-    "A Portland mailing address or ZIP code is not proof of city jurisdiction. Find the parcel in PortlandMaps and check its Jurisdiction field before applying city rules.":
-    input.place==="other-oregon"?"The property is outside Portland according to the entered location. Ask its own city or county for applicable trade permits.":
-    input.place==="outside-oregon"?"Oregon and Portland permits cannot establish this out-of-state property's requirements.":
-    "State and actual permit jurisdiction are unknown. Verify the property in official mapping or local permitting records.",
-   DOSSIER_SOURCES.propertyGuidance,DOSSIER_REVIEWED_ON,"pending-fact");
-  blockers.push("Actual parcel permit jurisdiction is not established by this application.");
+    "A Portland mailing address or ZIP code is not proof of city jurisdiction. Check the actual parcel on PortlandMaps.":
+   input.place==="other-oregon"?"Outside Portland per user selection. Identify the applicable city or county permit authority.":
+   input.place==="outside-oregon"?"Portland and Oregon permits do not determine requirements for an out-of-state property.":
+    "The property's jurisdiction is unknown. Confirm with an official parcel map or local permitting office.",
+   officialOther?PORTLAND_GIS_LAYER:DOSSIER_SOURCES.propertyGuidance,
+   officialOther?input.officialJurisdiction!.checkedOn:DOSSIER_REVIEWED_ON,
+   officialOther?"official-address-record":"pending-fact");
+  blockers.push(officialOther?
+   "Official GIS address-point records identify a non-Portland jurisdiction, but verify the parcel and the responsible permit office.":
+   "Actual parcel permit jurisdiction is not established by this application.");
  }else if(!housing){
   add("jurisdiction","building-class","Confirm building permit classification","verify",
-   "You reported Portland jurisdiction, but the one/two-family/townhouse/ADU guidance cannot be applied automatically to an unknown, multifamily or commercial building.",
+   (officialPortland?"An official GIS address point reports Portland":"You reported Portland jurisdiction")+
+   ", but one/two-family, townhouse or ADU permit rules cannot be applied to an unsupported or unknown building type.",
    DOSSIER_SOURCES.propertyGuidance,DOSSIER_REVIEWED_ON,"pending-fact");
   blockers.push("Residential one/two-family, townhouse or ADU permit pathway is not established.");
  }else{
-  add("jurisdiction","parcel-jurisdiction","Portland residential permit pathway (user-reported)","verify",
-   "Based on your statement that PortlandMaps shows Portland jurisdiction and your building type. This tool did NOT query or authenticate your parcel; recheck the official map and property classification.",
-   DOSSIER_SOURCES.property,DOSSIER_REVIEWED_ON,"pending-fact");
+  add("jurisdiction","parcel-jurisdiction",
+   officialPortland?"Portland jurisdiction — exact active address-point match":"Portland residential permit pathway (user-reported)","verify",
+   officialPortland?
+    "An exact active City of Portland GIS address-point record reports Portland, checked "+
+    input.officialJurisdiction!.checkedOn+
+    ". This establishes the public address-record jurisdiction, not parcel zoning, house classification, permits, or rebate eligibility. Confirm the linked property detail.":
+    "The visitor reports PortlandMaps jurisdiction and dwelling type. This site has not independently confirmed the parcel.",
+   officialPortland?PORTLAND_GIS_LAYER:DOSSIER_SOURCES.property,
+   officialPortland?input.officialJurisdiction!.checkedOn:DOSSIER_REVIEWED_ON,
+   officialPortland?"official-address-record":"pending-fact");
  }
  doc("parcel","Property jurisdiction and dwelling classification","property owner",
   "Before contracting or filing permits; record the official parcel result without entering an address here.",DOSSIER_SOURCES.property);
@@ -149,8 +177,8 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   const loc=resolveOregonProject({
    location:input.place==="outside-oregon"?"outside-oregon":
     input.place==="unknown"?"unknown":
-    input.place==="other-oregon"?"other-oregon":"portland",
-   jurisdiction:portland?"portland-confirmed":input.place==="other-oregon"?"not-portland":"unverified",
+    input.place==="other-oregon"||officialOther?"other-oregon":"portland",
+   jurisdiction:portland?"portland-confirmed":input.place==="other-oregon"||officialOther?"not-portland":"unverified",
    building:input.house==="one-two-family"?"one-two-family":
     input.house==="townhouse-adu"?"townhouse-adu":"multifamily-other" as BuildingKind,
    electricUtility:input.electricUtility,property:input.property,
@@ -195,9 +223,9 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   blockers.push("HP3 funding and any utility incentive are not live-confirmed by the application.");
  }else if(input.project==="heat-pump-water-heater"){
   const r=evaluateWaterHeater({
-   place:input.place==="portland-reported"?"portland-verified":
+   place:portland?"portland-verified":
     input.place==="portland-unverified"?"portland-unverified":
-    input.place==="other-oregon"?"other-oregon":
+    input.place==="other-oregon"||officialOther?"other-oregon":
     input.place==="outside-oregon"?"outside-oregon":"unknown",
    house:input.house==="one-two-family"?"one-two-family":"other" as HouseType,
    dwelling:input.property==="existing-owner-occupied"?"existing-owner":
@@ -345,7 +373,7 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   "OREGON PROPERTY / PROJECT REQUIREMENTS DOSSIER — "+DOSSIER_REVIEWED_ON,
   "INDEPENDENT RESEARCH ONLY. No government parcel or utility account was queried. No permit, rebate, or equipment eligibility is approved.",
   "Project: "+names[input.project],
-  "Property location: "+input.place+" (visitor statement); housing: "+input.house+"; property category: "+input.property,
+  "Property location: "+input.place+(officialPortland||officialOther?" (exact government GIS address point checked "+input.officialJurisdiction!.checkedOn+"; address not included)":" (visitor statement)")+"; housing: "+input.house+"; property category: "+input.property,
   "Electric utility: "+input.electricUtility+" (visitor statement); installation: "+input.installRoute,
   "Electrical work: "+input.electricScope+"; planned date: "+(input.plannedInstallationDate||"not entered"),
   ...(input.project==="space-heat-pump"?["Equipment: "+input.heatingEquipment+
