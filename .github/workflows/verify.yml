@@ -14,6 +14,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm test
       - run: npm run sources:check
+      - run: npm run evidence:check
       - run: npm run typecheck
       - run: npm run markets:check
       - run: npm run build

@@ -11,7 +11,8 @@
     "sources:check": "node scripts/source-audit.mjs",
     "sources:probe": "node scripts/source-audit.mjs --online",
     "markets:check": "node scripts/market-data-check.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "evidence:check": "node scripts/evidence-audit.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
