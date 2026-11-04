@@ -15,8 +15,7 @@ const n=(s:string)=>s.trim()===""?null:Number(s);
 type MoneyKey="installedPrice"|"otherDiscount"|"hp3ProposedDiscount"|"annualOperatingCost";
 type AnswerKey="otherDiscountConfirmed"|"hp3ApprovedContractor"|"hp3FundingConfirmed"|"hp3UpfrontReduction"|"modelAndRatingsDocumented"|"mechanicalPermitIncluded"|"electricalScopeIncluded"|"finalInspectionIncluded"|"warrantyInWriting"|"commissioningIncluded"|"ductAirflowTestingIncluded"|"oldSystemRemovalIncluded";
 function PriceInput({label,value,onChange,help}: {label:string;value:number|null;onChange:(x:number|null)=>void;help?:string}){
- const [raw,setRaw]=useState("");
- return <label className="hp-q-field">{label}{help&&<small>{help}</small>}<input type="number" min="0" step="0.01" inputMode="decimal" value={raw} placeholder="Unknown" onChange={e=>{setRaw(e.target.value);onChange(n(e.target.value))}}/></label>;
+ return <label className="hp-q-field">{label}{help&&<small>{help}</small>}<input type="number" min="0" step="0.01" inputMode="decimal" value={value??""} placeholder="Unknown" onChange={e=>onChange(n(e.target.value))}/></label>;
 }
 export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
  location:Location;property:Property;hspf2:number|null;seer2:number|null;
