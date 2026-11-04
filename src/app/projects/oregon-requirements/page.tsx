@@ -2,6 +2,8 @@
 import {useMemo,useState} from "react";
 import Link from "next/link";
 import {downloadTextReport} from "../../../lib/download-report";
+import {PortlandAddressJurisdictionCheck} from "../../../components/portland-address-jurisdiction-check";
+import type {GISResult} from "../../../lib/portland-jurisdiction-gis";
 import {initialDossierInput,resolveProjectDossier,DOSSIER_REVIEWED_ON,DOSSIER_SOURCES,
  type DossierInput,type DossierFinding} from "../../../lib/oregon-project-dossier";
 import "./oregon-requirements.css";
@@ -9,7 +11,7 @@ import "./oregon-requirements.css";
 type Option=readonly [string,string];
 function Choice({id,label,value,options,change}:{id:string;label:string;value:string;options:readonly Option[];change:(v:string)=>void}){
  return <label htmlFor={id}>{label}<select id={id} value={value} onChange={e=>change(e.target.value)}>
- {options.map(([v,t])=><option key={v} value={v}>{t}</option>)}</select></label>;
+ {options.map(([v,t])=><option key={v} value={v} disabled={v.endsWith("-gis-record")}>{t}</option>)}</select></label>;
 }
 const labels:Record<DossierFinding["status"],string>={
  required:"Required",verify:"Confirm","historical-limit":"Historical limitation","not-applicable":"Out of scope"
@@ -18,13 +20,26 @@ export default function OregonProjectDossier(){
  const [input,setInput]=useState<DossierInput>(initialDossierInput);
  const [message,setMessage]=useState("");
  const set=<K extends keyof DossierInput>(key:K,value:DossierInput[K])=>{
-  setInput(old=>({...old,[key]:value}));setMessage("");
+  setInput(old=>key==="place"?{...old,place:value as DossierInput["place"],officialJurisdiction:null}:{...old,[key]:value});setMessage("");
  };
  const outcome=useMemo(()=>{
   try{return {data:resolveProjectDossier(input),error:""};}
   catch(e){return {data:null,error:e instanceof Error?e.message:"Invalid project input"};}
  },[input]);
  const data=outcome.data;
+ const acceptGIS=(record:GISResult)=>{
+  setInput(old=>{
+   if(record.status==="portland"&&record.evidence?.scope==="portland")
+    return {...old,place:"portland-gis-record",officialJurisdiction:record.evidence};
+   if(record.status==="other-oregon"&&record.evidence?.scope==="other-oregon")
+    return {...old,place:"other-oregon-gis-record",officialJurisdiction:record.evidence};
+   if(record.status==="outside-oregon")
+    return {...old,place:"outside-oregon",officialJurisdiction:null};
+   return {...old,place:"portland-unverified",officialJurisdiction:null};
+  });
+  setMessage("");
+ };
+ const invalidateGIS=()=>setInput(old=>({...old,place:"portland-unverified",officialJurisdiction:null}));
  const copy=async()=>{if(!data)return;
   try{await navigator.clipboard.writeText(data.plainText);setMessage("Dossier copied. No application or inquiry submitted.");}
   catch{setMessage("Clipboard unavailable; use the download option.");}
@@ -37,7 +52,7 @@ export default function OregonProjectDossier(){
   <header><p className="or-dossier-kicker">Property + project requirements</p>
    <h1>Know what your project needs before accepting a quote.</h1>
    <p>Combine reported property conditions with official Portland permit guidance, Oregon incentive rules, and a written evidence checklist. The report identifies documents, unresolved facts, and contractor questions instead of promising a rebate.</p>
-   <p className="or-dossier-private">No address, utility account, income, payment information or file upload. Property jurisdiction is not independently checked.</p>
+   <p className="or-dossier-private">No account, income, payment information or file upload is required. An optional street-address check is sent directly from your browser to official PortlandMaps GIS only when you click Check; we do not store it or include it in your exported dossier.</p>
   </header>
   <div className="or-dossier-columns">
    <section className="or-dossier-form" aria-label="Project facts">
@@ -47,10 +62,13 @@ export default function OregonProjectDossier(){
      ["heat-pump-water-heater","Heat-pump water heater"],
      ["electrical-panel","Electrical panel or service work"]
     ])}
-    <p className="or-dossier-hint">First check the parcel's Jurisdiction field in <a target="_blank" rel="noreferrer" href={DOSSIER_SOURCES.property}>PortlandMaps</a>. A Portland mailing address is not proof of Portland permit authority.</p>
+    <PortlandAddressJurisdictionCheck onAccepted={acceptGIS} onInvalidated={invalidateGIS}/>
+    <p className="or-dossier-hint">You can also confirm the parcel's Jurisdiction field manually in <a target="_blank" rel="noreferrer" href={DOSSIER_SOURCES.property}>PortlandMaps</a>. A Portland mailing address is not proof of city jurisdiction. A city GIS match does not establish the property's building class or permit approval.</p>
     {C("place","od-place","Reported jurisdiction",[
      ["portland-unverified","Portland address, city jurisdiction not checked"],
      ["portland-reported","Portland jurisdiction shown in property records (self-reported)"],
+     ["portland-gis-record","Portland — exact City GIS address-point match (read-only)"],
+     ["other-oregon-gis-record","Outside Portland — City GIS address-point match (read-only)"],
      ["other-oregon","Elsewhere in Oregon"],
      ["outside-oregon","Outside Oregon"],
      ["unknown","Not sure"]
@@ -112,7 +130,15 @@ export default function OregonProjectDossier(){
     {data&&<>
      <div className="or-dossier-overview">
       <strong>{data.project==="space-heat-pump"?"Space heating":data.project==="heat-pump-water-heater"?"Water heating":"Electrical panel / service"}</strong>
-      <p>{data.jurisdiction==="user-reported-portland"?"Portland jurisdiction is reported by you; not authenticated by this site.":data.jurisdiction==="outside-portland"?"Portland permit authority does not apply from the entered location.":"Actual permit authority is not established."}</p>
+      <p>{data.jurisdiction==="official-portland-address"?
+       "The official City address-point layer reports Portland for an exact active property match. Confirm the actual parcel before filing.":
+       data.jurisdiction==="official-non-portland-address"?
+       "Official city address-point data reports a non-Portland jurisdiction. Check that local permitting authority.":
+       data.jurisdiction==="user-reported-portland"?
+       "Portland jurisdiction is reported by you; not authenticated by this site.":
+       data.jurisdiction==="outside-portland"?
+       "Portland permit authority does not apply from the entered location.":
+       "Actual permit authority is not established."}</p>
       <small>{data.counts.required} conditional permits · {data.counts.verify} verification findings · {data.counts.historicalLimit} historical funding restrictions</small>
      </div>
      <h3>Recommended order of work</h3>
@@ -125,7 +151,7 @@ export default function OregonProjectDossier(){
        {found.map(f=><article className="or-dossier-finding" key={f.id}>
         <div><strong>{f.title}</strong><span className={"or-dossier-status "+f.status}>{labels[f.status]}</span></div>
         <p>{f.detail}</p>
-        <p className="or-dossier-muted"><a href={f.sourceUrl} target="_blank" rel="noreferrer">Official / published source</a> · Reviewed/snapshot: {f.sourceDate} · {f.basis==="dated-program-snapshot"?"Historical":f.basis==="pending-fact"?"Unverified fact":"Published conditional rule"}</p>
+        <p className="or-dossier-muted"><a href={f.sourceUrl} target="_blank" rel="noreferrer">Official / published source</a> · Reviewed/snapshot: {f.sourceDate} · {f.basis==="dated-program-snapshot"?"Historical":f.basis==="official-address-record"?"Official address-point evidence":f.basis==="pending-fact"?"Unverified fact":"Published conditional rule"}</p>
        </article>)}
       </section>;
      })}
@@ -146,7 +172,7 @@ export default function OregonProjectDossier(){
       <button type="button" onClick={()=>{downloadTextReport("oregon-project-requirements",data.plainText);setMessage("Dossier downloaded locally.");}}>Download dossier (.txt)</button>
      </div>
      {message&&<p role="status">{message}</p>}
-     <p className="or-dossier-muted"><strong>Not verified:</strong> parcel jurisdiction, utility accounts, issued permits, live incentive funds, equipment certification, contractor approval, price, inspection completion or rebate award.</p>
+     <p className="or-dossier-muted"><strong>Not independently established:</strong> full parcel boundaries/building classification, utility accounts, issued permits, live incentive funds, equipment certification, contractor approval, price, completed inspections or rebate award. A City address-point match is not a legal permit determination.</p>
     </>}
    </section>
   </div>
