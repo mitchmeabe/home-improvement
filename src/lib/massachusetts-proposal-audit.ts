@@ -118,13 +118,12 @@ export function auditMassachusettsProposals(
    readiness:blocked?"blocked":verify?"verify":"reported-ready"
   };
  });
- const blockers=findings.some(f=>f.readiness==="blocked");
  const missingSchedule=!scheduleMatches||status==="unsupported"||problems.some(x=>/deadline|chronology/.test(x));
- if(missingSchedule||blockers){
-  for(const row of comparison.quotes){
-   const item=findings.find(x=>x.id===row.quote.id);
-   if(missingSchedule||item?.readiness==="blocked")row.conditionalPostRebate=null;
-  }
+ // A missing or uncertain system identity cannot support even conditional
+ // post-rebate arithmetic. Preserve original, as-quoted totals.
+ for(const row of comparison.quotes){
+  const item=findings.find(x=>x.id===row.quote.id);
+  if(missingSchedule||item?.readiness!=="reported-ready")row.conditionalPostRebate=null;
  }
  const priorityQuestions=[
   ...(problems.length?[problems[0]]:[]),
