@@ -132,7 +132,8 @@ export function interpretPortlandGISResponse(
   if(item.ADDRESS_NUMBER!==address.houseNumber||
     upper(item.STREET_NAME)!==address.streetName||
     upper(item.STREET_TYPE_CODE)!==address.streetType||
-    upper(item.ADDRESS_NUMBER_CHAR)!==""||
+    (upper(item.ADDRESS_NUMBER_CHAR)!==""&&
+     upper(item.ADDRESS_NUMBER_CHAR)!==String(address.houseNumber))||
     upper(item.STREET_POST_DIRECTION)!==""||
     upper(item.STREET_PREFIX_DIRECTION)!==address.direction||
     upper(item.STATUS)!=="ACTIVE"||
