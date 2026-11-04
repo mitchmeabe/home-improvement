@@ -186,7 +186,9 @@ test("dossier refuses stale or mismatched official evidence rather than acceptin
   officialJurisdiction:r.evidence}),RangeError);
 });
 
-test("records with extra house-number letters or trailing street directions are not an exact match",()=>{
+test("City ADDRESS_NUMBER_CHAR may repeat the full house number but not introduce an unmatched suffix",()=>{
+ assert.equal(decide(json(city({ADDRESS_NUMBER_CHAR:"1120"}))).status,"portland");
+ assert.equal(decide(json(city({ADDRESS_NUMBER_CHAR:"1120A"}))).status,"not-found");
  assert.equal(decide(json(city({ADDRESS_NUMBER_CHAR:"A"}))).status,"not-found");
  assert.equal(decide(json(city({STREET_POST_DIRECTION:"E"}))).status,"not-found");
 });
