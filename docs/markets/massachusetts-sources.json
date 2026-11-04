@@ -1,18 +1,18 @@
 {
-  "reviewed": "2026-11-03",
+  "reviewed": "2026-11-04",
   "policy": "Manual sources; no live rebate certification or autonomous regulatory changes.",
   "primary": [
     {
       "id": "mass-air",
       "url": "https://www.masssave.com/en/residential/rebates-offers-services/heating-and-cooling/heat-pumps/air-source-heat-pumps",
-      "checked": "2026-11-03",
+      "checked": "2026-11-04",
       "claims": "2026 whole/partial/basic, 2027 announced whole/partial, eligibility conditions"
     },
     {
       "id": "mass-products",
       "url": "https://www.masssave.com/heat-pump-qualified-list",
-      "checked": "2026-11-03",
-      "claims": "qualifying matched system references"
+      "checked": "2026-11-04",
+      "claims": "Matched eligible equipment, 2026 high-GWP split system removal, narrow VRF and factory-charged exceptions; no individual system is certified by this app"
     },
     {
       "id": "mass-enhanced",
