@@ -79,7 +79,7 @@ test("water-heater replacement in Portland gets plumbing and altered-circuit per
   installRoute:"contractor",electricUtility:"pge"});
  assert.equal(find(r,"water-plumbing")?.status,"required");
  assert.equal(find(r,"water-electrical")?.status,"required");
- assert.equal(find(r,"electrical-trade")?.status,"required");
+ assert.equal(find(r,"electrical-trade"),undefined); // Existing HPWH permit is reused; no duplicate.
  assert.ok(r.documents.some(d=>d.id==="plumbing"));
  assert.ok(r.documents.some(d=>d.id==="water-incentive"));
  assert.equal(find(r,"space-hp3"),undefined);
@@ -178,4 +178,19 @@ test("ADU DIY electrical project is not automatically allowed under owner-occupa
   house:"townhouse-adu",installRoute:"do-it-yourself",property:"existing-owner-occupied"});
  assert.equal(find(r,"licensed-work")?.status,"verify");
  assert.ok(r.blockers.some(x=>/ADU/i.test(x)));
+});
+
+test("panel added to a heat-pump proposal replaces general circuit finding with one specific trade permit",()=>{
+ const r=run({project:"space-heat-pump",place:"portland-reported",
+  house:"one-two-family",electricScope:"both"});
+ assert.equal(find(r,"electrical-trade")?.status,"required");
+ assert.equal(find(r,"space-electrical"),undefined);
+ assert.equal(r.findings.filter(x=>x.group==="permit"&&/electrical/i.test(x.title)).length,1);
+ assert.ok(r.documents.some(d=>d.id==="electrical"));
+});
+test("unknown electrical scope shows one action, not two duplicate permit checks",()=>{
+ const r=run({place:"portland-reported",house:"one-two-family",electricScope:"unknown"});
+ assert.equal(find(r,"space-electrical")?.status,"verify");
+ assert.equal(find(r,"electrical-trade"),undefined);
+ assert.ok(r.blockers.some(x=>/Electrical circuit/i.test(x)));
 });
