@@ -21,6 +21,7 @@ export function MassHPQPLImporter({catalog,onChange}:{catalog:HPQPLCatalog|null;
  const [working,setWorking]=useState(false);
  const [sheet,setSheet]=useState<HPQPLSheet>("Air Source Heat Pump");
  const currentFile=useRef<File|null>(null);
+ const fileInput=useRef<HTMLInputElement>(null);
  const generation=useRef(0);
  const load=async(file:File|undefined,requestedSheet:HPQPLSheet=sheet)=>{
   if(!file)return;
@@ -74,13 +75,13 @@ export function MassHPQPLImporter({catalog,onChange}:{catalog:HPQPLCatalog|null;
    }}>{HPQPL_SHEETS.map(s=><option value={s} key={s}>{s}</option>)}</select>
    <p>For performance and accurate category-specific results, this loads one workbook tab at a time. Switch category to recheck a different system type; the selected file remains on your device.</p>
    <label htmlFor="ma-hpqpl-file">Mass Save HPQPL workbook (.xlsx; up to 64 MiB)</label>
-   <input id="ma-hpqpl-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+   <input ref={fileInput} id="ma-hpqpl-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
      disabled={working} onChange={e=>void load(e.target.files?.[0])}/>
    {catalog&&<div className="ma-hpqpl-summary"><strong>Snapshot loaded: {catalog.rows.length.toLocaleString("en-US")} system rows</strong>
     <p>Workbook tab: {sheet}. Reported workbook data updated: {catalog.sourceDataUpdatedOn??"not found"}; imported {catalog.importedAt}. Filename is user-supplied, not proof the file came from Mass Save or is current.</p>
     {catalog.warnings.length>0&&<details><summary>Coverage limitations ({catalog.warnings.length})</summary>
       <ul>{catalog.warnings.map((w,i)=><li key={i}>{w}</li>)}</ul></details>}
-    <button type="button" onClick={()=>{generation.current++;currentFile.current=null;onChange(null);setMessage("Workbook cleared from the current page.");}}>Clear workbook</button>
+    <button type="button" onClick={()=>{generation.current++;currentFile.current=null;if(fileInput.current)fileInput.current.value="";onChange(null);setMessage("Workbook cleared from the current page.");}}>Clear workbook</button>
    </div>}
    {working&&<p role="status">Processing the workbook on this device…</p>}
    {message&&!working&&<p role="status">{message}</p>}
