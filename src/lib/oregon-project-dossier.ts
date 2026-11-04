@@ -163,8 +163,10 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
    add("permit","space-"+f.id,f.title,status(f.status),f.detail,f.sourceUrl,LOCAL_REVIEWED_ON);
   }
   for(const f of loc.programs)add("incentive","space-"+f.id,f.title,
-   f.id==="hp3"&&input.property==="existing-owner-occupied"&&oregon?"historical-limit":status(f.status),
-   f.detail,f.sourceUrl,f.id==="hp3"?FUNDING_SNAPSHOT_AS_OF:LOCAL_REVIEWED_ON,
+   f.id==="hp3"&&input.installRoute==="do-it-yourself"?"not-applicable":
+    f.id==="hp3"&&input.property==="existing-owner-occupied"&&oregon?"historical-limit":status(f.status),
+   f.id==="hp3"&&input.installRoute==="do-it-yourself"?
+    "HP3 is delivered through an ODOE-approved contractor, not a DIY installation. Change the route to an approved contractor before pursuing program funding. "+f.detail:f.detail,f.sourceUrl,f.id==="hp3"?FUNDING_SNAPSHOT_AS_OF:LOCAL_REVIEWED_ON,
    f.id==="hp3"?"dated-program-snapshot":"pending-fact");
   const hp=evaluateHeatPump({
    location:loc.effectiveLocation,property:input.property,
@@ -175,6 +177,8 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
   add("equipment","hp3-efficiency","General HP3 equipment efficiency (not approval)",
    hp.efficiency==="below-threshold"?"verify":"verify",hp.efficiencyExplanation,
    DOSSIER_SOURCES.hp3,FUNDING_SNAPSHOT_AS_OF,"dated-program-snapshot");
+  if(input.installRoute==="do-it-yourself")
+   blockers.push("HP3 is not an incentive for DIY installation; an ODOE-approved contractor must install and apply.");
   if(hp.efficiency==="below-threshold")
    blockers.push("Entered equipment ratings are below a general HP3 numeric threshold; clarify system class and current program policy.");
   if(input.hspf2===null||input.seer2===null)
@@ -280,8 +284,9 @@ export function resolveProjectDossier(input:DossierInput):DossierResult{
    "Before accepting equipment installation or service upgrade scope.",DOSSIER_SOURCES.panel);
   questions.push("Who obtains the electrical permit and closes the final/service inspection? Are utility charges and any new branch circuits included?");
  }
- if(input.installRoute==="do-it-yourself"&&input.property!=="existing-owner-occupied"){
-  blockers.push("DIY rights are not assumed for a non-owner-occupied property. Verify Oregon trade license and owner-occupancy restrictions.");
+ if(input.installRoute==="do-it-yourself"&&
+  (input.property!=="existing-owner-occupied"||input.house==="townhouse-adu")){
+  blockers.push("DIY electrical-work rights are not assumed for a rental, sale, ADU or other restricted property. Verify Oregon license and owner-occupancy rules.");
   add("permit","licensed-work","Trade licensing / homeowner-work restriction","verify",
    "Portland's homeowner electrical exception is limited to a recorded owner who lives in the property. Rental, future-sale and ADU work needs further licensed-contractor review.",
    DOSSIER_SOURCES.electrical,DOSSIER_REVIEWED_ON,"pending-fact");
