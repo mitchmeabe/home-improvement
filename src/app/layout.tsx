@@ -3,8 +3,8 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "Heat Pump Project Planner | Home Improvement",
-  description: "Plan Portland residential heat pump permits and investigate Oregon incentives using official sources.",
+  title: "Home Improvement | Heat-Pump Quotes and Incentive Planning",
+  description: "Compare Massachusetts and Oregon heat-pump installation proposals, review documented scope, verify incentives, and prepare contractor questions.",
   robots: { index: false, follow: false },
 };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

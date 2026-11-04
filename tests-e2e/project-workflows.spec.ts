@@ -81,3 +81,21 @@ test("Oregon quote engine withholds ranking across materially different ductwork
  await expect(page.locator(".hp-q-summary")).toContainText("No valid lowest-price ranking");
  await expect(page.getByRole("table",{name:/Oregon heat pump quote completeness comparison/})).toBeVisible();
 });
+
+test("both project routes remain non-indexable and robots are private",async({page})=>{
+ for(const route of ["/","/massachusetts/heat-pumps"]){
+   await page.goto(route);
+   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content",/noindex/);
+ }
+ const r=await page.goto("/robots.txt");
+ expect(r?.ok()).toBeTruthy();
+ await expect(page.locator("body")).toContainText("Disallow: /");
+});
+
+test("keyboard can reach the Massachusetts project details and quote entry",async({page})=>{
+ await page.goto("/massachusetts/heat-pumps");
+ await page.locator("#ma-year").focus();
+ await expect(page.locator("#ma-year")).toBeFocused();
+ await page.keyboard.press("Tab");
+ await expect(page.locator("#ma-route")).toBeFocused();
+});
