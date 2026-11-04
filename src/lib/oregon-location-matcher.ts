@@ -43,13 +43,16 @@ export interface LocalProjectResult {
  questions:string[];
 }
 export function resolveOregonProject(input:LocalProjectInput):LocalProjectResult{
- const isOregon=input.location!=="outside-oregon";
+ const isOregon=input.location==="portland"||input.location==="other-oregon";
  const citySelected=input.location==="portland";
  const confirmed=citySelected&&input.jurisdiction==="portland-confirmed";
  const outsidePortland=input.location==="other-oregon"||citySelected&&input.jurisdiction==="not-portland";
- const effectiveLocation:Location=confirmed?"portland":outsidePortland?"other-oregon":
-   input.location==="outside-oregon"?"outside-oregon":"unknown";
  const structureOk=input.building==="one-two-family"||input.building==="townhouse-adu";
+ // Geographic Oregon status is known from the selected state, even when a
+ // "Portland" mailing address is not proof of city permit jurisdiction.
+ // However unsupported building classes never receive one/two-family permit conclusions.
+ const effectiveLocation:Location=confirmed&&structureOk?"portland":isOregon?"other-oregon":
+   input.location==="outside-oregon"?"outside-oregon":"unknown";
  const permitAuthority=confirmed?"portland-confirmed":outsidePortland?"outside-portland":"not-established";
  const locationFindings:LocalFinding[]=[];
  const programs:LocalFinding[]=[];
@@ -107,8 +110,12 @@ export function resolveOregonProject(input:LocalProjectInput):LocalProjectResult
      questions.push("Which electric and gas utilities serve the property, and is a rebate program accepting new applications?");
    }
  }else{
-   add(programs,"oregon","Oregon incentive applicability","not-applicable",
-     "Oregon's HP3 and Energy Trust programs are not an incentive route for an out-of-state property.",LOCAL_SOURCES.hp3);
+   add(programs,"oregon","Oregon incentive applicability",
+     input.location==="outside-oregon"?"not-applicable":"check",
+     input.location==="outside-oregon"?
+       "Oregon's HP3 and Energy Trust programs are not an incentive route for an out-of-state property.":
+       "The state is not known; do not apply Oregon incentives until the project's state and program service area are confirmed.",
+     LOCAL_SOURCES.hp3);
  }
  return {permitAuthority,effectiveLocation,locationFindings,programs,questions};
 }
