@@ -1,6 +1,6 @@
 # Agent instructions
 
-- Implement one verified residential heat-pump project in Portland/Oregon first. Do not add all projects or all jurisdictions before product validation.
+- The initial Portland/Oregon heat-pump scope is historical. The protected pilot now also covers Oregon project requirements and Massachusetts heat-pump quote analysis. Do not add more project types or jurisdictions until those existing paths are validated.
 - Official municipal and program rules supersede AI summaries. Each published rule has a source URL, review date, applicability and exceptions.
 - Do not guarantee rebates or tax incentives. Funding availability is a frequently changing snapshot; confirm it live before users commit to work.
 - Do not claim a permit or inspection is unnecessary when the facts do not support that determination. Mark uncertain cases as `verify`.
