@@ -38,7 +38,7 @@ export function parseProposalText(text:string):ProposalTextReview {
  const lines=text.replaceAll("\r","").split("\n").map(x=>x.trim()).filter(Boolean);
  const candidates:ProposalCandidate[]=[];
  const warnings:string[]=[];
- const priceLabels=/\b(?:total installed (?:price|cost)|installed (?:price|total)|total project (?:price|cost)|contract (?:price|total)|project total|total estimate|total price)\b/i;
+ const priceLabels=/\b(?:total installed (?:price|cost)|installed (?:price|total)|total project (?:price|cost)|contract (?:price|total)|project total|total estimate|total price|total cost)\b/i;
  const rebateLabels=/\b(?:mass save rebate|hp3 rebate|proposed rebate|rebate amount|rebate credit)\b/i;
  const findPrice=(labels:RegExp)=>(line:string)=>{
    if(!labels.test(line)||/\b(?:not included|excluded|example only|illustration|optional|estimate range|starting at)\b/i.test(line))return null;
@@ -54,8 +54,22 @@ export function parseProposalText(text:string):ProposalTextReview {
    if(relevant.some(line=>parse(line)===null))return null;
    return fromLines(relevant,name,parse);
  };
- const price=labeledMoney(priceLabels,"total");
+ // Genuine contractor quote layouts sometimes distinguish the full contract
+ // cost, a *conditional* rebate, and a lower "final"/"net" figure. Never
+ // silently promote one figure to a comparable installed price: the homeowner
+ // must establish which amount already includes which incentive.
+ const netOrFinalPrice=/\\b(?:final (?:installed |project )?(?:cost|price)|net (?:installed |project )?(?:cost|price)|after[- ]rebate total)\\b/i;
+ const conditionalRebate=/\\b(?:rebates? available|potential (?:rebate|incentive)|rebate eligibility|subject to (?:rebate|incentive) approval)\\b/i;
+ const hasNetOrFinal=lines.some(line=>netOrFinalPrice.test(line));
+ const hasConditionalRebate=lines.some(line=>conditionalRebate.test(line));
+ const price=!hasNetOrFinal?labeledMoney(priceLabels,"total"):null;
  if(price)candidates.push({key:"price",label:"Installed quoted total",value:price.value,evidence:price.evidence});
+ else if(lines.some(x=>priceLabels.test(x))&&!hasNetOrFinal)
+  warnings.push("Installed-price labels were found but no single reliable $ amount could be extracted. Enter the total manually.");
+ if(hasNetOrFinal)
+  warnings.push("Final/net cost is listed separately from gross installed price. Confirm which amount includes incentives and enter the comparable installed total and price basis manually.");
+ if(hasConditionalRebate)
+  warnings.push("A rebate is described as available or conditional, not confirmed or already received. Verify funding, approval and whether the quoted total already deducts it.");
  else if(lines.some(x=>priceLabels.test(x)))warnings.push("Installed-price labels were found but no single reliable $ amount could be extracted. Enter the total manually.");
  const rebate=labeledMoney(rebateLabels,"rebate");
  if(rebate)candidates.push({key:"rebate",label:"Contractor-stated rebate amount (not approved)",value:rebate.value,evidence:rebate.evidence});
