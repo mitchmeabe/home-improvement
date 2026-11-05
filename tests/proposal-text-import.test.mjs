@@ -63,3 +63,59 @@ test("conflicting AHRI references withheld and marketing model mentions ignored"
  assert.equal(field(x,"indoorModel"),undefined);
  assert.ok(x.warnings.some(w=>/Conflicting AHRI/.test(w)));
 });
+
+test("one ambiguous labeled total prevents false certainty from a second clean total",()=>{
+ const x=parseProposalText([
+  "Total installed price: $18,500",
+  "Total project cost: $18,500 plus optional electrical work $2,500",
+  "Deposit: $2,000"
+ ].join("\n"));
+ assert.equal(field(x,"price"),undefined);
+ assert.match(x.warnings.join(" "),/Installed-price labels/);
+});
+
+test("one disclaimed total makes a repeated clean price unsafe to import",()=>{
+ const x=parseProposalText([
+  "Total installed price: $18,500",
+  "Total estimate: $18,500 (example only)",
+ ].join("\n"));
+ assert.equal(field(x,"price"),undefined);
+ assert.match(x.warnings.join(" "),/Enter the total manually/);
+});
+
+test("ambiguous rebate label cannot be silently discarded when another rebate amount is printed",()=>{
+ const x=parseProposalText([
+  "Mass Save rebate: $8,500",
+  "Proposed rebate amount: $8,500 plus an additional $1,000 incentive"
+ ].join("\n"));
+ assert.equal(field(x,"rebate"),undefined);
+ assert.match(x.warnings.join(" "),/unambiguous proposed amount/);
+});
+
+test("multiple consistent labeled totals are safe to propose for human confirmation",()=>{
+ const x=parseProposalText([
+  "Total installed price: $18,500",
+  "Total project cost: $18,500",
+  "Mass Save rebate: $2,000",
+  "Rebate amount: $2,000"
+ ].join("\n"));
+ assert.equal(field(x,"price"),18500);
+ assert.equal(field(x,"rebate"),2000);
+ assert.equal(x.warnings.length,0);
+});
+
+test("mixed before- and after-rebate labels never become an inferred price basis",()=>{
+ const x=parseProposalText([
+  "Total price before rebate: $20,000",
+  "Contract price after rebate: $18,000",
+ ].join("\n"));
+ assert.equal(field(x,"price"),undefined);
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.match(x.warnings.join(" "),/Conflicting before\/after/);
+});
+
+test("same-line before-and-after descriptions with one amount cannot establish a basis",()=>{
+ const x=parseProposalText("Total price before rebate and after incentives: $18,000");
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.match(x.warnings.join(" "),/Conflicting before\/after/);
+});

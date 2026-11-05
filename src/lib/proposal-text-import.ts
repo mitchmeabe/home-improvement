@@ -44,10 +44,20 @@ export function parseProposalText(text:string):ProposalTextReview {
    if(!labels.test(line)||/\b(?:not included|excluded|example only|illustration|optional|estimate range|starting at)\b/i.test(line))return null;
    return toMoney(line);
  };
- const price=fromLines(lines,"total",findPrice(priceLabels));
+ // Withhold an amount if ANY line claiming this total is ambiguous.
+ // Discarding an ambiguous labeled line could otherwise make a different
+ // amount appear uniquely supported by the proposal.
+ const labeledMoney=(labels:RegExp,name:string)=>{
+   const relevant=lines.filter(line=>labels.test(line));
+   if(!relevant.length)return null;
+   const parse=findPrice(labels);
+   if(relevant.some(line=>parse(line)===null))return null;
+   return fromLines(relevant,name,parse);
+ };
+ const price=labeledMoney(priceLabels,"total");
  if(price)candidates.push({key:"price",label:"Installed quoted total",value:price.value,evidence:price.evidence});
  else if(lines.some(x=>priceLabels.test(x)))warnings.push("Installed-price labels were found but no single reliable $ amount could be extracted. Enter the total manually.");
- const rebate=fromLines(lines,"rebate",findPrice(rebateLabels));
+ const rebate=labeledMoney(rebateLabels,"rebate");
  if(rebate)candidates.push({key:"rebate",label:"Contractor-stated rebate amount (not approved)",value:rebate.value,evidence:rebate.evidence});
  else if(lines.some(x=>rebateLabels.test(x)))warnings.push("Rebate text was found, but an unambiguous proposed amount was not established.");
  const capacity=fromLines(lines,"cooling capacity",line=>{
@@ -68,12 +78,20 @@ export function parseProposalText(text:string):ProposalTextReview {
  const scope=fromLines(lines,"scope",explicitScope);
  if(scope)candidates.push({key:"scope",label:"Described installation scope",value:scope.value,evidence:scope.evidence});
  else if(lines.some(x=>explicitScope(x)!==null))warnings.push("Conflicting installation scopes were described. Select scope manually.");
- const basis=fromLines(lines,"price basis",line=>{
-   if(/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\b/i.test(line))return "before-rebate" as const;
-   if(/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:after|including) (?:all )?(?:rebates?|incentives?)\b/i.test(line))return "after-rebate" as const;
-   return null;
- });
+ const beforeBasis=/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\b/i;
+ const afterBasis=/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:after|including) (?:all )?(?:rebates?|incentives?)\b/i;
+ const basisLines=lines.filter(line=>beforeBasis.test(line)||afterBasis.test(line));
+ const basis=basisLines.some(line=>
+   (beforeBasis.test(line)&&afterBasis.test(line))||
+   (/\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\b/i.test(line)&&
+    /\b(?:after|including) (?:all )?(?:rebates?|incentives?)\b/i.test(line)))
+   ?null:fromLines(basisLines,"price basis",line=>{
+     if(beforeBasis.test(line))return "before-rebate" as const;
+     if(afterBasis.test(line))return "after-rebate" as const;
+     return null;
+   });
  if(basis)candidates.push({key:"priceBasis",label:"Stated total price basis",value:basis.value,evidence:basis.evidence});
+ else if(basisLines.length)warnings.push("Conflicting before/after-rebate price labels found. Confirm the quoted total's basis manually.");
  // Only explicit labels supply candidate identifiers, never qualified-list approval.
  const identities=[
   {key:"ahriReference",label:"AHRI reference",re:/^\s*AHRI\s*(?:certified reference(?: number)?|reference(?: number)?|certificate(?: number)?|ID|#)\s*[:#=-]?\s*([A-Z0-9][A-Z0-9-]{4,39})\s*$/i},
