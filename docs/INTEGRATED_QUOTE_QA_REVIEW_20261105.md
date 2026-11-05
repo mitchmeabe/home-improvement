@@ -62,7 +62,7 @@ rebate eligibility, quote legality or installation claims have been verified.
 
 ## November 5 dependency and documentation hardening
 - Added a committed npm lockfile, pinning `@playwright/test` at 1.64.1 and overriding transitive `postcss` to the tested 8.5.32 version without a Next.js major-version migration.
-- Added npm formatting configuration so the compact lockfile remains stable across future installations.
+- The lockfile is kept in npm's standard readable format for dependency-diff review; no formatting override is needed.
 - Exact branch source passed 196/196 Node tests, TypeScript, source/market/evidence checks and production build; desktop/mobile Playwright acceptance passed 77 tests, one intentional skip, zero failures. Clean `npm ci` reproduced the build and production-dependency npm audit returned zero advisories.
 - Updated the original first-scope architecture and README language to acknowledge implemented Portland GIS lookups and Massachusetts PDF/quote analysis. No decision-rule or PDF-parser behavior was changed.
 - Genuinely redacted recent contractor bids, independent professional review and real-user acceptance remain prerequisites for a public launch. SSO/noindex and draft/unmerged status remain mandatory.
