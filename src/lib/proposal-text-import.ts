@@ -124,6 +124,7 @@ export function parseProposalText(text:string):ProposalTextReview {
   else if(matches.length)candidates.push({key:item.key,label:item.label+" (unverified)",value:matches[0].value,evidence:matches[0].evidence});
  }
  const prompts=[
+  {label:"Deposit / payment schedule",re:/\b(?:deposits?|down[- ]payments?|payment schedule|progress payment|installment payment)\b/i},
   {label:"Permits / inspections",re:/\b(?:permit|inspection)\b/i},
   {label:"Warranty",re:/\b(?:warrant(?:y|ies)|labor coverage)\b/i},
   {label:"Manual J / load calculations",re:/\b(?:manual j|heat loss|load calculation)\b/i},
