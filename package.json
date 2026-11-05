@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm test && npm run typecheck && npm run sources:check && npm run markets:check && npm run evidence:check",
+    "prebuild": "npm test && npm run typecheck && npm run sources:check && npm run markets:check && npm run evidence:check && npm run test:e2e:list",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,8 @@
     "sources:probe": "node scripts/source-audit.mjs --online",
     "markets:check": "node scripts/market-data-check.mjs",
     "test:e2e": "playwright test",
-    "evidence:check": "node scripts/evidence-audit.mjs"
+    "evidence:check": "node scripts/evidence-audit.mjs",
+    "test:e2e:list": "playwright test --list"
   },
   "dependencies": {
     "next": "^15.5.0",
