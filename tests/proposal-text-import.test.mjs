@@ -199,6 +199,7 @@ test("Massachusetts state sample contract total is distinct from deposit and ins
  assert.equal(field(x,"priceBasis"),undefined);
  assert.equal(x.warnings.length,0);
  assert.ok(x.mentions.some(m=>m.label==="Permits / inspections"));
+ assert.ok(x.mentions.some(m=>m.label==="Deposit / payment schedule"));
  assert.ok(x.mentions.some(m=>m.label==="Warranty"));
 });
 test("official Massachusetts contract payment-schedule heading alone is never a price",()=>{
