@@ -38,7 +38,7 @@ export function parseProposalText(text:string):ProposalTextReview {
  const lines=text.replaceAll("\r","").split("\n").map(x=>x.trim()).filter(Boolean);
  const candidates:ProposalCandidate[]=[];
  const warnings:string[]=[];
- const priceLabels=/\b(?:total installed (?:price|cost)|installed (?:price|total)|total project (?:price|cost)|contract (?:price|total)|project total|total estimate|total price|total cost)\b/i;
+ const priceLabels=/\b(?:total installed (?:price|cost)|installed (?:price|total)|total project (?:price|cost)|total contract price|contract (?:price|total)|project total|total estimate|total price|total cost)\b/i;
  const rebateLabels=/\b(?:mass save rebate|hp3 rebate|proposed rebate|rebate amount|rebate credit)\b/i;
  const findPrice=(labels:RegExp)=>(line:string)=>{
    if(!labels.test(line)||/\b(?:not included|excluded|example only|illustration|optional|estimate range|starting at|annual|monthly|yearly|operating|projected savings|fuel cost)\b/i.test(line))return null;
@@ -47,8 +47,12 @@ export function parseProposalText(text:string):ProposalTextReview {
  // Withhold an amount if ANY line claiming this total is ambiguous.
  // Discarding an ambiguous labeled line could otherwise make a different
  // amount appear uniquely supported by the proposal.
+ // The Massachusetts HIC sample contract uses this as a standalone
+ // table heading. Ignore only that EXACT empty heading; a priced or qualified
+ // line must still be parsed and checked as a potential conflicting total.
+ const contractPaymentHeading=/^total contract price and payment schedule$/i;
  const labeledMoney=(labels:RegExp,name:string)=>{
-   const relevant=lines.filter(line=>labels.test(line));
+   const relevant=lines.filter(line=>labels.test(line)&&!contractPaymentHeading.test(line));
    if(!relevant.length)return null;
    const parse=findPrice(labels);
    if(relevant.some(line=>parse(line)===null))return null;
@@ -64,7 +68,7 @@ export function parseProposalText(text:string):ProposalTextReview {
  const hasConditionalRebate=lines.some(line=>conditionalRebate.test(line));
  const price=!hasNetOrFinal?labeledMoney(priceLabels,"total"):null;
  if(price)candidates.push({key:"price",label:"Installed quoted total",value:price.value,evidence:price.evidence});
- else if(lines.some(x=>priceLabels.test(x))&&!hasNetOrFinal)
+ else if(lines.some(x=>priceLabels.test(x)&&!contractPaymentHeading.test(x))&&!hasNetOrFinal)
   warnings.push("Installed-price labels were found but no single reliable $ amount could be extracted. Enter the total manually.");
  if(hasNetOrFinal)
   warnings.push("Final/net cost is listed separately from gross installed price. Confirm which amount includes incentives and enter the comparable installed total and price basis manually.");
@@ -120,7 +124,8 @@ export function parseProposalText(text:string):ProposalTextReview {
   else if(matches.length)candidates.push({key:item.key,label:item.label+" (unverified)",value:matches[0].value,evidence:matches[0].evidence});
  }
  const prompts=[
-  {label:"Permits / inspections",re:/\b(?:permit|inspection)\b/i},
+  {label:"Deposit / payment schedule",re:/\b(?:deposits?|down[- ]payments?|payment schedule|progress payment|installment payment)\b/i},
+  {label:"Permits / inspections",re:/\b(?:permits?|inspections?)\b/i},
   {label:"Warranty",re:/\b(?:warrant(?:y|ies)|labor coverage)\b/i},
   {label:"Manual J / load calculations",re:/\b(?:manual j|heat loss|load calculation)\b/i},
   {label:"Commissioning",re:/\b(?:commissioning|start[- ]up testing)\b/i},

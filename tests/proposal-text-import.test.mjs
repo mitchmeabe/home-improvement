@@ -184,3 +184,49 @@ test("distinct explicit approval-free Mass Save rebate stays a human-reviewed ca
  assert.equal(field(x,"rebate"),2000);
  assert.equal(field(x,"priceBasis"),undefined);
 });
+
+test("Massachusetts state sample contract total is distinct from deposit and installment schedule",()=>{
+ const x=parseProposalText([
+  "Total Contract Price: $18,900.00",
+  "Down payment upon signature: $6,000.00",
+  "Payment upon equipment delivery: $6,000.00",
+  "Final payment at completion: $6,900.00",
+  "Permits secured by the contractor",
+  "Warranty: parts and labor"
+ ].join("\n"));
+ assert.equal(field(x,"price"),18900);
+ assert.equal(field(x,"rebate"),undefined);
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.equal(x.warnings.length,0);
+ assert.ok(x.mentions.some(m=>m.label==="Permits / inspections"));
+ assert.ok(x.mentions.some(m=>m.label==="Deposit / payment schedule"));
+ assert.ok(x.mentions.some(m=>m.label==="Warranty"));
+});
+test("official Massachusetts contract payment-schedule heading alone is never a price",()=>{
+ const heading=parseProposalText("Total Contract Price and Payment Schedule\n$18,900.00\nDeposit $6,000.00");
+ assert.equal(field(heading,"price"),undefined);
+ assert.equal(heading.warnings.length,0);
+ const withSeparateLabeledTotal=parseProposalText([
+  "Total Contract Price and Payment Schedule",
+  "Total Contract Price: $18,900.00",
+  "Deposit $6,000.00"
+ ].join("\n"));
+ assert.equal(field(withSeparateLabeledTotal,"price"),18900);
+ assert.equal(withSeparateLabeledTotal.warnings.length,0);
+});
+test("a total contract price line containing a second amount is not an unambiguous contract total",()=>{
+ const x=parseProposalText("Total Contract Price $18,900 plus a deposit of $6,000");
+ assert.equal(field(x,"price"),undefined);
+ assert.match(x.warnings.join(" "),/Enter the total manually/);
+});
+test("two inconsistent contract totals fail closed instead of accepting first",()=>{
+ const x=parseProposalText("Total Contract Price: $18,900\nTotal Installed Cost: $19,400");
+ assert.equal(field(x,"price"),undefined);
+ assert.match(x.warnings.join(" "),/Enter the total manually/);
+});
+test("Massachusetts contract total plus lower after-rebate figure requires a manual price basis",()=>{
+ const x=parseProposalText("Total Contract Price: $18,900\nNet Project Cost: $10,400");
+ assert.equal(field(x,"price"),undefined);
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.match(x.warnings.join(" "),/Final\/net cost/);
+});
