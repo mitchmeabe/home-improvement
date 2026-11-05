@@ -58,8 +58,8 @@ export function parseProposalText(text:string):ProposalTextReview {
  // cost, a *conditional* rebate, and a lower "final"/"net" figure. Never
  // silently promote one figure to a comparable installed price: the homeowner
  // must establish which amount already includes which incentive.
- const netOrFinalPrice=/\\b(?:final (?:installed |project )?(?:cost|price)|net (?:installed |project )?(?:cost|price)|after[- ]rebate total)\\b/i;
- const conditionalRebate=/\\b(?:rebates? available|potential (?:rebate|incentive)|rebate eligibility|subject to (?:rebate|incentive) approval)\\b/i;
+ const netOrFinalPrice=/\b(?:final (?:installed |project )?(?:cost|price)|net (?:installed |project )?(?:cost|price)|after[- ]rebate total)\b/i;
+ const conditionalRebate=/\b(?:rebates? available|potential (?:rebate|incentive)|rebate eligibility|subject to (?:rebate|incentive) approval)\b/i;
  const hasNetOrFinal=lines.some(line=>netOrFinalPrice.test(line));
  const hasConditionalRebate=lines.some(line=>conditionalRebate.test(line));
  const price=!hasNetOrFinal?labeledMoney(priceLabels,"total"):null;
