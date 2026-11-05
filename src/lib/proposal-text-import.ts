@@ -81,7 +81,10 @@ export function parseProposalText(text:string):ProposalTextReview {
  const beforeBasis=/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\b/i;
  const afterBasis=/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:after|including) (?:all )?(?:rebates?|incentives?)\b/i;
  const basisLines=lines.filter(line=>beforeBasis.test(line)||afterBasis.test(line));
- const basis=basisLines.some(line=>beforeBasis.test(line)&&afterBasis.test(line))
+ const basis=basisLines.some(line=>
+   (beforeBasis.test(line)&&afterBasis.test(line))||
+   (/\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\b/i.test(line)&&
+    /\b(?:after|including) (?:all )?(?:rebates?|incentives?)\b/i.test(line)))
    ?null:fromLines(basisLines,"price basis",line=>{
      if(beforeBasis.test(line))return "before-rebate" as const;
      if(afterBasis.test(line))return "after-rebate" as const;
