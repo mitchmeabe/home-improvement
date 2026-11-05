@@ -78,8 +78,8 @@ export function parseProposalText(text:string):ProposalTextReview {
  const scope=fromLines(lines,"scope",explicitScope);
  if(scope)candidates.push({key:"scope",label:"Described installation scope",value:scope.value,evidence:scope.evidence});
  else if(lines.some(x=>explicitScope(x)!==null))warnings.push("Conflicting installation scopes were described. Select scope manually.");
- const beforeBasis=/\\b(?:total|quoted price|contract price)\\b.{0,28}\\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\\b/i;
- const afterBasis=/\\b(?:total|quoted price|contract price)\\b.{0,28}\\b(?:after|including) (?:all )?(?:rebates?|incentives?)\\b/i;
+ const beforeBasis=/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:before|excluding) (?:all )?(?:rebates?|incentives?)\b/i;
+ const afterBasis=/\b(?:total|quoted price|contract price)\b.{0,28}\b(?:after|including) (?:all )?(?:rebates?|incentives?)\b/i;
  const basisLines=lines.filter(line=>beforeBasis.test(line)||afterBasis.test(line));
  const basis=basisLines.some(line=>beforeBasis.test(line)&&afterBasis.test(line))
    ?null:fromLines(basisLines,"price basis",line=>{
