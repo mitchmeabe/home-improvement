@@ -1,11 +1,11 @@
-# Home Improvement — first vertical slice
+# Home Improvement — protected quote and project-requirements pilot
 
-A narrow source-backed planning tool for residential heat-pump projects. The first implemented workflow covers Portland mechanical/electrical permit guidance and Oregon's Heat Pump Purchase Program (HP3) as a **reviewed snapshot**, not live funding or an eligibility award.
+The original Portland/Oregon heat-pump guidance remains alongside Oregon project requirements, an opt-in Portland address-point GIS lookup, and Massachusetts quote, PDF-text and equipment-list comparison. Government rules and rebate figures are dated snapshots, not live funding or permit determinations.
 
 ## Run locally
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -19,7 +19,7 @@ Visit http://localhost:3000. Check with `npm test`, `npm run typecheck`, `npm ru
 - General HP3 efficiency-threshold check with explicit exclusions and no eligibility guarantees.
 - Official government sources and deterministic test fixtures.
 
-**Not built:** an address-based jurisdiction resolver, contractor matching, permit filing, actual state program applications, live funding checks, incentive stacking, municipal coverage outside Portland, or accurate cost projections.
+**Not built:** a full parcel/permit determination service, contractor matching, permit filing, state-program applications, live funding checks, comprehensive municipal coverage, or independently modeled cost projections. The existing Portland ArcGIS address-point lookup provides only a conditional jurisdiction signal.
 
 ## Primary sources
 
