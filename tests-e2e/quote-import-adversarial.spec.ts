@@ -38,7 +38,7 @@ test("opposing before- and after-rebate quotes never auto-fill either basis or p
  await expect(importer.getByRole("checkbox",{name:/Installed total/})).toHaveCount(0);
  await expect(importer.getByRole("checkbox",{name:/Before\/after rebate status/})).toHaveCount(0);
  await expect(page.locator("#ma-a-price")).toHaveValue("");
- await expect(page.locator("#ma-a-basis")).toHaveValue("unknown");
+ await expect(page.locator("#ma-a-basis")).toHaveValue("unsure");
 });
 
 test("clean local text proposal never applies a value until the visitor checks it",async({page})=>{
