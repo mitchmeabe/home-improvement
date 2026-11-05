@@ -72,3 +72,31 @@ test("reviewing a second proposal invalidates prior candidate checks and blocks 
  await expect(importer.getByRole("button",{name:/Apply 0 confirmed field/})).toBeDisabled();
  await expect(page.locator("#ma-a-price")).toHaveValue("");
 });
+
+test("real public proposal pricing structure requires manual gross-versus-net confirmation",async({page})=>{
+ await page.goto(ma);
+ const importer=await openImport(page);
+ await importer.locator("textarea").fill([
+  "Total Cost: $9,204.50",
+  "Rebates Available: $500.00",
+  "Final Cost: $8,704.50"
+ ].join("\n"));
+ await expect(importer).toContainText("Final/net cost is listed separately");
+ await expect(importer).toContainText("A rebate is described as available or conditional");
+ await expect(importer.getByRole("checkbox",{name:/Installed total/})).toHaveCount(0);
+ await expect(importer.getByRole("checkbox",{name:/rebate amount/i})).toHaveCount(0);
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+ await expect(importer.getByRole("button",{name:/Apply 0 confirmed field/})).toBeDisabled();
+});
+
+test("simple Total Cost is only a candidate until explicit human confirmation",async({page})=>{
+ await page.goto(ma);
+ const importer=await openImport(page);
+ await importer.locator("textarea").fill("Total Cost: $9,204.50");
+ await expect(importer.getByRole("checkbox",{name:/Installed total/})).toHaveCount(1);
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+ await importer.getByRole("checkbox",{name:/Installed total/}).check();
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+ await importer.getByRole("button",{name:/Apply 1 confirmed field/}).click();
+ await expect(page.locator("#ma-a-price")).toHaveValue("9204.5");
+});
