@@ -70,7 +70,6 @@ export function parseProposalText(text:string):ProposalTextReview {
   warnings.push("Final/net cost is listed separately from gross installed price. Confirm which amount includes incentives and enter the comparable installed total and price basis manually.");
  if(hasConditionalRebate)
   warnings.push("A rebate is described as available or conditional, not confirmed or already received. Verify funding, approval and whether the quoted total already deducts it.");
- else if(lines.some(x=>priceLabels.test(x)))warnings.push("Installed-price labels were found but no single reliable $ amount could be extracted. Enter the total manually.");
  const rebate=labeledMoney(rebateLabels,"rebate");
  if(rebate)candidates.push({key:"rebate",label:"Contractor-stated rebate amount (not approved)",value:rebate.value,evidence:rebate.evidence});
  else if(lines.some(x=>rebateLabels.test(x)))warnings.push("Rebate text was found, but an unambiguous proposed amount was not established.");
