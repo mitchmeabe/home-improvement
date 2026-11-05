@@ -119,3 +119,68 @@ test("same-line before-and-after descriptions with one amount cannot establish a
  assert.equal(field(x,"priceBasis"),undefined);
  assert.match(x.warnings.join(" "),/Conflicting before\/after/);
 });
+
+test("actual public heat-pump proposal layout is ambiguous when price labels and values occupy separate rows",()=>{
+ // Structural reconstruction of a 2015 municipal-public heating proposal,
+ // WITHOUT customer, home address, contact details or original PDF bytes.
+ const x=parseProposalText([
+  "Heating System Proposal",
+  "COST",
+  "Total Cost:",
+  "Rebates Available:",
+  "Final Cost:",
+  "$9,204.50",
+  "$500.00",
+  "$8,704.50",
+  "Estimated Annual Savings: $618.89",
+  "Commissioning by trained refrigeration technicians",
+  "Warranty on parts and labor"
+ ].join("\n"));
+ assert.equal(field(x,"price"),undefined);
+ assert.equal(field(x,"rebate"),undefined);
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.match(x.warnings.join(" "),/Final\/net cost/);
+ assert.match(x.warnings.join(" "),/rebate is described as available or conditional/i);
+ assert.ok(x.mentions.some(x=>x.label==="Commissioning"));
+ assert.ok(x.mentions.some(x=>x.label==="Warranty"));
+});
+test("gross cost, potential rebate and net final cost must not be conflated",()=>{
+ const x=parseProposalText([
+  "Total Cost: $9,204.50",
+  "Rebates Available: $500.00",
+  "Final Cost: $8,704.50"
+ ].join("\n"));
+ assert.equal(field(x,"price"),undefined);
+ assert.equal(field(x,"rebate"),undefined);
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.match(x.warnings.join(" "),/Confirm which amount includes incentives/);
+});
+test("gross total cost alone can be extracted for manual confirmation, without an inferred rebate basis",()=>{
+ const x=parseProposalText("Total Cost: $9,204.50");
+ assert.equal(field(x,"price"),9204.5);
+ assert.equal(field(x,"priceBasis"),undefined);
+ assert.equal(field(x,"rebate"),undefined);
+});
+test("gross cost with separately available contingent rebate retains cost but never deducts potential incentive",()=>{
+ const x=parseProposalText([
+  "Total Cost: $9,204.50",
+  "Rebates Available: $500.00"
+ ].join("\n"));
+ assert.equal(field(x,"price"),9204.5);
+ assert.equal(field(x,"rebate"),undefined);
+ assert.match(x.warnings.join(" "),/Verify funding/);
+});
+test("final cost alone and unrelated annual heating costs cannot become an installed bid total",()=>{
+ const net=parseProposalText("Final Cost: $8,704.50");
+ assert.equal(field(net,"price"),undefined);
+ assert.match(net.warnings.join(" "),/Final\/net cost/);
+ const annual=parseProposalText("Annual Total Cost: $2,281.11");
+ assert.equal(field(annual,"price"),undefined);
+ assert.match(annual.warnings.join(" "),/Enter the total manually/);
+});
+test("distinct explicit approval-free Mass Save rebate stays a human-reviewed candidate",()=>{
+ const x=parseProposalText("Total installed price: $18,500\nProposed rebate amount: $2,000");
+ assert.equal(field(x,"price"),18500);
+ assert.equal(field(x,"rebate"),2000);
+ assert.equal(field(x,"priceBasis"),undefined);
+});
