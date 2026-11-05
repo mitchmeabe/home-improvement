@@ -41,7 +41,7 @@ export function parseProposalText(text:string):ProposalTextReview {
  const priceLabels=/\b(?:total installed (?:price|cost)|installed (?:price|total)|total project (?:price|cost)|contract (?:price|total)|project total|total estimate|total price|total cost)\b/i;
  const rebateLabels=/\b(?:mass save rebate|hp3 rebate|proposed rebate|rebate amount|rebate credit)\b/i;
  const findPrice=(labels:RegExp)=>(line:string)=>{
-   if(!labels.test(line)||/\b(?:not included|excluded|example only|illustration|optional|estimate range|starting at)\b/i.test(line))return null;
+   if(!labels.test(line)||/\b(?:not included|excluded|example only|illustration|optional|estimate range|starting at|annual|monthly|yearly|operating|projected savings|fuel cost)\b/i.test(line))return null;
    return toMoney(line);
  };
  // Withhold an amount if ANY line claiming this total is ambiguous.
