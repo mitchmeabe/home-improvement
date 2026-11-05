@@ -125,7 +125,7 @@ export function parseProposalText(text:string):ProposalTextReview {
  }
  const prompts=[
   {label:"Deposit / payment schedule",re:/\b(?:deposits?|down[- ]payments?|payment schedule|progress payment|installment payment)\b/i},
-  {label:"Permits / inspections",re:/\b(?:permit|inspection)\b/i},
+  {label:"Permits / inspections",re:/\b(?:permits?|inspections?)\b/i},
   {label:"Warranty",re:/\b(?:warrant(?:y|ies)|labor coverage)\b/i},
   {label:"Manual J / load calculations",re:/\b(?:manual j|heat loss|load calculation)\b/i},
   {label:"Commissioning",re:/\b(?:commissioning|start[- ]up testing)\b/i},
