@@ -100,3 +100,32 @@ test("simple Total Cost is only a candidate until explicit human confirmation",a
  await importer.getByRole("button",{name:/Apply 1 confirmed field/}).click();
  await expect(page.locator("#ma-a-price")).toHaveValue("9204.5");
 });
+
+test("Massachusetts contract total imports without mistaking installment payments for the price",async({page})=>{
+ await page.goto(ma);
+ const importer=await openImport(page);
+ await importer.locator("textarea").fill([
+  "Total Contract Price and Payment Schedule",
+  "Total Contract Price: $18,900.00",
+  "Deposit: $6,000.00",
+  "Final payment: $6,900.00"
+ ].join("\n"));
+ await expect(importer.getByRole("checkbox",{name:/Installed total/})).toHaveCount(1);
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+ await importer.getByRole("checkbox",{name:/Installed total/}).check();
+ await importer.getByRole("button",{name:/Apply 1 confirmed field/}).click();
+ await expect(page.locator("#ma-a-price")).toHaveValue("18900");
+});
+test("blank Massachusetts contract total with payment schedule never imports a deposit as contract price",async({page})=>{
+ await page.goto(ma);
+ const importer=await openImport(page);
+ await importer.locator("textarea").fill([
+  "Total Contract Price and Payment Schedule",
+  "$18,900.00",
+  "Deposit: $6,000.00",
+  "Final payment: $12,900.00"
+ ].join("\n"));
+ await expect(importer.getByRole("checkbox",{name:/Installed total/})).toHaveCount(0);
+ await expect(importer.getByRole("button",{name:/Apply 0 confirmed field/})).toBeDisabled();
+ await expect(page.locator("#ma-a-price")).toHaveValue("");
+});
