@@ -2,13 +2,17 @@
  * Supported project journeys, not public program eligibility.
  * Avoid linking to unmerged routes (M2 is still an independent PR).
  */
-export type ProjectGoal="all"|"space-heat-pump"|"water-heater";
-export type ProjectRegion="all"|"or"|"ma";
+export type ProjectGoal="all"|"space-heat-pump"|"water-heater"|"ev-charger";
+export type ProjectRegion="all"|"or"|"ma"|"ca";
 export interface ProjectWorkflow{
  id:string;name:string;goal:Exclude<ProjectGoal,"all">;region:Exclude<ProjectRegion,"all">;
  href:string;useWhen:string;confirm:string;notFor:string;
 }
 export const PROJECT_WORKFLOWS:readonly ProjectWorkflow[]=[
+ {id:"ca-sj-ev",name:"San José, California · home EV charger permits",goal:"ev-charger",region:"ca",
+ href:"/california/san-jose-ev-charger",useWhen:"Prepare a location-specific Level 1 or Level 2 charger and potential panel-work checklist.",
+ confirm:"Actual San José city permit jurisdiction, property type, equipment, electrician load evaluation and permit route.",
+ notFor:"Not a statewide California permit, utility rebate, load calculation or electrician referral."},
  {id:"or-space",name:"Oregon · space-heating heat pumps",goal:"space-heat-pump",region:"or",
  href:"/#oregon-project",useWhen:"Explore project permits, Oregon HP3 conditions, and compare contractor installation bids.",
  confirm:"Actual permit jurisdiction, equipment ratings, approved contractor and live HP3 funding.",
@@ -23,7 +27,7 @@ export const PROJECT_WORKFLOWS:readonly ProjectWorkflow[]=[
  notFor:"Not a space-heating heat pump, HP3 project, or a water-heater rebate award."}
 ];
 export function filterProjectWorkflows(goal:ProjectGoal,region:ProjectRegion):ProjectWorkflow[]{
- if(!["all","space-heat-pump","water-heater"].includes(goal)||
-   !["all","or","ma"].includes(region))throw new RangeError("Unsupported project filter.");
+ if(!["all","space-heat-pump","water-heater","ev-charger"].includes(goal)||
+   !["all","or","ma","ca"].includes(region))throw new RangeError("Unsupported project filter.");
  return PROJECT_WORKFLOWS.filter(x=>(goal==="all"||goal===x.goal)&&(region==="all"||region===x.region));
 }

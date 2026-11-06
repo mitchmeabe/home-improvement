@@ -28,3 +28,9 @@
 - Real-world public homeowner anecdotes are *unverified reports*; never present as authentic signed contractor PDFs, independently evaluated actual work, or current price benchmarks.
 - Mass Save offers no-cost quote review consultations; municipal utility networks sometimes use Abode. Never claim unique service or guaranteed affiliate demand.
 - Anonymous click events for multiple-bid readiness, report copy and official support use no price, equipment ID, identity or location data.
+
+## Protected San José EV integration and acquisition hold (2026-11-06)
+- This branch combines the complete quote-parser safety work from draft PR #24 and San José EV permitting pilot PR #25; neither source PR nor main is changed or merged.
+- Preserve Vercel all-environment SSO, site-wide noindex and robots Disallow; no public deployment, indexing, permit filing, affiliate code, lead capture or contractor outreach without explicit later owner authorization.
+- Events count **only anonymous action types**: first form interaction, successful checklist copy, official source click, and an explicit quote-interest button; never attach answers, property addresses, electrical service details, cost estimates, or user identifiers. Quote intent is NOT an actual referral, sale or partner acceptance.
+- The San José organic search/partner hypothesis and honest future editorial page plan are in docs/experiments/san-jose-ev-charger-acquisition-20261106.md.

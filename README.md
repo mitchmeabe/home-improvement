@@ -49,3 +49,9 @@ The new Massachusetts quote tool now prevents price ranking when one bid reuses 
 ## Quote-scope audit — November 2026
 
 The Oregon and Massachusetts heat-pump bid planners now check commissioning, duct/airflow testing and existing-system removal/disposal; Oregon additionally compares permits, electrical work and final inspection explicitly. The new pure scope-evidence comparison refuses to rank quotes when one explicitly includes costly work that another explicitly excludes. Unknown work stays unresolved. Differences appear in a side-by-side matrix, warning block and locally downloadable report. See docs/markets/massachusetts-heat-pumps.md for sources and limits.
+
+## Draft-only San José home EV charger planning and acquisition experiment (2026-11-06)
+
+Integrated private route `/california/san-jose-ev-charger` distinguishes existing Level 1 charging, new 120 V receptacles, Level 2 charging, assigned versus shared multifamily parking, manufacturer ventilation and separately proposed panel work. It uses dated City rules and makes **no electrical load calculation, permit approval, rebate award, contractor recommendation, or affiliate revenue claim**. A coarse optional quote-shopping-interest button never collects project data or contacts a contractor.
+
+Source: draft EV PR #25 integrated with quote-parser QA PR #24 in this **unmerged draft integration**. See `docs/INTEGRATED_EV_QUOTE_REVIEW_20261106.md` and `docs/experiments/san-jose-ev-charger-acquisition-20261106.md`. **Protected SSO and global noindex remain active**; only future separately authorized public-release work may make any page indexable.

@@ -259,7 +259,7 @@ test("project finder narrows by project and location and explains unsupported co
  await page.locator("#pf-region").selectOption("ma");
  await expect(page.getByText(/This combination is not supported/)).toBeVisible();
  await page.getByRole("button",{name:"Show all project planners"}).click();
- await expect(page.getByRole("status")).toContainText("3 matching project planners");
+ await expect(page.getByRole("status")).toContainText("4 matching project planners");
 });
 test("project finder supports keyboard skip and 390px screen without horizontal scroll",async({page})=>{
  await page.setViewportSize({width:390,height:780});
@@ -345,4 +345,23 @@ test("Massachusetts proposal text requires selection before applying AHRI/model 
  await bid.locator(".ma-bid-details summary").click();
  await expect(page.locator("#ma-a-ahriReference")).toHaveValue("123456789");
  await expect(page.locator("#ma-a-outdoorModel")).toHaveValue("");
+});
+
+test("San José EV planner blocks unknown jurisdiction, then distinguishes L1 and L2 work",async({page})=>{
+ await page.goto("/california/san-jose-ev-charger");
+ const result=page.locator(".sjev-result");
+ await expect(result).toContainText("Confirm actual San José city jurisdiction");
+ await page.locator("#sj-location").selectOption("city-verified");
+ await page.locator("#sj-property").selectOption("single-duplex");
+ await page.locator("#sj-panel").selectOption("not-proposed");
+ await page.locator("#sj-charge").selectOption("level1-existing");
+ await expect(result).toContainText("Not indicated for reported work");
+ await page.locator("#sj-charge").selectOption("level1-new-outlet");
+ await expect(result).toContainText("Required by City guidance");
+ await page.locator("#sj-charge").selectOption("level2");
+ await page.locator("#sj-ventilation").selectOption("requires-mechanical");
+ await expect(result).toContainText("Possible additional permit");
+ await page.locator("#sj-property").selectOption("multi-common");
+ await expect(result).toContainText("Shared or common multifamily parking needs a separate permit pathway");
+ await expect(result).not.toContainText("Required by City guidance");
 });
