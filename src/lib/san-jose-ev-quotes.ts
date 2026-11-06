@@ -144,6 +144,8 @@ export function compareSanJoseEVQuotes(plan:SJInput,permit:SJOutcome,quotes:read
   issues.push("The proposed panel-change scope is not included and documented consistently in both quotes.");
  if(plan.panel==="not-proposed"&&(a.panelWorkIncluded!=="no"||b.panelWorkIncluded!=="no"))
   issues.push("The project says no panel change is proposed; clarify any quote that includes or leaves panel work uncertain.");
+ if(plan.panel==="not-proposed"&&(a.scope==="level2-panel-work"||b.scope==="level2-panel-work"))
+  issues.push("A quote describes a panel-upgrade project despite the homeowner reporting no panel change is proposed.");
  if(issues.length||differences.length)
   return result(differences.length?"scope-mismatch":"needs-information",
     differences.length?"Quotes describe different work":"More bid details are needed",
