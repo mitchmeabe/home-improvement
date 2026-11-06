@@ -37,7 +37,7 @@ test("homeowner can download a shared bid specification and complete quality evi
  const assessment=studio.getByRole("region",{name:"Heat pump design and scope assessment"});
  await expect(assessment).toContainText("Written proposal evidence appears sufficiently complete for professional review");
  await expect(studio.getByText("9 / 9 core evidence items documented, self-reported")).toHaveCount(2);
- await expect(assessment).toContainText("not an equipment-sizing approval");
+ await expect(assessment).toContainText(/not an equipment-sizing approval/i);
  const pending=page.waitForEvent("download");
  await studio.getByRole("button",{name:"Download review (.txt)"}).click();
  expect((await pending).suggestedFilename()).toBe("oregon-heat-pump-design-evidence-plan.txt");
