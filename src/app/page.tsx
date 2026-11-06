@@ -39,6 +39,7 @@ export default function Home() {
     <section className="improvement-directory" id="project-tools" aria-label="Available project planners">
       <a href="/massachusetts/heat-pumps"><b>Massachusetts heat-pump quote review</b><span>Compare contractor bids, equipment and 2026 or announced 2027 Mass Save program conditions.</span><em>Open Massachusetts planner ↗</em></a>
       <a href="/oregon/heat-pump-water-heaters"><b>Oregon heat-pump water heaters</b><span>Check permit questions, dated incentives and two or three installation bids.</span><em>Open water-heater planner ↗</em></a>
+      <a href="/projects/heat-pump-bid-quality"><b>NEW: Heat-pump bid design and quality check</b><span>Request identical installation proposals; compare sizing evidence, winter capacity, coverage, backup strategy and commissioning.</span><em>Read the heat-pump bid guide ↗</em></a>
       <a href="/projects/oregon-requirements"><b>NEW: Oregon project requirements dossier</b><span>Combine location, project type, permits, panel/circuit work, incentives, and documentation into one exportable report.</span><em>Build Oregon dossier ↗</em></a>
       <a href="#oregon-project"><b>Oregon installation and incentive questions</b><span>Review Portland permit considerations, Oregon HP3 funding limits and contractor quote completeness.</span><em>Open Oregon planner ↓</em></a>
     </section>
