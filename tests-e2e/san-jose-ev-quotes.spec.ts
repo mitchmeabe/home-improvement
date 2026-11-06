@@ -1,11 +1,11 @@
-import {test,expect} from "@playwright/test";
+import {test,expect,type Page} from "@playwright/test";
 const work={
  equipmentIncluded:"yes",wiringIncluded:"yes",electricalPermitIncluded:"yes",
  inspectionIncluded:"yes",panelWorkIncluded:"no",trenchingIncluded:"no",mechanicalPermitIncluded:"no",
  loadReviewDocumented:"yes",managedChargingDocumented:"no",
  panelRationaleDocumented:"no",equipmentModelDocumented:"yes",warrantyWritten:"yes",
 };
-async function eligible(page){
+async function eligible(page:Page){
  await page.clock.install({time:new Date("2026-11-06T12:00:00Z")});
  await page.goto("/california/san-jose-ev-charger");
  await page.locator("#sj-location").selectOption("city-verified");
@@ -14,7 +14,7 @@ async function eligible(page){
  await page.locator("#sj-panel").selectOption("not-proposed");
  await page.locator("#sj-ventilation").selectOption("confirmed-not-required");
 }
-async function fillQuote(page,id,price){
+async function fillQuote(page:Page,id:"a"|"b",price:number){
  await page.locator("#sjev-quote-"+id+"-amount").fill(String(price));
  await page.locator("#sjev-quote-"+id+"-basis").selectOption("before-incentives");
  await page.locator("#sjev-quote-"+id+"-scope").selectOption("level2-dedicated");
