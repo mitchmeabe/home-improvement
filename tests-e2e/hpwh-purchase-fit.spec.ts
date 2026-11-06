@@ -5,17 +5,6 @@ async function open(page:Page){
  await page.clock.install({time:new Date("2026-11-06T19:00:00Z")});
  await page.goto(route);
 }
-async function fillOriginalQuote(page:Page,id:"a"|"b",amount:string){
- const details=page.locator(".hpwh-quote-step");if(!(await details.evaluate(el=>(el as HTMLDetailsElement).open)))await details.locator("summary").first().click();
- await page.locator("#hw-"+id+"-total").fill(amount);
- await page.locator("#hw-"+id+"-basis").selectOption("before-incentives");
- await page.locator("#hw-"+id+"-scope").selectOption("same-location");
- await page.locator("#hw-"+id+"-tank").fill("65");
- const panel=page.locator(".hpwh-quote").filter({has:page.locator("#hw-"+id+"-total")});
- await panel.locator(".hpwh-details > summary").click();
- for(const key of ["plumbingIncluded","electricalIncluded","condensateIncluded","airflowDocumented","warrantyWritten"])
-  await page.locator("#hw-"+id+"-"+key).selectOption("yes");
-}
 async function completeSite(page:Page){
  await page.locator("#hpwh-fit-location").selectOption("utility-room");
  await page.locator("#hpwh-fit-ambient").selectOption("typically-above-38");
@@ -57,7 +46,7 @@ test("undersized enclosed room triggers manufacturer air-volume review without a
  const studio=page.locator("#hpwh-installation-fit");
  await expect(studio.locator(".hpwh-fit-volume")).toContainText("200 cubic feet");
  await expect(studio).toContainText("below the user-reported model minimum");
- await expect(studio).toContainText("obtain a written approved intake/exhaust or louver");
+ await expect(studio).toContainText(/Obtain a written approved intake\/exhaust or louver/i);
 });
 test("same genuine quoted models and all model/site evidence allow only an as-quoted provisional comparison",async({page})=>{
  await open(page);
