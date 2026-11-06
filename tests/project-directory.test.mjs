@@ -14,7 +14,9 @@ test("water-heater incentives cannot be selected for Massachusetts or a space-he
  assert.equal(filterProjectWorkflows("water-heater","ma").length,0);
  assert.deepEqual(filterProjectWorkflows("space-heat-pump","ma").map(w=>w.id),["ma-space"]);
  assert.deepEqual(filterProjectWorkflows("space-heat-pump","or").map(w=>w.id),["or-space"]);
- assert.equal(filterProjectWorkflows("all","all").length,3);
+ assert.equal(filterProjectWorkflows("all","all").length,4);
+ assert.deepEqual(filterProjectWorkflows("ev-charger","ca").map(w=>w.id),["ca-sj-ev"]);
+ assert.equal(filterProjectWorkflows("ev-charger","or").length,0);
 });
 test("invalid category or region is rejected without substituting another state",()=>{
  assert.throws(()=>filterProjectWorkflows("insulation","ma"),RangeError);
