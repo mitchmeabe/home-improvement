@@ -28,3 +28,9 @@
 - Real-world public homeowner anecdotes are *unverified reports*; never present as authentic signed contractor PDFs, independently evaluated actual work, or current price benchmarks.
 - Mass Save offers no-cost quote review consultations; municipal utility networks sometimes use Abode. Never claim unique service or guaranteed affiliate demand.
 - Anonymous click events for multiple-bid readiness, report copy and official support use no price, equipment ID, identity or location data.
+
+## San José residential EV charger pilot (2026-11-06, owner-authorized private build)
+- The new California/San José project is a **development-only exception** to the earlier Oregon-first scope. Not public, not deployed intentionally, not indexed and not merged.
+- Source: City San José official EV charging, electrical and panel permit pages. The user's confirmed city jurisdiction and assigned versus shared multifamily parking control the answer.
+- Existing Level 1 without new electrical work differs from installing a new 120 V outlet. Level 2 requires an electrical permit; mechanical ventilation may introduce an additional permit.
+- Never infer that a 100 A panel or other service size requires replacement, perform load calculations, promise a rebate, approve work, or refer to unverified installers. No PII in inputs/events; private SSO/noindex remain.

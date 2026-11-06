@@ -49,3 +49,6 @@ The new Massachusetts quote tool now prevents price ranking when one bid reuses 
 ## Quote-scope audit — November 2026
 
 The Oregon and Massachusetts heat-pump bid planners now check commissioning, duct/airflow testing and existing-system removal/disposal; Oregon additionally compares permits, electrical work and final inspection explicitly. The new pure scope-evidence comparison refuses to rank quotes when one explicitly includes costly work that another explicitly excludes. Unknown work stays unresolved. Differences appear in a side-by-side matrix, warning block and locally downloadable report. See docs/markets/massachusetts-heat-pumps.md for sources and limits.
+
+## Protected San José EV charger permit planner (November 2026)
+The private route `/california/san-jose-ev-charger` prepares a permit and electrician-scope checklist for a **verified City of San José** home, with conservative Level 1/new outlet/Level 2, multifamily, ventilation and separately proposed panel branches. Not a California statewide tool, contractor referral, permit or electrical load calculation. See [official-source pilot notes](docs/markets/san-jose-ev-charging-pilot.md). Private SSO/noindex remains in effect.
