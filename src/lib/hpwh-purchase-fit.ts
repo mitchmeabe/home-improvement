@@ -88,7 +88,7 @@ export interface HPWHFitAssessment{
  findings:HPWHModelFinding[];
  differences:string[];
  projectQuestions:string[];
- safeToCompareAsQuoted:number extends never?never:boolean;
+ safeToCompareAsQuoted:boolean;
  priceComparisonExplanation:string;
  notProductApproval:true;
  noRebateAssumption:true;
@@ -207,7 +207,7 @@ export function assessHPWHFit(input:Input,site:HPWHSite,models:readonly HPWHMode
   if(site.demand==="unknown")issues.push("Clarify peak simultaneous showers/baths and hot-water demand before selecting capacity.");
   if(q.warrantyWritten!=="yes")
    issues.push("The base quote does not confirm written labor and equipment warranties.");
-  const blocking=issues.some(x=>/below the entered manufacturer|No condensate disposal route|differs from the proposed|No suitable existing circuit|frequently below 38°F/.test(x));
+  const blocking=issues.some(x=>/Room is smaller than the entered manufacturer|No condensate disposal route|differs from the proposed|No suitable existing circuit|frequently below 38°F/.test(x));
   return {id:q.id,kind:blocking?"needs-revision":issues.length?"needs-information":"documented-for-professional-review",
    issues,documented:confirmed,totalChecks:11,airVolumeAssessment:airResult};
  });
