@@ -63,7 +63,7 @@ export function screenSanJoseEV(input:SJInput,asOf:string):SJOutcome{
    "For multifamily assigned parking, the City's online route may be available; verify your assigned-space and other permit qualifications in SJPermits.":
    "For single-family/duplex homes, San José directs qualifying EV projects to its online SJPermits wizard.");
  notes.push("Use a qualified electrician for load, wiring, equipment, panel and inspection decisions; this tool does not perform a service/load calculation.");
- return outcome(level1Existing&&panel==="not-proposed"?"no-new-station-permit":"electrical-permit",
+ return outcome(level1Existing?(input.panel==="not-proposed"?"no-new-station-permit":"additional-review"):"electrical-permit",
   level1Existing?"Existing Level 1 charging: no new station work identified":"Electrical permit guidance for your planned installation",
   "City-specific planning summary only, based on your reported property type and work. Permit issuance and approvals are decided by San José.",
   electrical,vent,panel,"likely-online",notes,["city","electrical","panel","online","energy"]);
