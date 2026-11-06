@@ -3,8 +3,8 @@ import {useMemo,useState} from "react";
 import Link from "next/link";
 import {filterProjectWorkflows,type ProjectGoal,type ProjectRegion} from "../../lib/project-directory";
 import "./projects.css";
-const projects=[["all","All supported projects"],["space-heat-pump","Heating/cooling heat pump"],["water-heater","Heat-pump water heater"]] as const;
-const regions=[["all","Any supported location"],["or","Oregon"],["ma","Massachusetts"]] as const;
+const projects=[["all","All supported projects"],["space-heat-pump","Heating/cooling heat pump"],["water-heater","Heat-pump water heater"],["ev-charger","Home EV charger installation"]] as const;
+const regions=[["all","Any supported location"],["or","Oregon"],["ma","Massachusetts"],["ca","California · San José only"]] as const;
 export default function Projects(){
  const [goal,setGoal]=useState<ProjectGoal>("all");
  const [region,setRegion]=useState<ProjectRegion>("all");
