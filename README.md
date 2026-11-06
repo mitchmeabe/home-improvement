@@ -1,11 +1,11 @@
-# Home Improvement — first vertical slice
+# Home Improvement — protected quote and project-requirements pilot
 
-A narrow source-backed planning tool for residential heat-pump projects. The first implemented workflow covers Portland mechanical/electrical permit guidance and Oregon's Heat Pump Purchase Program (HP3) as a **reviewed snapshot**, not live funding or an eligibility award.
+The original Portland/Oregon heat-pump guidance remains alongside Oregon project requirements, an opt-in Portland address-point GIS lookup, and Massachusetts quote, PDF-text and equipment-list comparison. Government rules and rebate figures are dated snapshots, not live funding or permit determinations.
 
 ## Run locally
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -19,7 +19,7 @@ Visit http://localhost:3000. Check with `npm test`, `npm run typecheck`, `npm ru
 - General HP3 efficiency-threshold check with explicit exclusions and no eligibility guarantees.
 - Official government sources and deterministic test fixtures.
 
-**Not built:** an address-based jurisdiction resolver, contractor matching, permit filing, actual state program applications, live funding checks, incentive stacking, municipal coverage outside Portland, or accurate cost projections.
+**Not built:** a full parcel/permit determination service, contractor matching, permit filing, state-program applications, live funding checks, comprehensive municipal coverage, or independently modeled cost projections. The existing Portland ArcGIS address-point lookup provides only a conditional jurisdiction signal.
 
 ## Primary sources
 
@@ -49,3 +49,9 @@ The new Massachusetts quote tool now prevents price ranking when one bid reuses 
 ## Quote-scope audit — November 2026
 
 The Oregon and Massachusetts heat-pump bid planners now check commissioning, duct/airflow testing and existing-system removal/disposal; Oregon additionally compares permits, electrical work and final inspection explicitly. The new pure scope-evidence comparison refuses to rank quotes when one explicitly includes costly work that another explicitly excludes. Unknown work stays unresolved. Differences appear in a side-by-side matrix, warning block and locally downloadable report. See docs/markets/massachusetts-heat-pumps.md for sources and limits.
+
+## Draft-only San José home EV charger planning and acquisition experiment (2026-11-06)
+
+Integrated private route `/california/san-jose-ev-charger` distinguishes existing Level 1 charging, new 120 V receptacles, Level 2 charging, assigned versus shared multifamily parking, manufacturer ventilation and separately proposed panel work. It uses dated City rules and makes **no electrical load calculation, permit approval, rebate award, contractor recommendation, or affiliate revenue claim**. A coarse optional quote-shopping-interest button never collects project data or contacts a contractor.
+
+Source: draft EV PR #25 integrated with quote-parser QA PR #24 in this **unmerged draft integration**. See `docs/INTEGRATED_EV_QUOTE_REVIEW_20261106.md` and `docs/experiments/san-jose-ev-charger-acquisition-20261106.md`. **Protected SSO and global noindex remain active**; only future separately authorized public-release work may make any page indexable.

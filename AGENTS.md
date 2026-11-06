@@ -1,6 +1,6 @@
 # Agent instructions
 
-- Implement one verified residential heat-pump project in Portland/Oregon first. Do not add all projects or all jurisdictions before product validation.
+- The initial Portland/Oregon heat-pump scope is historical. The protected pilot now also covers Oregon project requirements and Massachusetts heat-pump quote analysis. Do not add more project types or jurisdictions until those existing paths are validated.
 - Official municipal and program rules supersede AI summaries. Each published rule has a source URL, review date, applicability and exceptions.
 - Do not guarantee rebates or tax incentives. Funding availability is a frequently changing snapshot; confirm it live before users commit to work.
 - Do not claim a permit or inspection is unnecessary when the facts do not support that determination. Mark uncertain cases as `verify`.
@@ -28,3 +28,9 @@
 - Real-world public homeowner anecdotes are *unverified reports*; never present as authentic signed contractor PDFs, independently evaluated actual work, or current price benchmarks.
 - Mass Save offers no-cost quote review consultations; municipal utility networks sometimes use Abode. Never claim unique service or guaranteed affiliate demand.
 - Anonymous click events for multiple-bid readiness, report copy and official support use no price, equipment ID, identity or location data.
+
+## Protected San José EV integration and acquisition hold (2026-11-06)
+- This branch combines the complete quote-parser safety work from draft PR #24 and San José EV permitting pilot PR #25; neither source PR nor main is changed or merged.
+- Preserve Vercel all-environment SSO, site-wide noindex and robots Disallow; no public deployment, indexing, permit filing, affiliate code, lead capture or contractor outreach without explicit later owner authorization.
+- Events count **only anonymous action types**: first form interaction, successful checklist copy, official source click, and an explicit quote-interest button; never attach answers, property addresses, electrical service details, cost estimates, or user identifiers. Quote intent is NOT an actual referral, sale or partner acceptance.
+- The San José organic search/partner hypothesis and honest future editorial page plan are in docs/experiments/san-jose-ev-charger-acquisition-20261106.md.

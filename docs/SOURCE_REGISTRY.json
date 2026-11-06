@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-04",
+  "updated": "2026-11-06",
   "policy": "Human-reviewed permit and program source snapshots; never auto-edit eligibility logic.",
   "sources": [
     {
@@ -80,6 +80,42 @@
         "Portland Maps"
       ],
       "claimedUse": "Property-ID/PortlandMaps verification that postal Portland address does not establish Portland permit jurisdiction"
+    },
+    {
+      "id": "sj-ev-charge-city-2026",
+      "owner": "City of San José",
+      "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/electric-vehicle-charging-stations",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "Level 1 existing vs new outlet, Level 2 electrical/mechanical permit requirements"
+    },
+    {
+      "id": "sj-ev-electric-2026",
+      "owner": "City of San José",
+      "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/electrical-projects",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "San José electrical permits, inspection and online process"
+    },
+    {
+      "id": "sj-ev-panel-2026",
+      "owner": "City of San José",
+      "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/single-family-duplex-properties/electrical-service-panel-upgrades",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "Separate permit for panel work; not a load-sufficiency determination"
+    },
+    {
+      "id": "sj-ev-online-2026",
+      "owner": "City of San José",
+      "url": "https://www.sanjoseca.gov/business/development-services-permit-center/online-permits-at-sjpermits-org/building-online-permits",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "Online single-family and multifamily assigned-parking EV charging permit categories"
     }
   ]
 }
