@@ -45,7 +45,7 @@ export default function WaterHeaterPlanner(){
    <p>Identify relevant Portland permits, check the applicable 2026 Energy Trust purchasing route, and compare two or three itemized heat-pump water heater quotes.</p>
    <p className="hpwh-muted">Reviewed {HPWH_REVIEWED}. Not a space-heating heat pump, HP3 calculation, approved rebate, permit issuance or contractor endorsement. Inputs stay in browser memory.</p>
   </header>
-  <p className="hpwh-jump"><a href="#hpwh-results">See permit and incentive results <span aria-hidden="true">↓</span></a></p>
+  <p className="hpwh-jump"><a href="#hpwh-results">See permit and incentive results <span aria-hidden="true">↓</span></a> · <a href="#hpwh-installation-fit">Check room and equipment fit <span aria-hidden="true">↓</span></a> · <Link href="/oregon/heat-pump-water-heaters/buying-guide">Read the HPWH purchasing guide</Link></p>
   <section className="hpwh-card hpwh-static">
    <h2>Before choosing a heat-pump water heater</h2>
    <p>Replacing a water heater can involve a plumbing permit, changes to electrical circuits, condensate disposal, and air-clearance or ventilation constraints. A lower appliance price can exclude significant installation work. Portland's permit rules require actual city jurisdiction—not merely a Portland mailing address. <a href={HPWH_SOURCES.jurisdiction} target="_blank" rel="noreferrer">Check city jurisdiction ↗</a></p>
