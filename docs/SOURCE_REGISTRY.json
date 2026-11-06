@@ -116,6 +116,24 @@
       "maxAgeDays": 30,
       "expectedText": [],
       "claimedUse": "Online single-family and multifamily assigned-parking EV charging permit categories"
+    },
+    {
+      "id": "heat-pump-doe-design-2026",
+      "owner": "US Department of Energy Building America",
+      "url": "https://basc.pnnl.gov/home-improvement-expert/checklists/heat-pump-replacement",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 60,
+      "expectedText": [],
+      "claimedUse": "Professional room-by-room ACCA Manual J and Manual S sizing selection; duct/airflow assessment as design evidence, not contractor certification"
+    },
+    {
+      "id": "heat-pump-doe-commission-2026",
+      "owner": "US Department of Energy Building America",
+      "url": "https://basc.pnnl.gov/resource-guides/heat-pump-quality-installation-and-commissioning",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 60,
+      "expectedText": [],
+      "claimedUse": "Heat-pump commissioning documentation, refrigerant charge, ducted airflow verification and owner controls"
     }
   ]
 }
