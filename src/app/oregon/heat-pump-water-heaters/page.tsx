@@ -5,6 +5,8 @@ import {downloadTextReport} from "../../../lib/download-report";
 import {HPWH_REVIEWED,HPWH_OFFER_PUBLISHED,HPWH_SOURCES,initialInput,newQuote,evaluate,report,
  type Input,type Quote,type Answer,type OregonPlace,type HouseType,type Dwelling,type ElectricCompany,type InstallRoute,type HeaterFuel,
  type PriceBasis,type QuoteScope} from "../../../lib/oregon-heat-pump-water-heater";
+import {HPWHPurchaseFitStudio} from "../../../components/hpwh-purchase-fit";
+import {newHPWHSite,newHPWHModelReview,assessHPWHFit,type HPWHSite,type HPWHModelReview} from "../../../lib/hpwh-purchase-fit";
 import "./water-heaters.css";
 const answerChoices=[["unknown","Not sure"],["yes","Yes"],["no","No"]] as const;
 const price=(v:number|null)=>v===null?"Not entered":v.toLocaleString("en-US",{style:"currency",currency:"USD"});
@@ -12,6 +14,14 @@ const parse=(s:string)=>s.trim()===""?null:Number(s);
 export default function WaterHeaterPlanner(){
  const [input,setInput]=useState<Input>(initialInput);
  const [message,setMessage]=useState("");
+ const [fitSite,setFitSite]=useState<HPWHSite>(newHPWHSite);
+ const [fitModels,setFitModels]=useState<Record<Quote["id"],HPWHModelReview>>({a:newHPWHModelReview("a"),b:newHPWHModelReview("b"),c:newHPWHModelReview("c")});
+ const fit=useMemo(()=>{
+  try{return {result:assessHPWHFit(input,fitSite,input.quotes.map(q=>fitModels[q.id]),new Date().toISOString().slice(0,10)),error:""}}
+  catch(e){return {result:null,error:e instanceof Error?e.message:"Check the model and room values entered."}}
+ },[input,fitSite,fitModels]);
+ const updateSite=<K extends keyof HPWHSite>(key:K,value:HPWHSite[K])=>setFitSite(old=>({...old,[key]:value}));
+ const updateFitModel=(id:Quote["id"],patch:Partial<HPWHModelReview>)=>setFitModels(old=>({...old,[id]:{...old[id],...patch}}));
  const out=useMemo(()=>{try{return {result:evaluate(input),error:""}}catch(e){
   return {result:null,error:e instanceof Error?e.message:"Check the values entered."};
  }},[input]);
@@ -123,8 +133,10 @@ export default function WaterHeaterPlanner(){
     <button type="button" onClick={()=>setInput(old=>({...old,quotes:old.quotes.slice(0,2)}))}>Remove third quote</button>}</div>
    </details>
   </section>
+  <HPWHPurchaseFitStudio input={input} site={fitSite} models={input.quotes.map(q=>fitModels[q.id])} assessment={fit.result} onSite={updateSite} onModel={updateFitModel}/>
+  {fit.error&&<p role="alert" className="hpwh-warning">{fit.error}</p>}
   <section className="hpwh-card hpwh-results" id="hpwh-results" aria-label="Heat pump water heater project results">
-   <h2>3. Permit, incentive and bid findings</h2>
+   <h2>4. Permit, incentive and bid findings</h2>
    {out.error?<p role="alert" className="hpwh-warning">{out.error}</p>:out.result&&<>
     <aside className="hpwh-next-action" aria-labelledby="hpwh-start-heading">
       <h3 id="hpwh-start-heading">Your first next action</h3>
@@ -132,7 +144,9 @@ export default function WaterHeaterPlanner(){
       <p><strong>Program check:</strong> {out.result.programs[0]?.title||"Confirm the applicable incentive route"}.
       Published discounts are not automatically awarded or deducted from contractor quotes.</p>
       <p><strong>Quote status:</strong> {out.result.comparison.comparable?
-        "The entered totals share a broad comparison basis; inspect the detailed omissions before deciding.":
+        fit.result?.safeToCompareAsQuoted?
+         "The reported site, model and written installation scopes align for a provisional as-quoted price comparison; a professional must still verify." :
+         "Broad quote totals match, but site fit and model equivalence are not established. Finish step 3 before interpreting the lower price." :
         "No reliable price comparison yet. Confirm matching scopes, inclusions, tank size and discount basis."}</p>
     </aside>
     <h3>Permit responsibilities</h3>
@@ -146,7 +160,8 @@ export default function WaterHeaterPlanner(){
     {input.quotes.some(q=>q.installedTotal!==null)?<>
     <h3>Installed-price comparison</h3>
     <p className={out.result.comparison.comparable?"hpwh-good":"hpwh-warning"}>{out.result.comparison.reason}</p>
-    {out.result.comparison.comparable&&<p><strong>Lowest listed total: quote {out.result.comparison.lowerTotalQuote?.toUpperCase()}</strong>; spread across quoted totals: {price(out.result.comparison.difference)}. This is not an endorsement of the cheaper quote.</p>}
+    {out.result.comparison.comparable&&fit.result?.safeToCompareAsQuoted&&<p><strong>Lowest equivalent-scope reported total: quote {out.result.comparison.lowerTotalQuote?.toUpperCase()}</strong>; spread across quoted totals: {price(out.result.comparison.difference)}. This is not an equipment certification, contractor endorsement or confirmed final price.</p>}
+    {out.result.comparison.comparable&&!fit.result?.safeToCompareAsQuoted&&<p className="hpwh-warning"><strong>Do not rank the quotes yet:</strong> The entered totals share only a broad basis, but the more detailed model, site and installation review has not established that both proposals describe equivalent purchases. Resolve the questions in step 3 first.</p>}
     {out.result.comparison.quotes.map(x=><details className="hpwh-quote-review" key={x.quote.id}>
       <summary>Quote {x.quote.id.toUpperCase()} — {price(x.quote.installedTotal)} · {x.warnings.length} items to verify</summary>
       <ul>{x.warnings.map(w=><li key={w}>{w}</li>)}</ul>
