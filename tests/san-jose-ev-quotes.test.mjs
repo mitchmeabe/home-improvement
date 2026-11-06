@@ -66,6 +66,7 @@ test("proposed panel work demands consistent included scope and documented ratio
  assert.equal(compare(patch,patch,p).status,"comparable");
  assert.equal(compare({...patch,panelRationaleDocumented:"unsure"},patch,p).lowest,null);
  assert.equal(compare({scope:"level2-dedicated"},patch,p).lowest,null);
+ assert.equal(compare({scope:"level2-panel-work",panelWorkIncluded:"no"},{scope:"level2-panel-work",panelWorkIncluded:"no"}).lowest,null);
 });
 test("unknown panel state, managed EV charging and manufacturer ventilation remain distinct technical review gates",()=>{
  assert.notEqual(compare({}, {},plan({panel:"unsure"})).status,"comparable");
