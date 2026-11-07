@@ -4,6 +4,7 @@ import {useMemo,useState} from "react";
 import {track} from "@vercel/analytics";
 import {SJ_INITIAL,SJ_EV_REVIEWED,SJ_EV_SOURCES,screenSanJoseEV,sanJoseEVChecklist,type SJInput} from "../../../lib/san-jose-ev";
 import {SanJoseEVQuoteWorkspace} from "../../../components/san-jose-ev-quote-workspace";
+import {SanJoseEVPanelAlternatives} from "../../../components/san-jose-ev-panel-alternatives";
 import "./ev-charger.css";
 type Field=keyof SJInput;
 const options:[Field,string,[string,string][]][]=[
@@ -42,5 +43,6 @@ export default function SanJoseEVPage(){
  <li>Check current City requirements and obtain permit authorization before work that requires it. Verify utility incentives separately; this prototype does not calculate rebates.</li>
  </ol>{outcome.status==="electrical-permit"&&<div className="sjev-quote-interest"><p>Preparing to compare quotes for the reported new electrical work? This does not request bids or contact any contractor.</p><button type="button" disabled={quoteIntent} onClick={()=>{setQuoteIntent(true);track("sj_ev_quote_intent")}}>I plan to compare electrician quotes</button>{quoteIntent&&<p role="status">Quote-shopping interest counted anonymously. No project details or referral request were sent.</p>}</div>}<p>For general home charging considerations, review the <a href={SJ_EV_SOURCES.energy.url} target="_blank" rel="noopener noreferrer" onClick={()=>track("sj_ev_official_outbound")}>US Department of Energy's home charging guide</a>.</p></section>
  <SanJoseEVQuoteWorkspace plan={input} permit={outcome}/>
+ <SanJoseEVPanelAlternatives key={input.location+':'+input.property+':'+input.charge+':'+input.panel+':'+input.ventilation} project={input} permit={outcome}/>
  </main>;
 }
