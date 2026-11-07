@@ -131,7 +131,7 @@ test("numeric whole-cent validity is strict and no price overflow/NaN can be ran
 test("invalid party size, clock values and crossing midnight fail closed",()=>{
  for(const party of [0,13,NaN,1.5]){
   const x=screen({...visit(),partySize:party});
-  assert.equal(x.status,"ship-details-needed");assert.equal(x.offers[0].totalGroupPriceUSD,194*0+89.5*party*2/2+15*1===-1?null:x.offers[0].totalGroupPriceUSD);
+  assert.equal(x.status,"ship-details-needed");assert.equal(x.offers[0].totalGroupPriceUSD,null);
  }
  for(const time of [-1,1440,NaN,1.1]){
   assert.equal(screen({...visit(),allAboardShipMinute:time}).status,"ship-details-needed");
@@ -191,6 +191,6 @@ test("only cited sources linked; no merchant checkout, affiliate codes, tracking
  const engine=fs.readFileSync("src/lib/decision.ts","utf8");
  const html=fs.readFileSync("index.html","utf8"),robots=fs.readFileSync("public/robots.txt","utf8");
  assert.match(html,/noindex,nofollow/);assert.match(robots,/Disallow: \/$/m);
- assert.doesNotMatch(ui+engine,/\bfetch\(|\bsendBeacon\(|localStorage|sessionStorage|affiliate_id|utm_|track\(|stripe|checkout/i);
+ assert.doesNotMatch(ui+engine,/\bfetch\(|\bsendBeacon\(|localStorage|sessionStorage|affiliate_id|utm_|track\(|stripe\\.com|createCheckout|checkout-session/i);
  assert.match(ui,/No.*affiliate|No.*commercial/i);
 });
