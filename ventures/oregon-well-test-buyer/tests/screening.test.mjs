@@ -104,7 +104,7 @@ test("unknown designated-area status blocks 'complete' sale panel until county r
  const r=screen(sale({areaReview:"not-reviewed"}));
  assert.equal(r.status,"needs-context");assert.deepEqual(r.tests,["coliform","nitrate","arsenic"]);
  assert.equal(r.comparisonAllowed,false);
- assert.match(r.description,/additional/);
+ assert.match(r.description,/may require more/);
 });
 test("known contamination or flood overrides standard package and prevents 'safe' claims",()=>{
  for(const p of [
