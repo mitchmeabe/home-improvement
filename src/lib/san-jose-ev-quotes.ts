@@ -78,7 +78,7 @@ export function newEVQuote(id:EVQuoteId):EVQuote{
 }
 function amountOK(value:number|null):value is number{
  return typeof value==="number"&&Number.isFinite(value)&&value>0&&value<=1000000&&
-   Math.round(value*100)===value*100;
+   Math.abs(Math.round(value*100)-value*100)<1e-6;
 }
 function validStatus(s:unknown):s is EVAnswer{return s==="yes"||s==="no"||s==="unsure";}
 function validScope(s:unknown):s is EVScope{return Object.hasOwn(humanScope,String(s));}
