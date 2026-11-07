@@ -243,8 +243,10 @@ test("Oregon HPWH compares matched bids without awarding incentive or unverified
    await page.locator("#hw-"+id+"-"+key).selectOption("yes");
   }
  }
- await expect(result).toContainText("Lowest listed total: quote B");
- await expect(result).toContainText("$600");
+ await expect(result).toContainText("Do not rank the quotes yet");
+ await expect(result).toContainText("$4,200.00");
+ await expect(result).toContainText("$3,600.00");
+ await expect(result).not.toContainText("Lowest equivalent-scope reported total");
  await page.locator("#hw-b-basis").selectOption("after-incentives");
  await expect(result).toContainText("Quotes differ in scope");
 });

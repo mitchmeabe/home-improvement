@@ -134,6 +134,42 @@
       "maxAgeDays": 60,
       "expectedText": [],
       "claimedUse": "Heat-pump commissioning documentation, refrigerant charge, ducted airflow verification and owner controls"
+    },
+    {
+      "id": "hpwh-energy-star-air-design-2026",
+      "owner": "ENERGY STAR / US EPA",
+      "url": "https://www.energystar.gov/partner-resources/residential_new/educational_resources/sup_program_guidance/heat_pump_water_heater_guide/design_considerations",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 60,
+      "expectedText": [],
+      "claimedUse": "Model-specific free-air volume, sizing by first-hour rating, noise and duct/louver options"
+    },
+    {
+      "id": "hpwh-energy-star-install-2026",
+      "owner": "ENERGY STAR / US EPA",
+      "url": "https://www.energystar.gov/partner-resources/residential_new/educational_resources/sup_program_guidance/heat_pump_water_heater_guide/installation_best_practices",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 60,
+      "expectedText": [],
+      "claimedUse": "Heat-pump water-heater model installation, condensate, service clearance, controls and handover"
+    },
+    {
+      "id": "hpwh-doe-single-family-2026",
+      "owner": "US Department of Energy Building America",
+      "url": "https://basc.pnnl.gov/resource-guides/heat-pump-water-heaters-single-family-homes",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 60,
+      "expectedText": [],
+      "claimedUse": "First hour rating, UEF, varying 120 V / 240 V circuit requirements, closet air volume, condensate solutions"
+    },
+    {
+      "id": "hpwh-energy-star-buying-2026",
+      "owner": "ENERGY STAR / US EPA",
+      "url": "https://www.energystar.gov/products/energy_star_home_upgrade/super_efficient_water_heater",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 60,
+      "expectedText": [],
+      "claimedUse": "Homeowner HPWH purchase, room-air access, tank sizing, manufacturer instructions, temperature and condensate"
     }
   ]
 }
