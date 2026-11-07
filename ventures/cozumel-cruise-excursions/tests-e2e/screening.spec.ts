@@ -35,7 +35,7 @@ test("private independent Cozumel app opens with no booking products or invented
  await expect(page.locator("#visit-pier")).toHaveValue("unknown");
  await expect(page.getByRole("region",{name:"Option A assessment"})).toContainText("Confirm the ship facts");
  await expect(page.locator("a[href*='affiliate_id']")).toHaveCount(0);
- await expect(page.getByText(/do not have live ship schedules/)).toBeVisible();
+ await expect(page.getByText(/does not have live ship schedules/)).toBeVisible();
 });
 test("user-confirmed pier, ship all-aboard and same-clock offer produce only conditional timing fit",async({page})=>{
  await ship(page);await offer(page,"a");
@@ -59,7 +59,7 @@ test("unverified ship/local clock never produces a presumptive suitable excursio
  await ship(page);await offer(page,"a");
  await page.locator("#visit-clockVerified").selectOption("unknown");
  await expect(page.getByRole("region",{name:"Option A assessment"})).toContainText("Confirm the ship facts");
- await expect(page.getByText(/Cozumel local time may differ/)).toBeVisible();
+ await expect(page.locator(".followups")).toContainText("Cozumel local time may differ");
  await page.locator("#visit-clockVerified").selectOption("yes");
  await page.locator("#offer-a-offerTimesOnShipClock").selectOption("unknown");
  await expect(page.getByRole("region",{name:"Option A assessment"})).toContainText("Verify the written excursion details");
