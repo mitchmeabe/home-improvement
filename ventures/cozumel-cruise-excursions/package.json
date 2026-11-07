@@ -1,0 +1,27 @@
+{
+  "name": "cozumel-excursion-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "npm test && npm run typecheck",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@playwright/test": "1.64.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
+  }
+}
