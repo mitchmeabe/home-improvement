@@ -31,3 +31,9 @@ The Vercel project should point to **rootDirectory `ventures/cozumel-cruise-excu
 No live tour or itinerary scraper, no airline/bus/ferry arrival prediction, no guaranteed ships, no invented available tour slots, no claims that a particular meeting point or pickup applies to the traveler, no ship-clock timezone auto-correction, no model-generated transfer times, no medical questions, no official tour-partner booking guarantees, no direct booking or commissions. Children/accessibility are a **confirmation requirement**, not collected age or disability details.
 
 Read `docs/EVIDENCE_AND_BUSINESS_GATES.md` for primary sources, affiliate constraints, test hypotheses and release blockers.
+
+## Verified prototype implementation
+
+- **Product deployment project:** Vercel `cozumel-shore-window-pilot`, root `ventures/cozumel-cruise-excursions`, intended Git repository `mitchmeabe/home-improvement`, all-deployment SSO enabled. No public promotion or release.
+- **Checks on GitHub feature branch:** 18 Node unit cases (including 432 adversarial cross-product paths), strict TypeScript, Vite production build; **14/14 real Playwright desktop and mobile** tests passed in an isolated Vercel Sandbox on commit `ebaf1bb8fe8a03160f9a657c5d456a33727666a7`.
+- The browser run does not verify cruise schedules, product listings, or merchant terms. Those remain the commercial release gates.
