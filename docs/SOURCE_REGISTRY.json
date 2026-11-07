@@ -170,6 +170,33 @@
       "maxAgeDays": 60,
       "expectedText": [],
       "claimedUse": "Homeowner HPWH purchase, room-air access, tank sizing, manufacturer instructions, temperature and condensate"
+    },
+    {
+      "id": "sj-panel-load-requirement-20261106",
+      "owner": "City of San José",
+      "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/electric-vehicle-charging-stations",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "Level 2 electrical permit, continuous-load requirements and written load calculations when panel rating is 125 A or less. Not a panel replacement requirement."
+    },
+    {
+      "id": "sj-panel-upgrade-permit-20261106",
+      "owner": "City of San José",
+      "url": "https://www.sanjoseca.gov/businesses/development-services-permit-center/start-your-project/single-family-duplex-properties/electrical-service-panel-upgrades",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "Separate main service panel electrical permit and conditional utility coordination; never infer panel upgrade from EV charging alone."
+    },
+    {
+      "id": "sj-panel-cslb-hiring-20261106",
+      "owner": "California Contractors State License Board",
+      "url": "https://www.cslb.ca.gov/Consumers/Hire_A_Contractor/Finding_the_Right_Contractor.aspx",
+      "lastReviewed": "2026-11-06",
+      "maxAgeDays": 30,
+      "expectedText": [],
+      "claimedUse": "Verify current contractor license and insurance/workers compensation; comparison of like-for-like bids; user verification not self-certification."
     }
   ]
 }

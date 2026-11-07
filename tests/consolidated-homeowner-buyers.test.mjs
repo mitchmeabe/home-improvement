@@ -28,17 +28,18 @@ test("three purchasing engines load together and preserve cautious no-buy defaul
  assert.equal(fit.noRebateAssumption,true);
 });
 
-test("original human-reviewed source ledger and six feature records are preserved without duplicates",()=>{
+test("original source ledger and six purchase-engine records plus three San José panel source records are preserved",()=>{
  const data=JSON.parse(fs.readFileSync("docs/SOURCE_REGISTRY.json","utf8"));
  assert.equal(data.version,1);
  const ids=data.sources.map(s=>s.id);
- assert.equal(data.sources.length,17);
+ assert.equal(data.sources.length,20);
  assert.equal(new Set(ids).size,ids.length);
  for(const id of [
   "heat-pump-doe-design-2026","heat-pump-doe-commission-2026",
   "hpwh-energy-star-air-design-2026","hpwh-energy-star-install-2026",
   "hpwh-doe-single-family-2026","hpwh-energy-star-buying-2026",
-  "sj-ev-charge-city-2026","portland-hpwh-jurisdiction"
+  "sj-ev-charge-city-2026","portland-hpwh-jurisdiction",
+  "sj-panel-load-requirement-20261106","sj-panel-upgrade-permit-20261106","sj-panel-cslb-hiring-20261106"
  ])assert.ok(ids.includes(id),"Missing regulator/technical source "+id);
  for(const s of data.sources){
   assert.match(s.url,/^https:\/\//,s.id);
