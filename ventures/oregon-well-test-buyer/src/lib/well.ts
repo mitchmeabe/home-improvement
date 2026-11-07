@@ -161,8 +161,8 @@ function make(status:Status,title:string,description:string,tests:Analyte[],note
  let qr:[QuoteReview,QuoteReview]=[blocked("a"),blocked("b")],allowed=false,low:QuoteId|null=null,diff:number|null=null;
  if(status==="order-plan"&&tests.length&&Array.isArray(quotes)&&quotes.length===2&&
  validQuote(quotes[0],"a")&&validQuote(quotes[1],"b")){
-  qr=[reviewQuote(quotes[0],tests,description.includes("real estate")),
-      reviewQuote(quotes[1],tests,description.includes("real estate"))];
+  qr=[reviewQuote(quotes[0],tests,notes.includes(SALE_NOTE)),
+      reviewQuote(quotes[1],tests,notes.includes(SALE_NOTE))];
   allowed=qr.every(q=>q.status==="ready-for-comparison")&&
    quotes[0].collectionMode===quotes[1].collectionMode;
   if(!allowed&&qr.every(q=>q.status==="ready-for-comparison"))
@@ -190,6 +190,12 @@ export function screenWell(raw:unknown,quotes:unknown,asOf=REVIEWED_ON):Decision
  if(x.source!=="domestic")return make("not-covered","Different water source: use the correct program",
   "This pilot covers an existing Oregon domestic groundwater well used for household water. Municipal service, spring supply, irrigation-only supplies and new well construction require separate guidance. This is not a conclusion that testing is unnecessary.",[],
   ["Oregon's domestic-well real-estate testing rule exempts specified spring, irrigation-only and undeveloped-land cases; confirm facts with OHA for any sale."],quotes);
+ if(x.urgentConcern==="unknown")
+  return make("needs-context","Confirm whether there is an unusual water-quality concern",
+   "Before a routine or sale test order, check whether flooding, known contamination, a well failure or another urgent issue needs different sampling. Do not assume the standard panel is sufficient.",[],[BASE_NOTE],quotes);
+ if(x.purpose==="sale"&&x.offerAccepted==="unknown")
+  return make("needs-context","Confirm whether the seller has accepted an offer",
+   "The Oregon seller test obligation follows acceptance of an offer. Choose accepted or planning ahead; this tool does not establish a transaction deadline.",[],[SALE_NOTE],quotes);
  if(x.purpose==="problem"||x.urgentConcern==="yes"||x.areaReview==="concern")
   return make("urgent-review","Seek situation-specific contaminant and safety guidance before ordering",
    "A contamination concern, unusual water event, flood, recent system failure or a declared area of concern needs tailored advice. No generic triad or safe-to-drink result is sufficient.",[],
