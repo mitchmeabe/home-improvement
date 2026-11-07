@@ -143,7 +143,7 @@ test("unsupported input shape, wrong offer identities and strange enum values ne
   {...good(),panelAmps:"1000"},
   {...good(),offers:[{...good().offers[0],permitIncluded:"maybe"},good().offers[1]]}
  ]){
-  const r=audit(v);
+  const r=evaluateSJPanelAlternatives(project,screenSanJoseEV(project,"2026-11-06"),v,"2026-11-06");
   assert.equal(r.status,"needs-assessment");assert.equal(r.priceDifference,null);
  }
 });
