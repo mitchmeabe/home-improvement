@@ -8,6 +8,7 @@ import {
  type QuoteItem,type Answer,type PriceBasis,type QuoteScope,
 } from "../lib/heat-pump-quotes";
 import {ProposalTextImporter,type ProposalPatch} from "./proposal-text-import";
+import {HeatPumpBidQualityStudio} from "./heat-pump-bid-quality";
 import "./heat-pump-quote-comparison.css";
 const yn=[{value:"unsure",label:"Not documented"},{value:"yes",label:"Confirmed in writing"},{value:"no",label:"No"}] as const;
 const m=(n:number|null)=>n===null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2});
@@ -136,6 +137,7 @@ export function HeatPumpQuoteComparison({location,property,hspf2,seer2}:{
     {compared.data.priceDifference===null&&<p className="hp-q-summary">{compared.data.comparisonReason}</p>}
     <p className="small">These are examples of arithmetic, not savings guarantees. HP3 has a published $2,000 program ceiling, strict funding/contractor/efficiency conditions, and restrictions on stacking with some federal incentives; an approved reservation is not required for all eligible applications, but funding is never guaranteed. Verify the specific program application and final invoice.</p>
   </div>}
+  {compared.data&&<HeatPumpBidQualityStudio quotes={quotes}/>}
   <div className="action-row"><button type="button" className="action-primary" disabled={!compared.data} onClick={copy}>Copy comparison questions</button>
    <button type="button" className="action-secondary" disabled={!compared.data} onClick={()=>{if(compared.data){downloadTextReport("oregon-heat-pump-quotes",quoteComparisonQuestions(compared.data));track("heat_pump_quote_report_downloaded")}}}>Download report (.txt)</button>
    <a href={QUOTE_SOURCES.mechanical} className="action-secondary" target="_blank" rel="noreferrer" onClick={()=>track("heat_pump_mechanical_permit_click")}>Portland mechanical permits ↗</a>
