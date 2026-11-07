@@ -79,7 +79,7 @@ test("wrong berth or operator pickup suppresses tour compatibility despite enoug
 });
 test("two independently verified on-island tours, and local report download",async({page})=>{
  await ship(page);await offer(page,"a");await offer(page,"b");
- await expect(page.getByRole("region",{name:"Option A assessment"})).toContainText("Tentative");
+ await expect(page.locator(".offer-card").first().locator(".status")).toContainText("Tentative");
  await expect(page.getByRole("region",{name:"Option B assessment"})).toContainText("supplied same-day timing fits");
  const event=page.waitForEvent("download");
  await page.getByRole("button",{name:"Download independent checklist (.txt)"}).click();
