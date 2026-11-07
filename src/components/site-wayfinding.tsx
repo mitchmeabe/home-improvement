@@ -6,6 +6,7 @@ export function SiteWayfinding(){
    <Link className="site-wayfinding-brand" href="/">Home Improvement</Link>
    <nav aria-label="Main site navigation">
     <Link href="/projects">Choose a project</Link>
+    <Link href="/pilot-review">Private feature review</Link>
     <Link href="/">Home</Link>
     <Link href="/privacy">Privacy</Link>
    </nav>
