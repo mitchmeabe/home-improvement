@@ -114,7 +114,7 @@ function evaluateOffer(v:Visit,raw:unknown,id:QuoteId,baseProblems:readonly stri
  if(quoteInvalid(raw,id))return failure(id,"needs-offer-details","The offer inputs are not valid",["Invalid price, duration, status or quote identity."]);
  const q=raw as Offer;
  let price:number|null=null;
- if(q.currency==="USD"&&q.pricePerPerson!==null&&q.mandatoryAdditionalTotal!==null)
+ if(q.currency==="USD"&&Number.isInteger(v.partySize)&&v.partySize>=1&&v.partySize<=12&&q.pricePerPerson!==null&&q.mandatoryAdditionalTotal!==null)
   price=Math.round((q.pricePerPerson*v.partySize+q.mandatoryAdditionalTotal)*100)/100;
  if(baseProblems.length)return failure(id,"needs-ship-details","Confirm the ship facts before screening an excursion",[...baseProblems],price);
  const problems:string[]=[];
