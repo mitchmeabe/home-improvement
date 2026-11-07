@@ -99,3 +99,14 @@ test("copy/download-ready reports preserve official sources, quote context and u
  assert.match(report,/\$700.00/);
  assert.match(report,/No contractor is contacted/);
 });
+
+test("ordinary cent-denominated EV installation prices are valid and not misclassified",()=>{
+ for(const price of [0.01,19.29,79.99,199.95,1450.29,999999.99]){
+  const x=compare({amount:price},{amount:price});
+  assert.equal(x.status,"comparable",String(price));
+  assert.equal(x.quotedPriceGap,0,String(price));
+ }
+ const invalid=compare({amount:79.999},{amount:99.95});
+ assert.notEqual(invalid.status,"comparable");
+ assert.equal(invalid.lowest,null);
+});
