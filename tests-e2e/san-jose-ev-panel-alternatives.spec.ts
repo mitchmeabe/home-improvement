@@ -31,6 +31,7 @@ test("shows panel alternative only for screened San José single-family Level 2 
 });
 test("unknown load and unresolved panel safety issues must withhold any financial recommendation",async({page})=>{
  await setUp(page);
+ await page.locator("#sjpanel-rating").selectOption("125-or-less");
  await fillOffer(page,"managed",1700);
  await fillOffer(page,"upgrade",6700);
  const result=page.getByRole("region",{name:"Panel upgrade decision audit"});
